@@ -1,0 +1,76 @@
+#!/bin/bash
+
+# script:  makeplot
+
+# usage: $0 plotfile.gp plotdata.txt outputplot.ps
+if [ $# -ne 3 ] 
+then
+  echo "usage: " $0 " plotfile.gp plotdata.txt outputplot.ps"
+  echo "apply plot command file 'plotfile.gp' to data file 'plotdata.txt' to produce postscript plot 'outputplot.ps'"
+  echo "example: " $0 "Vel_PWM.gp dataLog1.txt plot1.ps"
+  exit 1
+fi
+
+# grab and validate gnuplot, data, and postscript file names
+gpfile=$1
+if [ ! -e $gpfile ]
+then
+  echo $0": error: can't find plot file " "'"$gpfile"'"
+  exit 1
+fi    
+
+datafile=$2
+if [ ! -e $datafile ]
+then
+  echo $0": error: can't find data file " "'"$datafile"'"
+  exit 1
+fi    
+
+plotfile=$3
+tmpdir=/tmp/tmpplot_$$
+
+# now invoke the raw gnuplot script to process this file
+# echo "procid is " $$
+# echo "tmpdir is " $tmpdir
+
+# create the tmp dir, and copy the files in
+if test -d $tmpdir
+then
+  echo $0": error: dir " $tmpdir " exists.  I'm confused."
+  exit 1
+fi
+mkdir $tmpdir
+if [ ! -e $tmpdir ]
+then
+  echo $0": error: couldn't create temp dir " $tmpdir
+  exit 1
+fi
+cp $gpfile $tmpdir
+cp $datafile $tmpdir/data.txt
+
+echo $0": applying '"$gpfile"' to '"$datafile"' to produce plot '"$plotfile"'"
+
+# now create the plot; use cd rather than push/popd for quietude
+startdir=`pwd`
+cd $tmpdir
+./$gpfile # creates plot.ps
+cd $startdir
+
+# plot.ps should now exist in $tmpdir
+if [ ! -e $tmpdir/plot.ps ]
+then
+  echo $0": error: gnuplot script failed.  ask a staff member for help."
+  rm -rf $tmpdir
+  exit 1
+fi
+
+# copy resulting plot back to working dir
+mv $tmpdir/plot.ps $plotfile
+rm -rf $tmpdir
+
+echo $0": success: created postscript plot '"$plotfile"'"
+echo "  you can view this plot with the shell command 'gv "$plotfile"'"
+
+# return all-ok
+exit 0
+

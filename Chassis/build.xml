@@ -1,0 +1,49 @@
+<project name="build" default="compile">
+
+  <target name="compile">
+	<mkdir dir="./bin"></mkdir>
+    <javac srcdir="./src" destdir="./bin" sourcepath="..:." 
+classpath="..:.:../MotorControl/bin">
+      <exclude name="pub-staging/**"/>
+      <exclude name="attic/**"/>
+    </javac>
+  </target>
+
+<target name="run" depends="compile">
+        <java
+                
+classpath="./bin:../MotorControl/bin:../uORCInterface.jar"
+                classname="Chassis.Chassis"
+                fork="true">
+
+        </java>
+</target>
+  <target name="compile-solution">
+        <mkdir dir="./bin"></mkdir>
+    <javac srcdir="./src" destdir="./bin" sourcepath="..:."
+classpath="..:.:../MotorControlSolution/bin">
+      <exclude name="pub-staging/**"/>
+      <exclude name="attic/**"/>
+    </javac>
+  </target>
+
+<target name="run-solution" depends="compile-solution">
+        <java
+
+classpath="./bin:../MotorControlSolution/bin:../uORCInterface.jar"
+                classname="ChassisSolution.Chassis"
+                fork="true">
+
+        </java>
+</target>
+
+  <target name="clean" description="clean up">
+    <echo message="deleting class binaries"/>
+    <delete verbose="true">
+      <fileset dir="./bin">
+        <include name="*.class"/>
+      </fileset>
+    </delete>
+  </target>
+
+</project>

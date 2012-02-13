@@ -1,0 +1,42 @@
+<project name="build" default="compile">
+
+    
+
+  <target name="compile">
+	<mkdir dir="./bin"></mkdir>
+    <javac srcdir="./src" destdir="./bin" classpath="..:.:../uORCInterface.jar">
+      <exclude name="pub-staging/**"/>
+      <exclude name="attic/**"/>
+    </javac>
+  </target>
+  
+  <target name="run" depends="compile">
+        <java
+                classpath="./bin:../uORCInterface.jar"
+                classname="MotorControl.MotorControl"
+                fork="true">
+
+        </java>
+</target>
+
+<target name="run-solution" depends="compile">
+        <java
+                classpath="./bin:../uORCInterface.jar"
+                classname="MotorControlSolution.MotorControl"
+                fork="true">
+
+        </java>
+</target>   
+	
+
+
+  <target name="clean" description="clean up">
+    <echo message="deleting class binaries"/>
+    <delete verbose="true">
+      <fileset dir="./bin">
+        <include name="*/*.class"/>
+      </fileset>
+    </delete>
+  </target>
+
+</project>
