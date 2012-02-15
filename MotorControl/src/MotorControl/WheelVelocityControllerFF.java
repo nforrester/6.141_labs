@@ -15,8 +15,7 @@ public class WheelVelocityControllerFF extends WheelVelocityController {
    **/
   public double controlStep() {
     double result = 0;
-    // Start Student Code
-    // End Student Code
+    result = MAX_PWM * desiredAngularVelocity / MAX_ANGULAR_VELOCITY;
     return result;
   }
 
