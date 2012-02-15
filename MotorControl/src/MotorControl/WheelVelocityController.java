@@ -21,26 +21,31 @@ public abstract class WheelVelocityController extends VelocityController {
    * <p>Student Code: unloaded maximum wheel angular velocity in rad/s. 
    * This should be a protected static final double called MAX_ANGULAR_VELOCITY.</p>
    **/
+  protected static final double MAX_ANGULAR_VELOCITY = 7.95;
 
   /**
    * <p>Student Code: radius of the wheel on the motor (in meters). 
    * This should be a protected static final double called WHEEL_RADIUS_IN_M.</p>
    **/
+  protected static final double WHEEL_RADIUS_IN_M = .062775;
 
   /**
    * <p>Student Code: encoder resolution.</p>
    * This should be a protected static final double called ENCODER_RESOLUTION.</p>
    **/
+  protected static final double ENCODER_RESOLUTION = 2000;
 
   /**
    * <p>Student Code: motor revolutions per wheel revolution.
    * This should be a protected static final double called GEAR_RATIO.</p>
    **/
+  protected static final double GEAR_RATIO = 65.5;
 
   /**
    * <p>Student Code: encoder ticks per motor revolution.</p>
    * This should be a protected static final double called TICKS_PER_REVOLUTION.</p>
    **/
+  protected static final double TICKS_PER_REVOLUTION = 131000;
 
   /**
    * <p>Angular velocity in rad/s as we have been commanded.</p>
@@ -95,10 +100,8 @@ public abstract class WheelVelocityController extends VelocityController {
    * @return radians per encoder tick
    **/
   public double computeRadiansPerTick() {
-    double result = 0; //allow compilation w/o soln
-    // Start Student Code
-    // End Student Code
-    return result;
+    System.out.println("radians per tick: " + (2 * Math.PI / TICKS_PER_REVOLUTION));
+    return 2 * Math.PI / TICKS_PER_REVOLUTION;
   }
     
   /**
@@ -109,8 +112,8 @@ public abstract class WheelVelocityController extends VelocityController {
    * side)
    **/
   public double computeEncoderInRadians() {
-    double result = 0;
-    return result;
+    System.out.println("encoder in radians: " + (encoderTicks * computeRadiansPerTick()));
+    return encoderTicks * computeRadiansPerTick();
   }
   
   /**
@@ -120,21 +123,13 @@ public abstract class WheelVelocityController extends VelocityController {
    * when observing wheel from the outside (non-motor side)
    **/
   public double computeAngularVelocity() {
-    double result = 0; // allow compilation w/o soln
-    
     if (sampleTime == 0.0) {
-		result = 0;    // prevent division by 0 on startup
-    }
-    else {
-	// Start Student Code
-
-
-	
-	
-	
-	// End Student Code
+	System.out.println("angular velocity: 0");
+	return 0;    // prevent division by 0 on startup
+    } else {
+	System.out.println("angular velocity: " + (computeEncoderInRadians() / sampleTime));
+	return computeEncoderInRadians() / sampleTime;
     }       
-    return result;
   }
 
   public double computeTranslationalVelocity() {
