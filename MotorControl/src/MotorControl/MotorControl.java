@@ -18,16 +18,16 @@ public class MotorControl {
 
     //first task: direct pwm commanding
 
-    robotVelocityController =
-     new RobotVelocityController(new WheelVelocityControllerPWM(),
-                                  new WheelVelocityControllerPWM());
+//    robotVelocityController =
+//     new RobotVelocityController(new WheelVelocityControllerPWM(),
+//                                  new WheelVelocityControllerPWM());
 
 
     //second task: feed-forward control
 
-//    robotVelocityController =
-//      new RobotVelocityController(new WheelVelocityControllerFF(),
-//                                  new WheelVelocityControllerFF());
+    robotVelocityController =
+      new RobotVelocityController(new WheelVelocityControllerFF(),
+                                  new WheelVelocityControllerFF());
 
 
     //third task: integral feedback control
