@@ -100,7 +100,7 @@ public abstract class WheelVelocityController extends VelocityController {
    * @return radians per encoder tick
    **/
   public double computeRadiansPerTick() {
-    System.out.println("radians per tick: " + (2 * Math.PI / TICKS_PER_REVOLUTION));
+      // System.out.println("radians per tick: " + (2 * Math.PI / TICKS_PER_REVOLUTION));
     return 2 * Math.PI / TICKS_PER_REVOLUTION;
   }
     
