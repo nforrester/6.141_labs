@@ -26,16 +26,16 @@ public class MotorControl {
 
     //second task: feed-forward control
 
-    robotVelocityController =
-      new RobotVelocityController(new WheelVelocityControllerFF(),
-                                  new WheelVelocityControllerFF());
+    //robotVelocityController =
+      //new RobotVelocityController(new WheelVelocityControllerFF(),
+        //                          new WheelVelocityControllerFF());
 
 
     //third task: integral feedback control
 
-//    robotVelocityController =
-//      new RobotVelocityController(new WheelVelocityControllerI(),
-//                                  new WheelVelocityControllerI());
+    robotVelocityController =
+      new RobotVelocityController(new WheelVelocityControllerI(),
+                                  new WheelVelocityControllerI());
 
 
     //final task: balanced velocity control
