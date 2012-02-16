@@ -12,6 +12,18 @@ public class WheelVelocityControllerI extends WheelVelocityController {
    * <p>The result of the previous control step.</p>
    **/
   protected double lastResult = 0;
+  
+  /**
+   * <p>The integral of the error.</p>
+   */
+  protected double errorIntegral = 0;
+  
+  /**
+   * <p>The coefficent of the IIR error integrator.</p>
+   */
+  protected static final double INTEGRAL_COEFF = 0.9;
+  
+  protected static final double INTEGRAL_GAIN = 1.5;
 
   /**
    * {@inheritDoc}
@@ -21,8 +33,11 @@ public class WheelVelocityControllerI extends WheelVelocityController {
   public double controlStep() {
 
     double result = 0;
-
     // Start Student Code
+    double error = desiredAngularVelocity - currentAngularVelocity;
+    errorIntegral = errorIntegral * INTEGRAL_COEFF + error * sampleTime;
+    result = INTEGRAL_GAIN * errorIntegral;
+    result += PROPOTIONAL_GAIN * error;
     // End Student Code
 
     if (result > MAX_PWM)
