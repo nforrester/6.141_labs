@@ -11,6 +11,7 @@ public class MotorControl {
    * @param args command line arguments
    **/
   public static void main(String [] args) {
+    // Motion Control Lab, Part 7
     
     RobotBase robot = new RobotBase();
     
