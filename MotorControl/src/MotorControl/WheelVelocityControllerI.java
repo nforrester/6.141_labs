@@ -35,7 +35,7 @@ public class WheelVelocityControllerI extends WheelVelocityController {
     double result = 0;
     // Start Student Code
     double error = desiredAngularVelocity - currentAngularVelocity;
-    errorIntegral = errorIntegral * INTEGRAL_COEFF + error * sampleTime;
+    errorIntegral = errorIntegral * (INTEGRAL_COEFF * sampleTime) + error * sampleTime;
     result = INTEGRAL_GAIN * errorIntegral;
     result += PROPOTIONAL_GAIN * error;
     // End Student Code
