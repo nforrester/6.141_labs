@@ -39,8 +39,10 @@ public class WheelVelocityControllerI extends WheelVelocityController {
     double error = desiredAngularVelocity - currentAngularVelocity;
     errorIntegral = errorIntegral * (1 - ((1 - INTEGRAL_COEFF) * sampleTime)) + error * sampleTime;
     result = INTEGRAL_GAIN * errorIntegral;
-    //result += PROPOTIONAL_GAIN * error;
-    result += PROPOTIONAL_GAIN * desiredAngularVelocity;
+    result += PROPOTIONAL_GAIN * error;
+    result += lastResult;
+    
+    //result += PROPOTIONAL_GAIN * (desiredAngularVelocity);
     // End Student Code
 
     if (result > MAX_PWM)
