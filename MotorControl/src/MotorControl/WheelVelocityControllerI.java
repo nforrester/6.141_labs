@@ -18,14 +18,11 @@ public class WheelVelocityControllerI extends WheelVelocityController {
    */
   protected double errorIntegral = 0;
   
-  /**
-   * <p>The coefficent of the IIR error integrator.</p>
-   */
-  protected static final double INTEGRAL_COEFF = 0.9;
-  
-  protected static final double INTEGRAL_GAIN = 1.5;
+  protected static final double INTEGRAL_GAIN = 1.2;
 
-  protected static final double PROPOTIONAL_GAIN = MAX_PWM / MAX_ANGULAR_VELOCITY;
+  protected static final double PROPOTIONAL_GAIN_BIG = 10;
+
+  protected static final double PROPOTIONAL_GAIN_SMALL = 5;
   
   /**
    * {@inheritDoc}
@@ -37,12 +34,9 @@ public class WheelVelocityControllerI extends WheelVelocityController {
     double result = 0;
     // Start Student Code
     double error = desiredAngularVelocity - currentAngularVelocity;
-    errorIntegral = errorIntegral * (1 - ((1 - INTEGRAL_COEFF) * sampleTime)) + error * sampleTime;
-    result = INTEGRAL_GAIN * errorIntegral;
-    result += lastResult + PROPOTIONAL_GAIN * error;
-    //result += lastResult;
-    
-    //result += PROPOTIONAL_GAIN * (desiredAngularVelocity);
+    double propotionalGain = ((double)Math.abs(error) > (double)1.0) ? PROPOTIONAL_GAIN_BIG : PROPOTIONAL_GAIN_SMALL;
+    result = INTEGRAL_GAIN * error;
+    result += lastResult + propotionalGain * error;
     // End Student Code
 
     if (result > MAX_PWM)
