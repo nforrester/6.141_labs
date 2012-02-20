@@ -21,7 +21,7 @@ public class WheelVelocityControllerI extends WheelVelocityController {
   //protected static final double PROPROTIONAL_GAIN = MAX_PWM / MAX_ANGULAR_VELOCITY;
   protected static final double PROPORTIONAL_GAIN = 0.45 * 62;
 
-  protected static final double INTEGRAL_GAIN = 1.2 * PROPROTIONAL_GAIN / 0.4;
+  protected static final double INTEGRAL_GAIN = 1.2 * PROPORTIONAL_GAIN / 0.4;
   
   /**
    * {@inheritDoc}
