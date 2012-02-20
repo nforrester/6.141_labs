@@ -73,10 +73,15 @@ public class RobotVelocityControllerBalanced extends RobotVelocityController {
     double ldv = 0.0, rdv = 0.0;
 
     // Begin Student Code
+    angularDiffError = desiredDiffAngle - actualDiffAngle;
 
+    double correctionFactor = angularDiffError * gain;
 
+    rdv = desiredAngularVelocityAvg;
+    ldv = desiredAngularVelocityAvg;
 
-
+    rdv += correctionFactor;
+    ldv -= correctionFactor;
     // End Student Code
 
 //    if ((updateDbg++ % 10) == 0) {
