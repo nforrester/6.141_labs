@@ -19,9 +19,9 @@ public class WheelVelocityControllerI extends WheelVelocityController {
   protected double errorIntegral = 0;
   
   //protected static final double PROPROTIONAL_GAIN = MAX_PWM / MAX_ANGULAR_VELOCITY;
-  protected static final double PROPROTIONAL_GAIN = 0.45 * 60;
+  protected static final double PROPORTIONAL_GAIN = 0.45 * 62;
 
-  protected static final double INTEGRAL_GAIN = 1.2 * PROPROTIONAL_GAIN / 0.24;
+  protected static final double INTEGRAL_GAIN = 1.2 * PROPROTIONAL_GAIN / 0.4;
   
   /**
    * {@inheritDoc}
@@ -34,12 +34,7 @@ public class WheelVelocityControllerI extends WheelVelocityController {
     // Start Student Code
     double error = desiredAngularVelocity - currentAngularVelocity;
     errorIntegral += error*sampleTime;
-    result = gain * PROPROTIONAL_GAIN*error + INTEGRAL_GAIN*errorIntegral;
-    System.out.println("-----------------------------");
-    System.out.println(MAX_PWM);
-    System.out.println(MAX_ANGULAR_VELOCITY);
-    System.out.println(PROPROTIONAL_GAIN);
-    System.out.println(INTEGRAL_GAIN);
+    result = PROPORTIONAL_GAIN*error + gain*INTEGRAL_GAIN*errorIntegral;
     // End Student Code
 
     if (result > MAX_PWM)
