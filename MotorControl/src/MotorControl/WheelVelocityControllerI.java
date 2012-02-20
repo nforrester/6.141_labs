@@ -20,7 +20,7 @@ public class WheelVelocityControllerI extends WheelVelocityController {
   
   protected static final double INTEGRAL_GAIN = 1.2;
 
-  protected static final double PROPROTIONAL_GAIN = 20;
+  protected static final double PROPROTIONAL_GAIN = 60;
   
   /**
    * {@inheritDoc}
