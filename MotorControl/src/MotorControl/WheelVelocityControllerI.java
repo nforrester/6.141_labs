@@ -20,9 +20,7 @@ public class WheelVelocityControllerI extends WheelVelocityController {
   
   protected static final double INTEGRAL_GAIN = 1.2;
 
-  protected static final double PROPOTIONAL_GAIN_BIG = 10;
-
-  protected static final double PROPOTIONAL_GAIN_SMALL = 5;
+  protected static final double PROPROTIONAL_GAIN = 20;
   
   /**
    * {@inheritDoc}
@@ -35,7 +33,7 @@ public class WheelVelocityControllerI extends WheelVelocityController {
     // Start Student Code
     double error = desiredAngularVelocity - currentAngularVelocity;
     errorIntegral += error*sampleTime;
-    result = PROPOTIONAL_GAIN_BIG*error + INTEGRAL_GAIN*errorIntegral;
+    result = PROPROTIONAL_GAIN*error + INTEGRAL_GAIN*errorIntegral;
     // End Student Code
 
     if (result > MAX_PWM)
