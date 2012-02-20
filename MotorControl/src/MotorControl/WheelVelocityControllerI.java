@@ -34,9 +34,8 @@ public class WheelVelocityControllerI extends WheelVelocityController {
     double result = 0;
     // Start Student Code
     double error = desiredAngularVelocity - currentAngularVelocity;
-    double propotionalGain = ((double)Math.abs(error) > (double)1.0) ? PROPOTIONAL_GAIN_BIG : PROPOTIONAL_GAIN_SMALL;
-    result = INTEGRAL_GAIN * error;
-    result += lastResult + propotionalGain * error;
+    errorIntegral += error*sampleTime;
+    result = PROPOTIONAL_GAIN_BIG*error + INTEGRAL_GAIN*errorIntegral;
     // End Student Code
 
     if (result > MAX_PWM)
