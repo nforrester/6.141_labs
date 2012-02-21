@@ -192,20 +192,10 @@ public class RobotPositionController {
 	boolean ok = true;
 	// Begin Student Code
 
-	while (angle >= Math.PI) {
-		angle -= 2 * Math.PI;
-	}
-	while (angle < -1 * Math.PI) {
-		angle += 2 * Math.PI;
-	}
+	angle = rerangeAngle(angle);
 
 	double target_angle = theta + angle;
-	while (target_angle >= 2 * Math.PI) {
-		target_angle -= 2 * Math.PI;
-	}
-	while (target_angle < 0) {
-		target_angle += 2 * Math.PI;
-	}
+	target_angle = rerangeAngle(target_angle);
 
 	double[] desiredPose={x,y,target_angle};
 	double[] startPose={x,y,theta};
@@ -274,6 +264,15 @@ public class RobotPositionController {
 	return ok;
   }
     
+  public double rerangeAngle(double a) {
+	while (a >= 2 * Math.PI) {
+		a -= 2 * Math.PI;
+	}
+	while (a < 0) {
+		a += 2 * Math.PI;
+	}
+	return a;
+  }
 
     
 
@@ -354,20 +353,10 @@ public class RobotPositionController {
   	double a2 = pose2[2];
 
 	//keep a1 in range
-	while (a1 >= 2 * Math.PI) {
-		a1 -= 2 * Math.PI;
-	}
-	while (a1 < 0) {
-		a1 += 2 * Math.PI;
-	}
+	a1 = rerangeAngle(a1);
 
 	//keep a2 in range
-	while (a2 >= 2 * Math.PI) {
-		a2 -= 2 * Math.PI;
-	}
-	while (a2 < 0) {
-		a2 += 2 * Math.PI;
-	}
+	a2 = rerangeAngle(a2);
 
 	return (poseDistance(pose1, pose2) < toleranceLinear) && (Math.abs(a1 - a2) < toleranceAngular);
   }
@@ -407,12 +396,7 @@ public class RobotPositionController {
     double yNew = y + Math.sin(thetaTravel) * distAvg;
 
     //keep thetaNew in range
-    while (thetaNew >= 2 * Math.PI) {
-    	thetaNew -= 2 * Math.PI;
-    }
-    while (thetaNew < 0) {
-    	thetaNew += 2 * Math.PI;
-    }
+    thetaNew = rerangeAngle(thetaNew);
 
     //apply the new odometry
     x = xNew;
