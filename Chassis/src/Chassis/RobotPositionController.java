@@ -192,61 +192,6 @@ public class RobotPositionController {
     boolean ok = true;
     // Begin Student Code
 
-    //Normalize the angle
-    angle = angle%(2*Math.PI);
-    if (angle > Math.PI)
-	angle = angle - 2*Math.PI;
-    if (angle < -Math.PI)
-	angle = 2*Math.PI + angle;
-
-    double[] pose = {x,y,theta};
-    double[] desiredPose = {x,y,theta + angle};
-    double desiredAngularVelocity = (speed * DISTANCE_BETWEEN_WHEELS/2)/WHEEL_RADIUS_IN_M;
-    int dir;
-
-    double startingTime = totalTime;
-    if(angle > 0) {
-	dir = 1;
-	robotVelocityController.setDesiredAngularVelocity(-desiredAngularVelocity, desiredAngularVelocity);
-    } else {
-	dir = 0;
-	robotVelocityController.setDesiredAngularVelocity(desiredAngularVelocity, -desiredAngularVelocity);
-    }
-
-    double lastAngle = angle;
-    double currentAngle = 0;
-    while(!comparePose(pose,desiredPose, .1, .1)) {
-	pose[0] = x;
-	pose[1] = y;
-	pose[2] = theta;
-		    
-	
-	//Gets and normalizes the current angle between the current pose and the desired pose
-	currentAngle = desiredPose[2] - pose[2];
-	
-	//IF the magnitude of the angle between the current pose and desired pose is larger than the step before, flip directions.
-	if(Math.abs(currentAngle) > Math.abs(lastAngle) && Math.abs(currentAngle - lastAngle) > .01) {
-	    desiredAngularVelocity = desiredAngularVelocity/1.5;
-	    if(dir == 0) {
-		robotVelocityController.setDesiredAngularVelocity(-desiredAngularVelocity, desiredAngularVelocity);
-		dir = 1;
-	    }
-	    else {
-		robotVelocityController.setDesiredAngularVelocity(desiredAngularVelocity, -desiredAngularVelocity);
-		dir = 0;
-	    }
-	}
-	//Update lastAngle
-	lastAngle = currentAngle;
-	
-    }
-
-    printPose();
-    System.out.println("desiredPose: x: "+desiredPose[0]+" y:"+desiredPose[1]+" theta: "+desiredPose[2]);
-    System.out.println(comparePose(pose, desiredPose, 0.1, 0.15));
-    System.out.println("We got there.");
-
-    robotVelocityController.setDesiredAngularVelocity(0,0);
     // End Student Code
     return ok;
   }
