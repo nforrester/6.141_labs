@@ -126,7 +126,8 @@ public class RobotPositionController {
 		robotVelocityController.setDesiredAngularVelocity(angularVelocityDesired,angularVelocityDesired);
 		System.out.println("myPose: x: "+myPose[0]+" y:"+myPose[1]+" theta: "+myPose[2]);
 		System.out.println("desiredPose: x: "+desiredPose[0]+" y:"+desiredPose[1]+" theta: "+desiredPose[2]);
-
+		System.out.println(comparePose(myPose,desiredPose,.05));
+		
 		while (!comparePose(myPose,desiredPose,.05)){
 			myPose[0]=x;
 			myPose[1]=y;
@@ -232,13 +233,9 @@ public class RobotPositionController {
    **/
   
   public boolean comparePose(double [] pose1, double [] pose2, double tolerance){
-	  if (((pose1[0]<pose2[0]+pose2[0]*tolerance)||(pose1[0]>pose2[0]-pose2[0]*tolerance))
+	  return (((pose1[0]<pose2[0]+pose2[0]*tolerance)||(pose1[0]>pose2[0]-pose2[0]*tolerance))
 			  && ((pose1[1]<pose2[1]+pose2[1]*tolerance)||(pose1[1]>pose2[1]-pose2[1]*tolerance))
-					  && ((pose1[2]<pose2[2]+pose2[2]*tolerance)||(pose1[2]>pose2[2]-pose2[2]*tolerance))){
-		  return true;
-	  }
-	  else
-		  return false;
+					  && ((pose1[2]<pose2[2]+pose2[2]*tolerance)||(pose1[2]>pose2[2]-pose2[2]*tolerance)));
   }
 
   /**
