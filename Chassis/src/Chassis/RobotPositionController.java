@@ -202,15 +202,16 @@ public class RobotPositionController {
     double[] pose = {x,y,theta};
     double[] desiredPose = {x,y,theta + angle};
     double desiredAngularVelocity = (speed * DISTANCE_BETWEEN_WHEELS/2)/WHEEL_RADIUS_IN_M;
-    
+    int dir = -1;
+
     double startingTime = totalTime;
     if(angle > 0) {
 	robotVelocityController.setDesiredAngularVelocity(-desiredAngularVelocity, desiredAngularVelocity);
-	int dir = 1;
+	dir = 1;
     }
     else {
 	robotVelocityController.setDesiredAngularVelocity(desiredAngularVelocity, -desiredAngularVelocity);
-	int dir = 0;
+	dir = 0;
     }
 
     double lastAngle = angle;
