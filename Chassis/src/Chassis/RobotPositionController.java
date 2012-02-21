@@ -156,6 +156,14 @@ public class RobotPositionController {
   public boolean rotate(double speed, double angle) {
     boolean ok = true;
     // Begin Student Code
+
+    //Normalize the angle
+    angle = angle%2*Math.PI;
+    if (angle > Math.PI)
+	angle = angle - 2*Math.PI;
+    if (angle < -Math.PI)
+	angle = 2*Math.PI + angle;
+
     double[] pose = {x,y,theta};
     double[] desiredPose = {x,y,theta + angle};
     
