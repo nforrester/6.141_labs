@@ -152,7 +152,7 @@ public class RobotPositionController {
   }
 
   /**
-   * <p>Rotate at the specified speed for the specifietotalTicks[RobotBase.LEFT]d angle.</p>
+   * <p>Rotate at the specified speed for the specified angle.</p>
    *
    * <p>Blocks until the motion is complete or errored.</p>
    *
