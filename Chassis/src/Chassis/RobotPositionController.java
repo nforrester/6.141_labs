@@ -123,6 +123,8 @@ public class RobotPositionController {
 		robotVelocityController.setDesiredAngularVelocity(angularVelocityDesired,angularVelocityDesired);
 		
 		while (distAfterTranslatingL>totalTicks[RobotBase.LEFT]/kR){
+			robotVelocityController.setDesiredAngularVelocity(angularVelocityDesired,angularVelocityDesired);
+			
 			//Do nothing until we get there, unless we get an error.
 			//if one of our wheels overshoots the other, stop and return false;
 			if((distAfterTranslatingL>totalTicks[RobotBase.LEFT]/kR
