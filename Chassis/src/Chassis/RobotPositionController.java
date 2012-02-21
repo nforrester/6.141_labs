@@ -114,7 +114,7 @@ public class RobotPositionController {
 
 		double kR=TICKS_PER_REVOLUTION * 2 * Math.PI * WHEEL_RADIUS_IN_M;
 		
-		double[] desiredPose=[x+distance*Math.sin(theta),y+distance*Math.cos(theta),theta];
+		double[] desiredPose={x+distance*Math.sin(theta),y+distance*Math.cos(theta),theta};
 		System.out.println("desiredPose: "+desiredPose);
 		printPose();
 		double angularVelocityDesired=speed/WHEEL_RADIUS_IN_M;
