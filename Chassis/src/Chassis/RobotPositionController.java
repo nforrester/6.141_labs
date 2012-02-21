@@ -220,6 +220,16 @@ public class RobotPositionController {
 	pose[1] = y;
 	pose[2] = theta;
 	
+	if(dir == 1 && (desiredPose[2] - pose[2] < 0 || desiredPose[2] - pose[2] > Math.PI)) {
+	    dir = 0;
+	    robotVelocityController.setDesiredAngularVelocity(desiredAngularVelocity, -desiredAngularVelocity);
+        }
+	else if(dir == 0 && (pose[2] - desiredPose[2] < 0 || pose[2] - desiredPose[2] > Math.PI)) {
+	    dir = 1;
+	    robotVelocityController.setDesiredAngularVelocity(-desiredAngularVelocity, desiredAngularVelocity);
+	}
+	    
+	/*
 	//Gets and normalizes the current angle between the current pose and the desired pose
 	currentAngle = desiredPose[2] - pose[2];
 	if(currentAngle > Math.PI)
@@ -241,7 +251,7 @@ public class RobotPositionController {
 	}
 	//Update lastAngle
 	lastAngle = currentAngle;
-      
+	*/
     }
 
     printPose();
