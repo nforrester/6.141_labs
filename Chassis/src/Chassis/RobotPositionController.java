@@ -205,7 +205,7 @@ public class RobotPositionController {
 
 	double startTheta = theta;
 	double currentDistance = 0;
-	double distance = Math.abs(target_angle - startTheta);
+	double distance = Math.abs(rerangeAngle(target_angle - startTheta));
 
 	double aDist = Math.PI / 5; // acceleration distance
 	double dDist = Math.PI / 5; // deceleration distance
@@ -220,7 +220,7 @@ public class RobotPositionController {
 		myPose[0]=x;
 		myPose[1]=y;
 		myPose[2]=theta;
-		currentDistance = theta - startTheta;
+		currentDistance = Math.abs(rerangeAngle(theta - startTheta));
 
 		if (currentDistance < distance * 0.5) {
 			if (currentDistance < aDist) {
