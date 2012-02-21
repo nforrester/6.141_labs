@@ -106,12 +106,9 @@ public class RobotPositionController {
    **/
   public boolean translate(double speed, double distance) {
 		boolean ok = true;
-    // Begin Student Code
+		// Begin Student Code
 		
 		//translation, Feed-Forward implementation
-		if (distance<0 && speed>0 || distance>0 && speed<0)
-			speed=-speed;
-
 		double kR=TICKS_PER_REVOLUTION * 2 * Math.PI * WHEEL_RADIUS_IN_M;
 		
 		double[] desiredPose={x+distance*Math.cos(theta),y+distance*Math.sin(theta),theta};
@@ -124,11 +121,10 @@ public class RobotPositionController {
 		
 		//Set desired angular velocity
 		robotVelocityController.setDesiredAngularVelocity(angularVelocityDesired,angularVelocityDesired);
-		System.out.println("myPose: x: "+myPose[0]+" y:"+myPose[1]+" theta: "+myPose[2]);
-		System.out.println("desiredPose: x: "+desiredPose[0]+" y:"+desiredPose[1]+" theta: "+desiredPose[2]);
-		System.out.println(comparePose(myPose,desiredPose,.05));
 		
-		while (!comparePose(myPose,desiredPose,.05)){
+		while (!comparePose(myPose,desiredPose,0.05)){
+			//Set desired angular velocity
+			robotVelocityController.setDesiredAngularVelocity(angularVelocityDesired,angularVelocityDesired);	
 			myPose[0]=x;
 			myPose[1]=y;
 			myPose[2]=theta;
@@ -144,6 +140,12 @@ public class RobotPositionController {
 				
 			}
 		}
+		//Why the fuck is it coming out of the while loop when the conditions clearly haven't been met?
+		printPose();	
+		System.out.println("desiredPose: x: "+desiredPose[0]+" y:"+desiredPose[1]+" theta: "+desiredPose[2]);
+		System.out.println(comparePose(myPose,desiredPose,0.05));
+		System.out.println("We got there.");
+				
 		//Set angular velocity to 0
 		robotVelocityController.setDesiredAngularVelocity(0,0);
 		
@@ -233,9 +235,9 @@ public class RobotPositionController {
    **/
   
   public boolean comparePose(double [] pose1, double [] pose2, double tolerance){
-	  return (((pose1[0]<pose2[0]+pose2[0]*tolerance)||(pose1[0]>pose2[0]-pose2[0]*tolerance))
-			  && ((pose1[1]<pose2[1]+pose2[1]*tolerance)||(pose1[1]>pose2[1]-pose2[1]*tolerance))
-					  && ((pose1[2]<pose2[2]+pose2[2]*tolerance)||(pose1[2]>pose2[2]-pose2[2]*tolerance)));
+	  return (	   ((pose1[0]<=(pose2[0]+pose2[0]*tolerance))||(pose1[0]>=(pose2[0]-pose2[0]*tolerance)))
+			&& ((pose1[1]<=(pose2[1]+pose2[1]*tolerance))||(pose1[1]>=(pose2[1]-pose2[1]*tolerance)))
+			&& ((pose1[2]<=(pose2[2]+pose2[2]*tolerance))||(pose1[2]>=(pose2[2]-pose2[2]*tolerance))));
   }
 
   /**
