@@ -111,11 +111,14 @@ public class RobotPositionController {
 		//translation, Feed-Forward implementation
 		if (distance<0 && speed>0 || distance>0 && speed<0)
 			speed=-speed;
+
+		double kR=TICKS_PER_REVOLUTION * 2 * Math.PI * WHEEL_RADIUS_IN_M;
 		
-		
+		double[] desiredPose=[x+distance*Math.sin(theta),y+distance*Math.cos(theta),theta];
+		System.out.println("desiredPose: "+desiredPose);
+		printPose();
 		double angularVelocityDesired=speed/WHEEL_RADIUS_IN_M;
 		
-		double kR=TICKS_PER_REVOLUTION * 2 * Math.PI * WHEEL_RADIUS_IN_M;
 		double distAfterTranslatingL=distance+totalTicks[RobotBase.LEFT]/kR;
 		double distAfterTranslatingR=distance+totalTicks[RobotBase.RIGHT]/kR;
 		
@@ -178,6 +181,7 @@ public class RobotPositionController {
       return;
 
     // Begin Student Code (if implementing closed-loop control)
+    
     // End Student Code (if implementing closed-loop control)
   }
 
@@ -208,6 +212,10 @@ public class RobotPositionController {
    **/
   public double getGain() {
     return gain;
+  }
+  
+  public void printPose(){
+	  System.out.println("Current Pose: X: "+x+" Y: "+y+" Theta: "+theta);
   }
 
   /**
