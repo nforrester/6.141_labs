@@ -158,7 +158,7 @@ public class RobotPositionController {
     // Begin Student Code
 
     //Normalize the angle
-    angle = angle%2*Math.PI;
+    angle = angle%(2*Math.PI);
     if (angle > Math.PI)
 	angle = angle - 2*Math.PI;
     if (angle < -Math.PI)
