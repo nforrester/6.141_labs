@@ -126,7 +126,8 @@ public class RobotPositionController {
 	double aDist = 0.15; // acceleration distance
 	double dDist = 0.15; // deceleration distance
 	double currentAngVel = 0;
-	double minAngVel = 0.005 / WHEEL_RADIUS_IN_M;
+	double minAngVelStart = 0.01 / WHEEL_RADIUS_IN_M;
+	double minAngVelEnd = 0.005 / WHEEL_RADIUS_IN_M;
 
 	//Set angular velocity to 0
 	robotVelocityController.setDesiredAngularVelocity(0,0);
@@ -144,15 +145,18 @@ public class RobotPositionController {
 			} else {
 				currentAngVel = angularVelocityDesired;
 			}
+			if (minAngVelStart > currentAngVel) {
+				currentAngVel = minAngVelStart;
+			}
 		} else {
 			if (currentDistance > distance - dDist) {
 				currentAngVel = ((distance - currentDistance) / dDist) * angularVelocityDesired;
 			} else {
 				currentAngVel = angularVelocityDesired;
 			}
-		}
-		if (minAngVel > currentAngVel) {
-			currentAngVel = minAngVel;
+			if (minAngVelEnd > currentAngVel) {
+				currentAngVel = minAngVelEnd;
+			}
 		}
 		robotVelocityController.setDesiredAngularVelocity(currentAngVel,currentAngVel);
 	}
