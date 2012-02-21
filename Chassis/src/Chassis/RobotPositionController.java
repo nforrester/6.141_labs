@@ -115,6 +115,7 @@ public class RobotPositionController {
 		double kR=TICKS_PER_REVOLUTION * 2 * Math.PI * WHEEL_RADIUS_IN_M;
 		
 		double[] desiredPose={x+distance*Math.sin(theta),y+distance*Math.cos(theta),theta};
+		double[] myPose={x,y,theta};
 		
 		double angularVelocityDesired=speed/WHEEL_RADIUS_IN_M;
 		
@@ -124,9 +125,7 @@ public class RobotPositionController {
 		//Set desired angular velocity
 		robotVelocityController.setDesiredAngularVelocity(angularVelocityDesired,angularVelocityDesired);
 		
-		while (distAfterTranslatingL>totalTicks[RobotBase.LEFT]/kR){
-			System.out.println("desiredPose: "+desiredPose);
-			printPose();
+		while (comparePose(myPose,desiredPose,.05)){
 			
 			//Do nothing until we get there, unless we get an error.
 			//if one of our wheels overshoots the other, stop and return false;
@@ -135,7 +134,9 @@ public class RobotPositionController {
 					||(distAfterTranslatingL<totalTicks[RobotBase.LEFT]/kR
 							&& distAfterTranslatingR>totalTicks[RobotBase.RIGHT]/kR)){
 				robotVelocityController.setDesiredAngularVelocity(0,0);
+				System.out.println("We didn't get there.");
 				return false;
+				
 			}
 		}
 		//Set angular velocity to 0
@@ -216,6 +217,24 @@ public class RobotPositionController {
   
   public void printPose(){
 	  System.out.println("Current Pose: X: "+x+" Y: "+y+" Theta: "+theta);
+  }
+  
+  /**
+   * <p>Check if pose1 is near pose 2 within a certain tolerance</p>
+   *
+   * @param pose1 pose to check
+   * @param pose2 pose to compare to
+   * @param tolerance a percentage of tolerance (write as decimal)
+   **/
+  
+  public boolean comparePose(double [] pose1, double [] pose2, double tolerance){
+	  if (pose1[0]<pose2[0]+pose2[0]*tolerance)||((pose1[0]>pose2[0]-pose2[0]*tolerance)
+			  && pose1[1]<pose2[1]+pose2[1]*tolerance)||((pose1[1]>pose2[1]-pose2[1]*tolerance)
+					  && pose1[2]<pose2[2]+pose2[2]*tolerance)||((pose1[2]>pose2[2]-pose2[2]*tolerance)){
+		  return true;
+	  }
+	  else
+		  return false;
   }
 
   /**
