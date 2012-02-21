@@ -77,21 +77,21 @@ public class Chassis {
     }
     else if(command == 1) {
 	System.out.println("Driving Out and Back");
-	robot.getPositionController().translate(.2, 1);
-	robot.getPositionController().rotate(.4, Math.PI);
-	robot.getPositionController().translate(.2, 1);
-	robot.getPositionController().rotate(.4, -Math.PI);
+	robot.getRobotPositionController().translate(.2, 1);
+	robot.getRobotPositionController().rotate(.4, Math.PI);
+	robot.getRobotPositionController().translate(.2, 1);
+	robot.getRobotPositionController().rotate(.4, -Math.PI);
     }
     else if(command == 2) {
 	System.out.println("Driving in a Square");
-	robot.getPositionController().translate(.2,1);
-	robot.getPositionController().rotate(.3,Math.PI/2);
-	robot.getPositionController().translate(.2,1);
-	robot.getPositionController().rotate(.3,Math.PI/2);
-	robot.getPositionController().translate(.2,1);
-	robot.getPositionController().rotate(.3,Math.PI/2);
-	robot.getPositionController().translate(.2,1);
-	robot.getPositionController().rotate(.3,Math.PI/2);
+	robot.getRobotPositionController().translate(.2,1);
+	robot.getRobotPositionController().rotate(.3,Math.PI/2);
+	robot.getRobotPositionController().translate(.2,1);
+	robot.getRobotPositionController().rotate(.3,Math.PI/2);
+	robot.getRobotPositionController().translate(.2,1);
+	robot.getRobotPositionController().rotate(.3,Math.PI/2);
+	robot.getRobotPositionController().translate(.2,1);
+	robot.getRobotPositionController().rotate(.3,Math.PI/2);
     }
     // End Student Code
 
