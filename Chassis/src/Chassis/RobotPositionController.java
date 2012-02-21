@@ -201,19 +201,46 @@ public class RobotPositionController {
 
     double[] pose = {x,y,theta};
     double[] desiredPose = {x,y,theta + angle};
-    
     double desiredAngularVelocity = (speed * DISTANCE_BETWEEN_WHEELS/2)/WHEEL_RADIUS_IN_M;
-
+    
     double startingTime = totalTime;
-    if(angle > 0)
+    if(angle > 0) {
 	robotVelocityController.setDesiredAngularVelocity(-desiredAngularVelocity, desiredAngularVelocity);
-    else
+	int dir = 1;
+    }
+    else {
 	robotVelocityController.setDesiredAngularVelocity(desiredAngularVelocity, -desiredAngularVelocity);
+	int dir = 0;
+    }
 
-    while(!comparePose(pose,desiredPose, .1, .15)) {
+    double lastAngle = angle;
+    while(!comparePose(pose,desiredPose, .1, .05)) {
 	pose[0] = x;
 	pose[1] = y;
 	pose[2] = theta;
+
+	//Gets and normalizes the current angle between the current pose and the desired pose
+	angle = (desiredPose[2] + Math.PI) - (pose[2] + Math.PI);
+	if(angle > Math.PI)
+	    angle = angle - 2*Math.PI;
+	else if (angle < Math.PI)
+	    angle = angle + 2*Math.PI;
+
+	//IF the magnitude of the angle between the current pose and desired pose is larger than the step before, flip directions.
+	if(Math.abs(angle) > Math.abs(lastAngle)) {
+	    desiredAngularVelocity = desiredAngularVelocity/1.5;
+	    if(dir == 0) {
+		robotVelocityController.setDesiredAngularVelocity(-desiredAngularVelocity, desiredAngularVelocity);
+		dir = 1;
+	    }
+	    else {
+		robotVelocityController.setDesiredAngularVelocity(desiredAngularVelocity, -desiredAngularVelocity);
+		dir = 0;
+	    }
+	}
+	//Update lastAngle
+	lastAngle = angle;
+	    
     }
 
     printPose();
