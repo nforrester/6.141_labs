@@ -121,14 +121,40 @@ public class RobotPositionController {
 
 	double angularVelocityDesired=speed/WHEEL_RADIUS_IN_M;
 
-	//Set desired angular velocity
-	robotVelocityController.setDesiredAngularVelocity(angularVelocityDesired,angularVelocityDesired);
+	double currentDistance = poseDistance(myPose, startPose);
+
+	double aDist = 0.15; // acceleration distance
+	double dDist = 0.15; // deceleration distance
+	double currentAngVel = 0;
+	double minAngVel = 0.005 / WHEEL_RADIUS_IN_M;
+
+	//Set angular velocity to 0
+	robotVelocityController.setDesiredAngularVelocity(0,0);
 
 	System.out.println("AVD: " + angularVelocityDesired);
-	while (poseDistance(myPose, startPose) < distance){
+	while (currentDistance < distance){
 		myPose[0]=x;
 		myPose[1]=y;
 		myPose[2]=theta;
+		currentDistance = poseDistance(myPose, startPose);
+
+		if (currentDistance < distance * 0.5) {
+			if (currentDistance < aDist) {
+				currentAngVel = (currentDistance / aDist) * angularVelocityDesired;
+			} else {
+				currentAngVel = angularVelocityDesired;
+			}
+		} else {
+			if (currentDistance > distance - dDist) {
+				currentAngVel = ((distance - currentDistance) / dDist) * angularVelocityDesired;
+			} else {
+				currentAngVel = angularVelocityDesired;
+			}
+		}
+		if (minAngVel > currentAngVel) {
+			currentAngVel = minAngVel;
+		}
+		robotVelocityController.setDesiredAngularVelocity(currentAngVel,currentAngVel);
 	}
 
 	//Set angular velocity to 0
