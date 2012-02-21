@@ -51,7 +51,7 @@ public class RobotPositionController {
   /**
    * <p>The whole-robot velocity controller.</p>
    **/
-  protected RobotVelocityController robotVelocityController;
+  protected RobotVelocityControllerBalanced robotVelocityController;
 
   /**
    * <p>Total ticks since reset, positive means corresp side of robot moved
@@ -126,9 +126,10 @@ public class RobotPositionController {
 	//Set desired angular velocity
 	robotVelocityController.setDesiredAngularVelocity(angularVelocityDesired,angularVelocityDesired);
 
+	System.out.println("AVD: " + angularVelocityDesired);
 	while (!comparePose(myPose, desiredPose, 0.1, 0.15)){
 		//Set desired angular velocity
-		robotVelocityController.setDesiredAngularVelocity(angularVelocityDesired,angularVelocityDesired);	
+		//robotVelocityController.setDesiredAngularVelocity(angularVelocityDesired,angularVelocityDesired);	
 		myPose[0]=x;
 		myPose[1]=y;
 		myPose[2]=theta;
@@ -183,6 +184,9 @@ public class RobotPositionController {
       return;
 
     // Begin Student Code (if implementing closed-loop control)
+    System.out.println("hello world!");
+    //double[] junk = {0, 0};
+    //robotVelocityController.controlStep(junk);
     // End Student Code (if implementing closed-loop control)
   }
 
@@ -194,7 +198,7 @@ public class RobotPositionController {
    * @param vc the whole-robot velocity controller
    **/
   public void setRobotVelocityController(RobotVelocityController vc) {
-    robotVelocityController = vc;
+    robotVelocityController = (RobotVelocityControllerBalanced)vc;
   }
 
   /**

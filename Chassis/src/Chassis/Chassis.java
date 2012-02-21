@@ -47,15 +47,13 @@ public class Chassis {
 
     //this block to configures *our* solution to lab 2 (yours may or
     //may not be configured the same way)
-    final double VELOCITY_BALANCE_GAIN = 1.0; 
-    final double VELOCITY_WHEEL_GAIN = 6.0;
-    robotVelocityController.setGain(VELOCITY_BALANCE_GAIN);
-    robotVelocityController.getWheelVelocityController(RobotBase.LEFT). 
-      setGain(VELOCITY_WHEEL_GAIN);
-    robotVelocityController.getWheelVelocityController(RobotBase.RIGHT).
-      setGain(VELOCITY_WHEEL_GAIN);
-
-
+//    final double VELOCITY_BALANCE_GAIN = 1.0; 
+//    final double VELOCITY_WHEEL_GAIN = 6.0;
+//    robotVelocityController.setGain(VELOCITY_BALANCE_GAIN);
+//    robotVelocityController.getWheelVelocityController(RobotBase.LEFT). 
+//      setGain(VELOCITY_WHEEL_GAIN);
+//    robotVelocityController.getWheelVelocityController(RobotBase.RIGHT).
+//      setGain(VELOCITY_WHEEL_GAIN);
 
     //////////////////// display estop button //////////////////////////    
 
@@ -68,8 +66,8 @@ public class Chassis {
 
     //Tests
     robot.enableMotors(true);
-    System.out.println("Move forward 10 meters with a speed of 2");
-    robot.getRobotPositionController().translate(1, 1);
+    System.out.println("Move forward 4 meters with a speed of 1");
+    robot.getRobotPositionController().translate(0.45, 4);
 
     // End Student Code
 
