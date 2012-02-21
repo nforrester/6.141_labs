@@ -239,7 +239,7 @@ public class RobotPositionController {
    **/
 
   public boolean comparePose(double [] pose1, double [] pose2, double toleranceLinear, double toleranceAngular){
-  	double distance = Math.pow(Math.pow(pose1[0] - pose2[0], 2) + Math.pow(pose1[1] - pose2[1], 2), 0.5);
+	double distance = Math.pow(Math.pow(pose1[0] - pose2[0], 2) + Math.pow(pose1[1] - pose2[1], 2), 0.5);
 	return (distance < toleranceLinear) && (Math.abs(pose1[2] - pose2[2]) < toleranceAngular);
   }
 
