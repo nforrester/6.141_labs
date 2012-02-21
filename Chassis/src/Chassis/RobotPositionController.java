@@ -132,16 +132,6 @@ public class RobotPositionController {
 		myPose[0]=x;
 		myPose[1]=y;
 		myPose[2]=theta;
-		//Do nothing until we get there, unless we get an error.
-		//if one of our wheels overshoots the other, stop and return false;
-		if((distAfterTranslatingL>totalTicks[RobotBase.LEFT]/TICKS_PER_METER
-				&& distAfterTranslatingR<totalTicks[RobotBase.RIGHT]/TICKS_PER_METER)
-				||(distAfterTranslatingL<totalTicks[RobotBase.LEFT]/TICKS_PER_METER
-						&& distAfterTranslatingR>totalTicks[RobotBase.RIGHT]/TICKS_PER_METER)){
-			robotVelocityController.setDesiredAngularVelocity(0,0);
-			System.out.println("We didn't get there.");
-			return false;
-		}
 	}
 	//Why the fuck is it coming out of the while loop when the conditions clearly haven't been met?
 	/* It could have been because comparePose was taking percentages when it should have been taking absolute values.
