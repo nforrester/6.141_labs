@@ -66,7 +66,7 @@ public class Chassis {
 
     //Tests
     robot.enableMotors(true);
-    System.out.println("Move forward 4 meters with a speed of 1");
+    System.out.println("Move forward 4 meters with a speed of 0.45");
     robot.getRobotPositionController().translate(0.45, 4);
 
     // End Student Code

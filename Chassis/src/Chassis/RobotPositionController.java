@@ -128,8 +128,6 @@ public class RobotPositionController {
 
 	System.out.println("AVD: " + angularVelocityDesired);
 	while (!comparePose(myPose, desiredPose, 0.1, 0.15)){
-		//Set desired angular velocity
-		//robotVelocityController.setDesiredAngularVelocity(angularVelocityDesired,angularVelocityDesired);	
 		myPose[0]=x;
 		myPose[1]=y;
 		myPose[2]=theta;
@@ -184,9 +182,6 @@ public class RobotPositionController {
       return;
 
     // Begin Student Code (if implementing closed-loop control)
-    System.out.println("hello world!");
-    //double[] junk = {0, 0};
-    //robotVelocityController.controlStep(junk);
     // End Student Code (if implementing closed-loop control)
   }
 
