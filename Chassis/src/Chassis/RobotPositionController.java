@@ -121,7 +121,7 @@ public class RobotPositionController {
 	//Set desired angular velocity
 	robotVelocityController.setDesiredAngularVelocity(angularVelocityDesired,angularVelocityDesired);
 
-	while (!comparePose(myPose,desiredPose,0.05)){
+	while (!comparePose(myPose, desiredPose, 0.1, 0.15)){
 		//Set desired angular velocity
 		robotVelocityController.setDesiredAngularVelocity(angularVelocityDesired,angularVelocityDesired);	
 		myPose[0]=x;
@@ -139,9 +139,11 @@ public class RobotPositionController {
 		}
 	}
 	//Why the fuck is it coming out of the while loop when the conditions clearly haven't been met?
+	/* It could have been because comparePose was taking percentages when it should have been taking absolute values.
+	 * Let's test the new version and see. */
 	printPose();
 	System.out.println("desiredPose: x: "+desiredPose[0]+" y:"+desiredPose[1]+" theta: "+desiredPose[2]);
-	System.out.println(comparePose(myPose,desiredPose,0.05));
+	System.out.println(comparePose(myPose, desiredPose, 0.1, 0.15));
 	System.out.println("We got there.");
 
 	//Set angular velocity to 0
@@ -223,17 +225,17 @@ public class RobotPositionController {
   }
 
   /**
-   * <p>Check if pose1 is near pose 2 within a certain tolerance</p>
+   * <p>Check if pose1 is near pose 2 within certain tolerances</p>
    *
    * @param pose1 pose to check
    * @param pose2 pose to compare to
-   * @param tolerance a percentage of tolerance (write as decimal)
+   * @param toleranceLinear linear tolerance in meters
+   * @param toleranceAngular angular tolerance in radians
    **/
 
-  public boolean comparePose(double [] pose1, double [] pose2, double tolerance){
-	  return (	   ((pose1[0]<=(pose2[0]+pose2[0]*tolerance))||(pose1[0]>=(pose2[0]-pose2[0]*tolerance)))
-			&& ((pose1[1]<=(pose2[1]+pose2[1]*tolerance))||(pose1[1]>=(pose2[1]-pose2[1]*tolerance)))
-			&& ((pose1[2]<=(pose2[2]+pose2[2]*tolerance))||(pose1[2]>=(pose2[2]-pose2[2]*tolerance))));
+  public boolean comparePose(double [] pose1, double [] pose2, double toleranceLinear, double toleranceAngular){
+  	double distance = Math.pow(Math.pow(pose1[0] - pose2[0], 2) + Math.pow(pose1[1] - pose2[1], 2), 0.5);
+	return (distance < toleranceLinear) && (Math.abs(pose1[2] - pose2[2]) < toleranceAngular);
   }
 
   /**
