@@ -277,6 +277,14 @@ public class RobotPositionController {
     double xNew = x + Math.cos(thetaTravel) * distAvg;
     double yNew = y + Math.sin(thetaTravel) * distAvg;
 
+    //keep thetaNew in range
+    while (thetaNew >= 2 * Math.PI) {
+    	thetaNew -= 2 * Math.PI;
+    }
+    while (thetaNew < 0) {
+    	thetaNew += 2 * Math.PI;
+    }
+
     //apply the new odometry
     x = xNew;
     y = yNew;
