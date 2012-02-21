@@ -43,6 +43,12 @@ public class RobotPositionController {
   protected static final double TICKS_PER_REVOLUTION = WheelVelocityController.TICKS_PER_REVOLUTION;
 
   /**
+   * <p>Student Code: encoder ticks per meter.</p>
+   * ticks/rev * rev/rad * rad/m = ticks/m
+   **/
+  protected static final double TICKS_PER_METER = TICKS_PER_REVOLUTION * (1 / (2 * Math.PI)) * (1 / WHEEL_RADIUS_IN_M);
+
+  /**
    * <p>The whole-robot velocity controller.</p>
    **/
   protected RobotVelocityController robotVelocityController;
@@ -108,15 +114,14 @@ public class RobotPositionController {
 	// Begin Student Code
 
 	//translation, Feed-Forward implementation
-	double kR=TICKS_PER_REVOLUTION * 2 * Math.PI * WHEEL_RADIUS_IN_M;
 
 	double[] desiredPose={x+distance*Math.cos(theta),y+distance*Math.sin(theta),theta};
 	double[] myPose={x,y,theta};
 
 	double angularVelocityDesired=speed/WHEEL_RADIUS_IN_M;
 
-	double distAfterTranslatingL=distance+totalTicks[RobotBase.LEFT]/kR;
-	double distAfterTranslatingR=distance+totalTicks[RobotBase.RIGHT]/kR;
+	double distAfterTranslatingL=distance+totalTicks[RobotBase.LEFT]/TICKS_PER_METER;
+	double distAfterTranslatingR=distance+totalTicks[RobotBase.RIGHT]/TICKS_PER_METER;
 
 	//Set desired angular velocity
 	robotVelocityController.setDesiredAngularVelocity(angularVelocityDesired,angularVelocityDesired);
@@ -129,10 +134,10 @@ public class RobotPositionController {
 		myPose[2]=theta;
 		//Do nothing until we get there, unless we get an error.
 		//if one of our wheels overshoots the other, stop and return false;
-		if((distAfterTranslatingL>totalTicks[RobotBase.LEFT]/kR
-				&& distAfterTranslatingR<totalTicks[RobotBase.RIGHT]/kR)
-				||(distAfterTranslatingL<totalTicks[RobotBase.LEFT]/kR
-						&& distAfterTranslatingR>totalTicks[RobotBase.RIGHT]/kR)){
+		if((distAfterTranslatingL>totalTicks[RobotBase.LEFT]/TICKS_PER_METER
+				&& distAfterTranslatingR<totalTicks[RobotBase.RIGHT]/TICKS_PER_METER)
+				||(distAfterTranslatingL<totalTicks[RobotBase.LEFT]/TICKS_PER_METER
+						&& distAfterTranslatingR>totalTicks[RobotBase.RIGHT]/TICKS_PER_METER)){
 			robotVelocityController.setDesiredAngularVelocity(0,0);
 			System.out.println("We didn't get there.");
 			return false;
@@ -258,8 +263,8 @@ public class RobotPositionController {
     totalTime += time;
 
     //Convert from ticks to meters
-    double rightDist = rightTicks / TICKS_PER_REVOLUTION * 2 * Math.PI * WHEEL_RADIUS_IN_M;
-    double leftDist = leftTicks / TICKS_PER_REVOLUTION * 2 * Math.PI * WHEEL_RADIUS_IN_M;
+    double rightDist = rightTicks / TICKS_PER_METER;
+    double leftDist = leftTicks / TICKS_PER_METER;
 
     //Useful definitions
     double distDiff = rightDist - leftDist;
