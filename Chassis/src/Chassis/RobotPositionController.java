@@ -120,9 +120,6 @@ public class RobotPositionController {
 
 	double angularVelocityDesired=speed/WHEEL_RADIUS_IN_M;
 
-	double distAfterTranslatingL=distance+totalTicks[RobotBase.LEFT]/TICKS_PER_METER;
-	double distAfterTranslatingR=distance+totalTicks[RobotBase.RIGHT]/TICKS_PER_METER;
-
 	//Set desired angular velocity
 	robotVelocityController.setDesiredAngularVelocity(angularVelocityDesired,angularVelocityDesired);
 
@@ -132,9 +129,7 @@ public class RobotPositionController {
 		myPose[1]=y;
 		myPose[2]=theta;
 	}
-	//Why the fuck is it coming out of the while loop when the conditions clearly haven't been met?
-	/* It could have been because comparePose was taking percentages when it should have been taking absolute values.
-	 * Let's test the new version and see. */
+
 	printPose();
 	System.out.println("desiredPose: x: "+desiredPose[0]+" y:"+desiredPose[1]+" theta: "+desiredPose[2]);
 	System.out.println(comparePose(myPose, desiredPose, 0.1, 0.15));
