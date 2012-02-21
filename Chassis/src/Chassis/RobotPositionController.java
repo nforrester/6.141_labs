@@ -264,13 +264,11 @@ public class RobotPositionController {
     //Useful definitions
     double distDiff = rightDist - leftDist;
     double distAvg = (rightDist + leftDist) / 2;
-
-    //Calculate dtheta
     double dtheta = distDiff / DISTANCE_BETWEEN_WHEELS;
+    double thetaTravel = theta + dtheta / 2;
 
     //update our current odometry
     double thetaNew = theta + dtheta;
-    double thetaTravel = theta + dtheta / 2;
     double xNew = x + Math.sin(thetaTravel) * distAvg;
     double yNew = y + Math.cos(thetaTravel) * distAvg;
 
