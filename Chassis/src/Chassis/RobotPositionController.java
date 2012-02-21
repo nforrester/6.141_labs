@@ -215,20 +215,20 @@ public class RobotPositionController {
 
     double lastAngle = angle;
     double currentAngle = 0;
-    while(!comparePose(pose,desiredPose, .1, .05)) {
+    while(!comparePose(pose,desiredPose, .1, .1)) {
 	pose[0] = x;
 	pose[1] = y;
 	pose[2] = theta;
-
+	/*
 	//Gets and normalizes the current angle between the current pose and the desired pose
 	currentAngle = (desiredPose[2] + Math.PI) - (pose[2] + Math.PI);
-	if(angle > Math.PI)
+	if(currentAngle > Math.PI)
 	    currentAngle = currentAngle - 2*Math.PI;
-	else if (currentAngle < Math.PI)
+	else if (currentAngle < -Math.PI)
 	    currentAngle = currentAngle + 2*Math.PI;
 
 	//IF the magnitude of the angle between the current pose and desired pose is larger than the step before, flip directions.
-	if(Math.abs(currentAngle) > Math.abs(lastAngle)) {
+	if(Math.abs(currentAngle) > Math.abs(lastAngle) && Math.abs(currentAngle - lastAngle) > .05) {
 	    desiredAngularVelocity = desiredAngularVelocity/1.5;
 	    if(dir == 0) {
 		robotVelocityController.setDesiredAngularVelocity(-desiredAngularVelocity, desiredAngularVelocity);
@@ -241,7 +241,7 @@ public class RobotPositionController {
 	}
 	//Update lastAngle
 	lastAngle = currentAngle;
-	    
+	*/
     }
 
     printPose();
