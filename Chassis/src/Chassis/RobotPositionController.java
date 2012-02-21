@@ -35,10 +35,19 @@ public class RobotPositionController {
    **/
   protected double gain = 1.0;
 
+  protected final static double DISTANCE_BETWEEN_WHEELS = 0.430;
+
   /**
    * <p>The robot.</p>
    **/
   protected OdometryRobot robot;
+
+  /**
+   * <p>position state variables.</p>
+   **/
+  protected double x = 0;
+  protected double y = 0;
+  protected double theta = 0;
 
   /**
    * <p>Create a new position controller for a robot.</p>
@@ -152,5 +161,24 @@ public class RobotPositionController {
     totalTicks[RobotBase.LEFT] += leftTicks;
     totalTicks[RobotBase.RIGHT] += rightTicks;
     totalTime += time;
+
+    double rightDist = rightTicks / WheelVelocityController.TICKS_PER_REVOLUTION * 2 * Math.PI * WheelVelocityController.WHEEL_RADIUS_IN_M;
+    double leftDist = leftTicks / WheelVelocityController.TICKS_PER_REVOLUTION * 2 * Math.PI * WheelVelocityController.WHEEL_RADIUS_IN_M;
+
+    double distDiff = rightDist - leftDist;
+    double distAvg = (rightDist + leftDist) / 2;
+
+    double dtheta = distDiff / DISTANCE_BETWEEN_WHEELS;
+
+    double thetaNew = theta + dtheta
+
+    double thetaTravel = theta + dtheta / 2;
+
+    double xNew = x + Math.sin(thetaTravel) * distAvg;
+    double yNew = y + Math.cos(thetaTravel) * distAvg;
+
+    x = xNew;
+    y = yNew;
+    theta = thetaNew;
   }
 }
