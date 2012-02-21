@@ -10,37 +10,37 @@ public class RobotPositionController {
  /**
    * <p>The maximum pwm command magnitude.</p>
    **/
-  protected static final double MAX_PWM = 255;
+  protected static final double MAX_PWM = WheelVelocityController.MAX_PWM;
 
   /**
    * <p>Student Code: unloaded maximum wheel angular velocity in rad/s.
    * This should be a protected static final double called MAX_ANGULAR_VELOCITY.</p>
    **/
-  protected static final double MAX_ANGULAR_VELOCITY = 7.95;
+  protected static final double MAX_ANGULAR_VELOCITY = WheelVelocityController.MAX_ANGULAR_VELOCITY;
 
   /**
    * <p>Student Code: radius of the wheel on the motor (in meters).
    * This should be a protected static final double called WHEEL_RADIUS_IN_M.</p>
    **/
-  protected static final double WHEEL_RADIUS_IN_M = .062775;
+  protected static final double WHEEL_RADIUS_IN_M = WheelVelocityController.WHEEL_RADIUS_IN_M;
 
   /**
    * <p>Student Code: encoder resolution.</p>
    * This should be a protected static final double called ENCODER_RESOLUTION.</p>
    **/
-  protected static final double ENCODER_RESOLUTION = 2000;
+  protected static final double ENCODER_RESOLUTION = WheelVelocityController.ENCODER_RESOLUTION;
 
   /**
    * <p>Student Code: motor revolutions per wheel revolution.
    * This should be a protected static final double called GEAR_RATIO.</p>
    **/
-  protected static final double GEAR_RATIO = 65.5;
+  protected static final double GEAR_RATIO = WheelVelocityController.GEAR_RATIO;
 
   /**
    * <p>Student Code: encoder ticks per motor revolution.</p>
    * This should be a protected static final double called TICKS_PER_REVOLUTION.</p>
    **/
-  protected static final double TICKS_PER_REVOLUTION = 131000;
+  protected static final double TICKS_PER_REVOLUTION = WheelVelocityController.TICKS_PER_REVOLUTION;
 
   /**
    * <p>The whole-robot velocity controller.</p>
