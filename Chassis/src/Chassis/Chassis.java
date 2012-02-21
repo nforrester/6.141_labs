@@ -68,9 +68,9 @@ public class Chassis {
     
     //Tests
     System.out.println("Move forward 4 meters with a speed of 2");
-    robot.getRobotPositionController().translate(2, 4);
+  /*  robot.getRobotPositionController().translate(2, 4);
     System.out.println("Move forward 4 meters with a speed of 2");
-    robot.getRobotPositionController().translate(1, -4);
+    robot.getRobotPositionController().translate(1, -4);*/
     
     // End Student Code
 
