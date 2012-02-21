@@ -7,42 +7,41 @@ import MotorControl.*;
  * <p>A whole-robot position controller.</p>
  **/
 public class RobotPositionController {
+ /**
+   * <p>The maximum pwm command magnitude.</p>
+   **/
+  protected static final double MAX_PWM = 255;
 
-	
-	 /**
-	   * <p>The maximum pwm command magnitude.</p>
-	   **/
-	  protected static final double MAX_PWM = 255;
+  /**
+   * <p>Student Code: unloaded maximum wheel angular velocity in rad/s.
+   * This should be a protected static final double called MAX_ANGULAR_VELOCITY.</p>
+   **/
+  protected static final double MAX_ANGULAR_VELOCITY = 7.95;
 
-	  /**
-	   * <p>Student Code: unloaded maximum wheel angular velocity in rad/s. 
-	   * This should be a protected static final double called MAX_ANGULAR_VELOCITY.</p>
-	   **/
-	  protected static final double MAX_ANGULAR_VELOCITY = 7.95;
+  /**
+   * <p>Student Code: radius of the wheel on the motor (in meters).
+   * This should be a protected static final double called WHEEL_RADIUS_IN_M.</p>
+   **/
+  protected static final double WHEEL_RADIUS_IN_M = .062775;
 
-	  /**
-	   * <p>Student Code: radius of the wheel on the motor (in meters). 
-	   * This should be a protected static final double called WHEEL_RADIUS_IN_M.</p>
-	   **/
-	  protected static final double WHEEL_RADIUS_IN_M = .062775;
+  /**
+   * <p>Student Code: encoder resolution.</p>
+   * This should be a protected static final double called ENCODER_RESOLUTION.</p>
+   **/
+  protected static final double ENCODER_RESOLUTION = 2000;
 
-	  /**
-	   * <p>Student Code: encoder resolution.</p>
-	   * This should be a protected static final double called ENCODER_RESOLUTION.</p>
-	   **/
-	  protected static final double ENCODER_RESOLUTION = 2000;
+  /**
+   * <p>Student Code: motor revolutions per wheel revolution.
+   * This should be a protected static final double called GEAR_RATIO.</p>
+   **/
+  protected static final double GEAR_RATIO = 65.5;
 
-	  /**
-	   * <p>Student Code: motor revolutions per wheel revolution.
-	   * This should be a protected static final double called GEAR_RATIO.</p>
-	   **/
-	  protected static final double GEAR_RATIO = 65.5;
+  /**
+   * <p>Student Code: encoder ticks per motor revolution.</p>
+   * This should be a protected static final double called TICKS_PER_REVOLUTION.</p>
+   **/
+  protected static final double TICKS_PER_REVOLUTION = 131000;
 
-	  /**
-	   * <p>Student Code: encoder ticks per motor revolution.</p>
-	   * This should be a protected static final double called TICKS_PER_REVOLUTION.</p>
-	   **/
-	  protected static final double TICKS_PER_REVOLUTION = 131000;
   /**
    * <p>The whole-robot velocity controller.</p>
    **/
@@ -105,52 +104,51 @@ public class RobotPositionController {
    * @return true iff motion was successful
    **/
   public boolean translate(double speed, double distance) {
-		boolean ok = true;
-		// Begin Student Code
-		
-		//translation, Feed-Forward implementation
-		double kR=TICKS_PER_REVOLUTION * 2 * Math.PI * WHEEL_RADIUS_IN_M;
-		
-		double[] desiredPose={x+distance*Math.cos(theta),y+distance*Math.sin(theta),theta};
-		double[] myPose={x,y,theta};
-		
-		double angularVelocityDesired=speed/WHEEL_RADIUS_IN_M;
-		
-		double distAfterTranslatingL=distance+totalTicks[RobotBase.LEFT]/kR;
-		double distAfterTranslatingR=distance+totalTicks[RobotBase.RIGHT]/kR;
-		
+	boolean ok = true;
+	// Begin Student Code
+
+	//translation, Feed-Forward implementation
+	double kR=TICKS_PER_REVOLUTION * 2 * Math.PI * WHEEL_RADIUS_IN_M;
+
+	double[] desiredPose={x+distance*Math.cos(theta),y+distance*Math.sin(theta),theta};
+	double[] myPose={x,y,theta};
+
+	double angularVelocityDesired=speed/WHEEL_RADIUS_IN_M;
+
+	double distAfterTranslatingL=distance+totalTicks[RobotBase.LEFT]/kR;
+	double distAfterTranslatingR=distance+totalTicks[RobotBase.RIGHT]/kR;
+
+	//Set desired angular velocity
+	robotVelocityController.setDesiredAngularVelocity(angularVelocityDesired,angularVelocityDesired);
+
+	while (!comparePose(myPose,desiredPose,0.05)){
 		//Set desired angular velocity
-		robotVelocityController.setDesiredAngularVelocity(angularVelocityDesired,angularVelocityDesired);
-		
-		while (!comparePose(myPose,desiredPose,0.05)){
-			//Set desired angular velocity
-			robotVelocityController.setDesiredAngularVelocity(angularVelocityDesired,angularVelocityDesired);	
-			myPose[0]=x;
-			myPose[1]=y;
-			myPose[2]=theta;
-			//Do nothing until we get there, unless we get an error.
-			//if one of our wheels overshoots the other, stop and return false;
-			if((distAfterTranslatingL>totalTicks[RobotBase.LEFT]/kR
-					&& distAfterTranslatingR<totalTicks[RobotBase.RIGHT]/kR)
-					||(distAfterTranslatingL<totalTicks[RobotBase.LEFT]/kR
-							&& distAfterTranslatingR>totalTicks[RobotBase.RIGHT]/kR)){
-				robotVelocityController.setDesiredAngularVelocity(0,0);
-				System.out.println("We didn't get there.");
-				return false;
-				
-			}
+		robotVelocityController.setDesiredAngularVelocity(angularVelocityDesired,angularVelocityDesired);	
+		myPose[0]=x;
+		myPose[1]=y;
+		myPose[2]=theta;
+		//Do nothing until we get there, unless we get an error.
+		//if one of our wheels overshoots the other, stop and return false;
+		if((distAfterTranslatingL>totalTicks[RobotBase.LEFT]/kR
+				&& distAfterTranslatingR<totalTicks[RobotBase.RIGHT]/kR)
+				||(distAfterTranslatingL<totalTicks[RobotBase.LEFT]/kR
+						&& distAfterTranslatingR>totalTicks[RobotBase.RIGHT]/kR)){
+			robotVelocityController.setDesiredAngularVelocity(0,0);
+			System.out.println("We didn't get there.");
+			return false;
 		}
-		//Why the fuck is it coming out of the while loop when the conditions clearly haven't been met?
-		printPose();	
-		System.out.println("desiredPose: x: "+desiredPose[0]+" y:"+desiredPose[1]+" theta: "+desiredPose[2]);
-		System.out.println(comparePose(myPose,desiredPose,0.05));
-		System.out.println("We got there.");
-				
-		//Set angular velocity to 0
-		robotVelocityController.setDesiredAngularVelocity(0,0);
-		
-    // End Student Code
-		return ok;
+	}
+	//Why the fuck is it coming out of the while loop when the conditions clearly haven't been met?
+	printPose();
+	System.out.println("desiredPose: x: "+desiredPose[0]+" y:"+desiredPose[1]+" theta: "+desiredPose[2]);
+	System.out.println(comparePose(myPose,desiredPose,0.05));
+	System.out.println("We got there.");
+
+	//Set angular velocity to 0
+	robotVelocityController.setDesiredAngularVelocity(0,0);
+
+	// End Student Code
+	return ok;
   }
 
   /**
@@ -165,11 +163,10 @@ public class RobotPositionController {
    * @return true iff motion was successful
    **/
   public boolean rotate(double speed, double angle) {
-		boolean ok = true;
+    boolean ok = true;
     // Begin Student Code
-		
     // End Student Code
-	  return ok;	
+    return ok;
   }
     
 
@@ -189,7 +186,6 @@ public class RobotPositionController {
       return;
 
     // Begin Student Code (if implementing closed-loop control)
-    
     // End Student Code (if implementing closed-loop control)
   }
 
@@ -221,11 +217,11 @@ public class RobotPositionController {
   public double getGain() {
     return gain;
   }
-  
+
   public void printPose(){
 	  System.out.println("Current Pose: X: "+x+" Y: "+y+" Theta: "+theta);
   }
-  
+
   /**
    * <p>Check if pose1 is near pose 2 within a certain tolerance</p>
    *
@@ -233,7 +229,7 @@ public class RobotPositionController {
    * @param pose2 pose to compare to
    * @param tolerance a percentage of tolerance (write as decimal)
    **/
-  
+
   public boolean comparePose(double [] pose1, double [] pose2, double tolerance){
 	  return (	   ((pose1[0]<=(pose2[0]+pose2[0]*tolerance))||(pose1[0]>=(pose2[0]-pose2[0]*tolerance)))
 			&& ((pose1[1]<=(pose2[1]+pose2[1]*tolerance))||(pose1[1]>=(pose2[1]-pose2[1]*tolerance)))
@@ -258,7 +254,7 @@ public class RobotPositionController {
     totalTicks[RobotBase.LEFT] += leftTicks;
     totalTicks[RobotBase.RIGHT] += rightTicks;
     totalTime += time;
-    
+
     //Convert from ticks to meters
     double rightDist = rightTicks / TICKS_PER_REVOLUTION * 2 * Math.PI * WHEEL_RADIUS_IN_M;
     double leftDist = leftTicks / TICKS_PER_REVOLUTION * 2 * Math.PI * WHEEL_RADIUS_IN_M;
@@ -266,7 +262,7 @@ public class RobotPositionController {
     //Useful definitions
     double distDiff = rightDist - leftDist;
     double distAvg = (rightDist + leftDist) / 2;
-    
+
     //Calculate dtheta
     double dtheta = distDiff / DISTANCE_BETWEEN_WHEELS;
 
@@ -275,7 +271,7 @@ public class RobotPositionController {
     double thetaTravel = theta + dtheta / 2;
     double xNew = x + Math.sin(thetaTravel) * distAvg;
     double yNew = y + Math.cos(thetaTravel) * distAvg;
-    
+
     //apply the new odometry
     x = xNew;
     y = yNew;
