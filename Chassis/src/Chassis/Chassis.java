@@ -66,9 +66,33 @@ public class Chassis {
 
     //Tests
     robot.enableMotors(true);
-    System.out.println("Move forward 4 meters with a speed of 0.45");
-    robot.getRobotPositionController().rotate(.2, Math.PI);
 
+    //COMMANDS:
+    //0 = Manual, 1 = Out and Back, 2 = Square
+    int command = 0;
+
+    if(command == 0) {
+	System.out.println("Manual Command Input: Look at code for commands");
+	robot.getRobotPositionController().rotate(.2, Math.PI);
+    }
+    else if(command == 1) {
+	System.out.println("Driving Out and Back");
+	robot.getPositionController().translate(.2, 1);
+	robot.getPositionController().rotate(.4, Math.PI);
+	robot.getPositionController().translate(.2, 1);
+	robot.getPositionController().rotate(.4, -Math.PI);
+    }
+    else if(command == 2) {
+	System.out.println("Driving in a Square");
+	robot.getPositionController().translate(.2,1);
+	robot.getPositionController().rotate(.3,Math.PI/2);
+	robot.getPositionController().translate(.2,1);
+	robot.getPositionController().rotate(.3,Math.PI/2);
+	robot.getPositionController().translate(.2,1);
+	robot.getPositionController().rotate(.3,Math.PI/2);
+	robot.getPositionController().translate(.2,1);
+	robot.getPositionController().rotate(.3,Math.PI/2);
+    }
     // End Student Code
 
     //////////////////// shutdown //////////////////////////////////////    
