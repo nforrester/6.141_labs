@@ -217,11 +217,11 @@ public class RobotPositionController {
 	double currentDistance = 0;
 	double distance = Math.abs(target_angle - startTheta);
 
-	double aDist = 0.15; // acceleration distance
-	double dDist = 0.15; // deceleration distance
+	double aDist = Math.PI / 5; // acceleration distance
+	double dDist = Math.PI / 5; // deceleration distance
 	double currentAngVel = 0;
-	double minAngVelStart = (0.01 * DISTANCE_BETWEEN_WHEELS / 2) / WHEEL_RADIUS_IN_M;
-	double minAngVelEnd = (0.01 * DISTANCE_BETWEEN_WHEELS / 2) / WHEEL_RADIUS_IN_M;
+	double minAngVelStart = (0.1 * DISTANCE_BETWEEN_WHEELS / 2) / WHEEL_RADIUS_IN_M;
+	double minAngVelEnd = (0.1 * DISTANCE_BETWEEN_WHEELS / 2) / WHEEL_RADIUS_IN_M;
 
 	//Set angular velocity to 0
 	robotVelocityController.setDesiredAngularVelocity(0,0);
