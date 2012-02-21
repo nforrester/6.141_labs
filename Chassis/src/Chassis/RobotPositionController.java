@@ -330,7 +330,26 @@ public class RobotPositionController {
    **/
 
   public boolean comparePose(double [] pose1, double [] pose2, double toleranceLinear, double toleranceAngular){
-	return (poseDistance(pose1, pose2) < toleranceLinear) && (Math.abs(pose1[2] - pose2[2]) < toleranceAngular);
+  	double a1 = pose1[2];
+  	double a2 = pose2[2];
+
+	//keep a1 in range
+	while (a1 >= 2 * Math.PI) {
+		a1 -= 2 * Math.PI;
+	}
+	while (a1 < 0) {
+		a1 += 2 * Math.PI;
+	}
+
+	//keep a2 in range
+	while (a2 >= 2 * Math.PI) {
+		a2 -= 2 * Math.PI;
+	}
+	while (a2 < 0) {
+		a2 += 2 * Math.PI;
+	}
+
+	return (poseDistance(pose1, pose2) < toleranceLinear) && (Math.abs(a1 - a2) < toleranceAngular);
   }
 
   /**
