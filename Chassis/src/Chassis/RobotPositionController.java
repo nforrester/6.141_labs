@@ -156,8 +156,8 @@ public class RobotPositionController {
   public boolean rotate(double speed, double angle) {
     boolean ok = true;
     // Begin Student Code
-    double pose = {x,y,theta};
-    double desiredPose = {x,y,theta + angle};
+    double[] pose = {x,y,theta};
+    double[] desiredPose = {x,y,theta + angle};
     
     double desiredAngularVelocity = (speed * DISTANCE_BETWEEN_WHEELS/2)/WHEEL_RADIUS_IN_M;
 
@@ -175,7 +175,7 @@ public class RobotPositionController {
 
     printPose();
     System.out.println("desiredPose: x: "+desiredPose[0]+" y:"+desiredPose[1]+" theta: "+desiredPose[2]);
-    System.out.println(comparePose(myPose, desiredPose, 0.1, 0.15));
+    System.out.println(comparePose(pose, desiredPose, 0.1, 0.15));
     System.out.println("We got there.");
 
     robotVelocityController.setDesiredAngularVelocity(0,0);
