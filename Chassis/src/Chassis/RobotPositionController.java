@@ -111,13 +111,24 @@ public class RobotPositionController {
 		//translation, Feed-Forward implementation
 		
 		double angularVelocityDesired=speed/WHEEL_RADIUS_IN_M;
-		double distAfterTranslating=distance+totalTicks[RobotBase.LEFT]/TICKS_PER_REVOLUTION * 2 * Math.PI * WHEEL_RADIUS_IN_M;
+		
+		double kR=TICKS_PER_REVOLUTION * 2 * Math.PI * WHEEL_RADIUS_IN_M;
+		double distAfterTranslatingL=distance+totalTicks[RobotBase.LEFT]/kR;
+		double distAfterTranslatingR=distance+totalTicks[RobotBase.RIGHT]/kR;
 		
 		//Set desired angular velocity
 		robotVelocityController.setDesiredAngularVelocity(angularVelocityDesired,angularVelocityDesired);
 		
-		while (distAfterTranslating>totalTicks[RobotBase.LEFT]/TICKS_PER_REVOLUTION * 2 * Math.PI * WHEEL_RADIUS_IN_M){
-			
+		while (distAfterTranslatingL>totalTicks[RobotBase.LEFT]/kR){
+			//Do nothing until we get there, unless we get an error.
+			//if one of our wheels overshoots the other, stop and return false;
+			if((distAfterTranslatingL>totalTicks[RobotBase.LEFT]/kR
+					&& distAfterTranslatingR<totalTicks[RobotBase.RIGHT]/kR)
+					||(distAfterTranslatingL<totalTicks[RobotBase.LEFT]/kR
+							&& distAfterTranslatingR>totalTicks[RobotBase.RIGHT]/kR)){
+				robotVelocityController.setDesiredAngularVelocity(0,0);
+				return false;
+			}
 		}
 		//Set angular velocity to 0
 		robotVelocityController.setDesiredAngularVelocity(0,0);
