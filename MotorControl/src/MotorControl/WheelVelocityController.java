@@ -15,37 +15,37 @@ public abstract class WheelVelocityController extends VelocityController {
   /**
    * <p>The maximum pwm command magnitude.</p>
    **/
-  protected static final double MAX_PWM = 255;
+  public static final double MAX_PWM = 255;
 
   /**
    * <p>Student Code: unloaded maximum wheel angular velocity in rad/s. 
    * This should be a protected static final double called MAX_ANGULAR_VELOCITY.</p>
    **/
-  protected static final double MAX_ANGULAR_VELOCITY = 7.95;
+  public static final double MAX_ANGULAR_VELOCITY = 7.95;
 
   /**
    * <p>Student Code: radius of the wheel on the motor (in meters). 
    * This should be a protected static final double called WHEEL_RADIUS_IN_M.</p>
    **/
-  protected static final double WHEEL_RADIUS_IN_M = .062775;
+  public static final double WHEEL_RADIUS_IN_M = .062775;
 
   /**
    * <p>Student Code: encoder resolution.</p>
    * This should be a protected static final double called ENCODER_RESOLUTION.</p>
    **/
-  protected static final double ENCODER_RESOLUTION = 2000;
+  public static final double ENCODER_RESOLUTION = 2000;
 
   /**
    * <p>Student Code: motor revolutions per wheel revolution.
    * This should be a protected static final double called GEAR_RATIO.</p>
    **/
-  protected static final double GEAR_RATIO = 65.5;
+  public static final double GEAR_RATIO = 65.5;
 
   /**
    * <p>Student Code: encoder ticks per motor revolution.</p>
    * This should be a protected static final double called TICKS_PER_REVOLUTION.</p>
    **/
-  protected static final double TICKS_PER_REVOLUTION = 131000;
+  public static final double TICKS_PER_REVOLUTION = 131000;
 
   /**
    * <p>Angular velocity in rad/s as we have been commanded.</p>
