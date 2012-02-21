@@ -51,6 +51,7 @@ public class RobotVelocityController extends VelocityController {
    * corresp side of robot rolled forward
    **/
   public void controlStep(double[] controlOutput) {
+    System.out.println("FUCK!");
     controlOutput[RobotBase.LEFT] =
       wheelVelocityController[RobotBase.LEFT].controlStep();
     controlOutput[RobotBase.RIGHT] =

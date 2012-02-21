@@ -33,13 +33,13 @@ public class RobotVelocityControllerBalanced extends RobotVelocityController {
    * <p>Total integrated actual angle differential in radians, positive means
    * left wheel leads right.</p>
    **/
-  protected double actualDiffAngle;
+  protected double actualDiffAngle = 0;
 
   /**
    * <p>Desired integrated angle differential in radians, positive means left
    * wheel leads right.</p>
    **/
-  protected double desiredDiffAngle;
+  protected double desiredDiffAngle = 0;
 
   protected final static double STEERING_GAIN = 3;
 
@@ -85,11 +85,8 @@ public class RobotVelocityControllerBalanced extends RobotVelocityController {
     rdv -= correctionFactor;
     ldv += correctionFactor;
     
-    System.out.println("-----------------------");
-    System.out.println(desiredAngularVelocityAvg);
-    System.out.println(correctionFactor);
-    System.out.println(rdv);
-    System.out.println(ldv);
+    System.out.println("RDV: " + rdv);
+    System.out.println("LDV: " + ldv);
 
     // End Student Code
 
