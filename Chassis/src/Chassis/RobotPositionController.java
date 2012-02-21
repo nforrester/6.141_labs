@@ -72,12 +72,27 @@ public class RobotPositionController {
   public boolean translate(double speed, double distance) {
 		boolean ok = true;
     // Begin Student Code
+		
+		//translation, Feed-Forward implementation
+		
+		double angularVelocityDesired=speed/WheelVelocityController.WHEEL_RADIUS_IN_M;
+		double distAfterTranslating=distance+totalTicks[RobotBase.LEFT]/WheelVelocityController.TICKS_PER_REVOLUTION * 2 * Math.PI * WheelVelocityController.WHEEL_RADIUS_IN_M;
+		
+		//Set desired angular velocity
+		robotVelocityController.setDesiredAngularVelocity(angularVelocityDesired,angularVelocityDesired);
+		
+		while (distAfterTranslating>totalTicks[RobotBase.LEFT]/WheelVelocityController.TICKS_PER_REVOLUTION * 2 * Math.PI * WheelVelocityController.WHEEL_RADIUS_IN_M){
+			
+		}
+		//Set angular velocity to 0
+		robotVelocityController.setDesiredAngularVelocity(0,0);
+		
     // End Student Code
 		return ok;
   }
 
   /**
-   * <p>Rotate at the specified speed for the specified angle.</p>
+   * <p>Rotate at the specified speed for the specifietotalTicks[RobotBase.LEFT]d angle.</p>
    *
    * <p>Blocks until the motion is complete or errored.</p>
    *
@@ -161,22 +176,25 @@ public class RobotPositionController {
     totalTicks[RobotBase.LEFT] += leftTicks;
     totalTicks[RobotBase.RIGHT] += rightTicks;
     totalTime += time;
-
+    
+    //Convert from ticks to meters
     double rightDist = rightTicks / WheelVelocityController.TICKS_PER_REVOLUTION * 2 * Math.PI * WheelVelocityController.WHEEL_RADIUS_IN_M;
     double leftDist = leftTicks / WheelVelocityController.TICKS_PER_REVOLUTION * 2 * Math.PI * WheelVelocityController.WHEEL_RADIUS_IN_M;
 
+    //Useful definitions
     double distDiff = rightDist - leftDist;
     double distAvg = (rightDist + leftDist) / 2;
-
+    
+    //Calculate dtheta
     double dtheta = distDiff / DISTANCE_BETWEEN_WHEELS;
 
+    //update our current odometry
     double thetaNew = theta + dtheta
-
     double thetaTravel = theta + dtheta / 2;
-
     double xNew = x + Math.sin(thetaTravel) * distAvg;
     double yNew = y + Math.cos(thetaTravel) * distAvg;
-
+    
+    //apply the new odometry
     x = xNew;
     y = yNew;
     theta = thetaNew;
