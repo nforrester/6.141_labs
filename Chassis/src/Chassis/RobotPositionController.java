@@ -219,9 +219,9 @@ public class RobotPositionController {
 	pose[0] = x;
 	pose[1] = y;
 	pose[2] = theta;
-	/*
+	
 	//Gets and normalizes the current angle between the current pose and the desired pose
-	currentAngle = (desiredPose[2] + Math.PI) - (pose[2] + Math.PI);
+	currentAngle = desiredPose[2] - pose[2];
 	if(currentAngle > Math.PI)
 	    currentAngle = currentAngle - 2*Math.PI;
 	else if (currentAngle < -Math.PI)
@@ -241,7 +241,7 @@ public class RobotPositionController {
 	}
 	//Update lastAngle
 	lastAngle = currentAngle;
-	*/
+      
     }
 
     printPose();
