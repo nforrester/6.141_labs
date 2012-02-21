@@ -109,6 +109,9 @@ public class RobotPositionController {
     // Begin Student Code
 		
 		//translation, Feed-Forward implementation
+		if (distance<0 && speed>0 || distance>0 && speed<0)
+			speed=-speed;
+		
 		
 		double angularVelocityDesired=speed/WHEEL_RADIUS_IN_M;
 		
@@ -151,6 +154,7 @@ public class RobotPositionController {
   public boolean rotate(double speed, double angle) {
 		boolean ok = true;
     // Begin Student Code
+		
     // End Student Code
 	  return ok;	
   }
