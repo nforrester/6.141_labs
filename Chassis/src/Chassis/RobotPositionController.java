@@ -189,11 +189,88 @@ public class RobotPositionController {
    * @return true iff motion was successful
    **/
   public boolean rotate(double speed, double angle) {
-    boolean ok = true;
-    // Begin Student Code
+	boolean ok = true;
+	// Begin Student Code
 
-    // End Student Code
-    return ok;
+	while (angle >= Math.PI) {
+		angle -= 2 * Math.PI;
+	}
+	while (angle < -1 * Math.PI) {
+		angle += 2 * Math.PI;
+	}
+
+	double target_angle = theta + angle;
+	while (target_angle >= 2 * Math.PI) {
+		target_angle -= 2 * Math.PI;
+	}
+	while (target_angle < 0) {
+		target_angle += 2 * Math.PI;
+	}
+
+	double[] desiredPose={x,y,target_angle};
+	double[] startPose={x,y,theta};
+	double[] myPose={x,y,theta};
+
+	double angularVelocityDesired = (speed * DISTANCE_BETWEEN_WHEELS / 2) / WHEEL_RADIUS_IN_M;
+
+	double currentDistance = Math.abs(target_angle - theta);
+	double distance = Math.abs(target_angle - theta);
+
+	double aDist = 0.15; // acceleration distance
+	double dDist = 0.15; // deceleration distance
+	double currentAngVel = 0;
+	double minAngVelStart = (0.01 * DISTANCE_BETWEEN_WHEELS / 2) / WHEEL_RADIUS_IN_M;
+	double minAngVelEnd = (0.01 * DISTANCE_BETWEEN_WHEELS / 2) / WHEEL_RADIUS_IN_M;
+
+	//Set angular velocity to 0
+	robotVelocityController.setDesiredAngularVelocity(0,0);
+
+	while (currentDistance < distance){
+		myPose[0]=x;
+		myPose[1]=y;
+		myPose[2]=theta;
+		currentDistance = Math.abs(target_angle - theta);
+
+		if (currentDistance < distance * 0.5) {
+			if (currentDistance < aDist) {
+				currentAngVel = (currentDistance / aDist) * angularVelocityDesired;
+			} else {
+				currentAngVel = angularVelocityDesired;
+			}
+			if (minAngVelStart > currentAngVel) {
+				currentAngVel = minAngVelStart;
+			}
+		} else {
+			if (currentDistance > distance - dDist) {
+				currentAngVel = ((distance - currentDistance) / dDist) * angularVelocityDesired;
+			} else {
+				currentAngVel = angularVelocityDesired;
+			}
+			if (minAngVelEnd > currentAngVel) {
+				currentAngVel = minAngVelEnd;
+			}
+		}
+		if (angle > 0) {
+			robotVelocityController.setDesiredAngularVelocity(-1 * currentAngVel,currentAngVel);
+		} else {
+			robotVelocityController.setDesiredAngularVelocity(currentAngVel,-1 * currentAngVel);
+		}
+	}
+
+	//Set angular velocity to 0
+	robotVelocityController.setDesiredAngularVelocity(0,0);
+
+	printPose();
+	System.out.println("desiredPose: x: "+desiredPose[0]+" y:"+desiredPose[1]+" theta: "+desiredPose[2]);
+	System.out.println(comparePose(myPose, desiredPose, 0.1, 0.15));
+	System.out.println("We got there.");
+
+	if (!comparePose(myPose, desiredPose, 0.1, 0.10)) {
+		return false;
+	}
+
+	// End Student Code
+	return ok;
   }
     
 
