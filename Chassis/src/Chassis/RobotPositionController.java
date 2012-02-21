@@ -213,8 +213,9 @@ public class RobotPositionController {
 
 	double angularVelocityDesired = (speed * DISTANCE_BETWEEN_WHEELS / 2) / WHEEL_RADIUS_IN_M;
 
+	double startTheta = theta;
 	double currentDistance = 0;
-	double distance = Math.abs(target_angle - theta);
+	double distance = Math.abs(target_angle - startTheta);
 
 	double aDist = 0.15; // acceleration distance
 	double dDist = 0.15; // deceleration distance
@@ -229,7 +230,7 @@ public class RobotPositionController {
 		myPose[0]=x;
 		myPose[1]=y;
 		myPose[2]=theta;
-		currentDistance = Math.abs(target_angle - theta);
+		currentDistance = theta - startTheta;
 
 		if (currentDistance < distance * 0.5) {
 			if (currentDistance < aDist) {
