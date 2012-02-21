@@ -34,6 +34,14 @@ public class WheelVelocityControllerI extends WheelVelocityController {
     // Start Student Code
     double error = desiredAngularVelocity - currentAngularVelocity;
     errorIntegral += error*sampleTime;
+    System.out.print("hist: ");
+    System.out.println(sampleTime);
+    System.out.print("hidav: ");
+    System.out.println(desiredAngularVelocity);
+    System.out.print("hicav: ");
+    System.out.println(currentAngularVelocity);
+    System.out.print("hiei: ");
+    System.out.println(errorIntegral);
     result = PROPORTIONAL_GAIN*error + gain*INTEGRAL_GAIN*errorIntegral;
     // End Student Code
 

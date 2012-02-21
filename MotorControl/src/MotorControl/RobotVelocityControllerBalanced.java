@@ -41,6 +41,8 @@ public class RobotVelocityControllerBalanced extends RobotVelocityController {
    **/
   protected double desiredDiffAngle;
 
+  protected final static double STEERING_GAIN = 3;
+
   /**
    * <p>Debug counter.</p>
    **/
@@ -75,13 +77,20 @@ public class RobotVelocityControllerBalanced extends RobotVelocityController {
     // Begin Student Code
     angularDiffError = desiredDiffAngle - actualDiffAngle;
 
-    double correctionFactor = angularDiffError * gain;
+    double correctionFactor = angularDiffError * STEERING_GAIN;
 
     rdv = desiredAngularVelocityAvg;
     ldv = desiredAngularVelocityAvg;
 
-    rdv += correctionFactor;
-    ldv -= correctionFactor;
+    rdv -= correctionFactor;
+    ldv += correctionFactor;
+    
+    System.out.println("-----------------------");
+    System.out.println(desiredAngularVelocityAvg);
+    System.out.println(correctionFactor);
+    System.out.println(rdv);
+    System.out.println(ldv);
+
     // End Student Code
 
 //    if ((updateDbg++ % 10) == 0) {

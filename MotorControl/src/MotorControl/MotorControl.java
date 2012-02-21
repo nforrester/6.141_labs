@@ -33,14 +33,14 @@ public class MotorControl {
 
     //third task: integral feedback control
 
-    robotVelocityController =
-      new RobotVelocityController(new WheelVelocityControllerI(),
-                                  new WheelVelocityControllerI());
+    //robotVelocityController =
+     // new RobotVelocityController(new WheelVelocityControllerI(),
+      //                            new WheelVelocityControllerI());
 
 
     //final task: balanced velocity control
 
-   // robotVelocityController = new RobotVelocityControllerBalanced();
+    robotVelocityController = new RobotVelocityControllerBalanced();
 
     robot.setRobotVelocityController(robotVelocityController);
     MotorControlGUI GUI = new MotorControlGUI(robot);
