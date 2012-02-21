@@ -274,8 +274,8 @@ public class RobotPositionController {
 
     //update our current odometry
     double thetaNew = theta + dtheta;
-    double xNew = x + Math.sin(thetaTravel) * distAvg;
-    double yNew = y + Math.cos(thetaTravel) * distAvg;
+    double xNew = x + Math.cos(thetaTravel) * distAvg;
+    double yNew = y + Math.sin(thetaTravel) * distAvg;
 
     //apply the new odometry
     x = xNew;
