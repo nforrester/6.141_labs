@@ -85,9 +85,6 @@ public class RobotVelocityControllerBalanced extends RobotVelocityController {
     rdv -= correctionFactor;
     ldv += correctionFactor;
     
-    System.out.println("RDV: " + rdv);
-    System.out.println("LDV: " + ldv);
-
     // End Student Code
 
 //    if ((updateDbg++ % 10) == 0) {
