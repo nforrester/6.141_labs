@@ -8,6 +8,41 @@ import MotorControl.*;
  **/
 public class RobotPositionController {
 
+	
+	 /**
+	   * <p>The maximum pwm command magnitude.</p>
+	   **/
+	  protected static final double MAX_PWM = 255;
+
+	  /**
+	   * <p>Student Code: unloaded maximum wheel angular velocity in rad/s. 
+	   * This should be a protected static final double called MAX_ANGULAR_VELOCITY.</p>
+	   **/
+	  protected static final double MAX_ANGULAR_VELOCITY = 7.95;
+
+	  /**
+	   * <p>Student Code: radius of the wheel on the motor (in meters). 
+	   * This should be a protected static final double called WHEEL_RADIUS_IN_M.</p>
+	   **/
+	  protected static final double WHEEL_RADIUS_IN_M = .062775;
+
+	  /**
+	   * <p>Student Code: encoder resolution.</p>
+	   * This should be a protected static final double called ENCODER_RESOLUTION.</p>
+	   **/
+	  protected static final double ENCODER_RESOLUTION = 2000;
+
+	  /**
+	   * <p>Student Code: motor revolutions per wheel revolution.
+	   * This should be a protected static final double called GEAR_RATIO.</p>
+	   **/
+	  protected static final double GEAR_RATIO = 65.5;
+
+	  /**
+	   * <p>Student Code: encoder ticks per motor revolution.</p>
+	   * This should be a protected static final double called TICKS_PER_REVOLUTION.</p>
+	   **/
+	  protected static final double TICKS_PER_REVOLUTION = 131000;
   /**
    * <p>The whole-robot velocity controller.</p>
    **/
@@ -75,13 +110,13 @@ public class RobotPositionController {
 		
 		//translation, Feed-Forward implementation
 		
-		double angularVelocityDesired=speed/WheelVelocityController.WHEEL_RADIUS_IN_M;
-		double distAfterTranslating=distance+totalTicks[RobotBase.LEFT]/WheelVelocityController.TICKS_PER_REVOLUTION * 2 * Math.PI * WheelVelocityController.WHEEL_RADIUS_IN_M;
+		double angularVelocityDesired=speed/WHEEL_RADIUS_IN_M;
+		double distAfterTranslating=distance+totalTicks[RobotBase.LEFT]/TICKS_PER_REVOLUTION * 2 * Math.PI * WHEEL_RADIUS_IN_M;
 		
 		//Set desired angular velocity
 		robotVelocityController.setDesiredAngularVelocity(angularVelocityDesired,angularVelocityDesired);
 		
-		while (distAfterTranslating>totalTicks[RobotBase.LEFT]/WheelVelocityController.TICKS_PER_REVOLUTION * 2 * Math.PI * WheelVelocityController.WHEEL_RADIUS_IN_M){
+		while (distAfterTranslating>totalTicks[RobotBase.LEFT]/TICKS_PER_REVOLUTION * 2 * Math.PI * WHEEL_RADIUS_IN_M){
 			
 		}
 		//Set angular velocity to 0
@@ -178,8 +213,8 @@ public class RobotPositionController {
     totalTime += time;
     
     //Convert from ticks to meters
-    double rightDist = rightTicks / WheelVelocityController.TICKS_PER_REVOLUTION * 2 * Math.PI * WheelVelocityController.WHEEL_RADIUS_IN_M;
-    double leftDist = leftTicks / WheelVelocityController.TICKS_PER_REVOLUTION * 2 * Math.PI * WheelVelocityController.WHEEL_RADIUS_IN_M;
+    double rightDist = rightTicks / TICKS_PER_REVOLUTION * 2 * Math.PI * WHEEL_RADIUS_IN_M;
+    double leftDist = leftTicks / TICKS_PER_REVOLUTION * 2 * Math.PI * WHEEL_RADIUS_IN_M;
 
     //Useful definitions
     double distDiff = rightDist - leftDist;
@@ -189,7 +224,7 @@ public class RobotPositionController {
     double dtheta = distDiff / DISTANCE_BETWEEN_WHEELS;
 
     //update our current odometry
-    double thetaNew = theta + dtheta
+    double thetaNew = theta + dtheta;
     double thetaTravel = theta + dtheta / 2;
     double xNew = x + Math.sin(thetaTravel) * distAvg;
     double yNew = y + Math.cos(thetaTravel) * distAvg;
