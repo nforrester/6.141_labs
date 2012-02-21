@@ -114,7 +114,7 @@ public class RobotPositionController {
 
 		double kR=TICKS_PER_REVOLUTION * 2 * Math.PI * WHEEL_RADIUS_IN_M;
 		
-		double[] desiredPose={x+distance*Math.sin(theta),y+distance*Math.cos(theta),theta};
+		double[] desiredPose={x+distance*Math.cos(theta),y+distance*Math.sin(theta),theta};
 		double[] myPose={x,y,theta};
 		
 		double angularVelocityDesired=speed/WHEEL_RADIUS_IN_M;
@@ -124,9 +124,13 @@ public class RobotPositionController {
 		
 		//Set desired angular velocity
 		robotVelocityController.setDesiredAngularVelocity(angularVelocityDesired,angularVelocityDesired);
-		
-		while (comparePose(myPose,desiredPose,.05)){
-			
+		System.out.println("myPose: x: "+myPose[0]+" y:"+myPose[1]+" theta: "+myPose[2]);
+		System.out.println("desiredPose: x: "+desiredPose[0]+" y:"+desiredPose[1]+" theta: "+desiredPose[2]);
+
+		while (!comparePose(myPose,desiredPose,.05)){
+			myPose[0]=x;
+			myPose[1]=y;
+			myPose[2]=theta;
 			//Do nothing until we get there, unless we get an error.
 			//if one of our wheels overshoots the other, stop and return false;
 			if((distAfterTranslatingL>totalTicks[RobotBase.LEFT]/kR
