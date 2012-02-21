@@ -116,6 +116,7 @@ public class RobotPositionController {
 	//translation, Feed-Forward implementation
 
 	double[] desiredPose={x+distance*Math.cos(theta),y+distance*Math.sin(theta),theta};
+	double[] startPose={x,y,theta};
 	double[] myPose={x,y,theta};
 
 	double angularVelocityDesired=speed/WHEEL_RADIUS_IN_M;
@@ -124,19 +125,23 @@ public class RobotPositionController {
 	robotVelocityController.setDesiredAngularVelocity(angularVelocityDesired,angularVelocityDesired);
 
 	System.out.println("AVD: " + angularVelocityDesired);
-	while (!comparePose(myPose, desiredPose, 0.1, 0.15)){
+	while (poseDistance(myPose, startPose) < distance){
 		myPose[0]=x;
 		myPose[1]=y;
 		myPose[2]=theta;
 	}
+
+	//Set angular velocity to 0
+	robotVelocityController.setDesiredAngularVelocity(0,0);
 
 	printPose();
 	System.out.println("desiredPose: x: "+desiredPose[0]+" y:"+desiredPose[1]+" theta: "+desiredPose[2]);
 	System.out.println(comparePose(myPose, desiredPose, 0.1, 0.15));
 	System.out.println("We got there.");
 
-	//Set angular velocity to 0
-	robotVelocityController.setDesiredAngularVelocity(0,0);
+	if (!comparePose(myPose, desiredPose, 0.1, 0.10)) {
+		return false;
+	}
 
 	// End Student Code
 	return ok;
@@ -245,6 +250,19 @@ public class RobotPositionController {
   }
 
   /**
+   * <p>Compute the distance between two poses.
+   *
+   * Ignore angle.
+   *
+   * @param pose1 first pose
+   * @param pose2 second pose
+   **/
+
+  public double poseDistance(double [] pose1, double [] pose2){
+	return Math.pow(Math.pow(pose1[0] - pose2[0], 2) + Math.pow(pose1[1] - pose2[1], 2), 0.5);
+  }
+
+  /**
    * <p>Check if pose1 is near pose 2 within certain tolerances</p>
    *
    * @param pose1 pose to check
@@ -254,8 +272,7 @@ public class RobotPositionController {
    **/
 
   public boolean comparePose(double [] pose1, double [] pose2, double toleranceLinear, double toleranceAngular){
-	double distance = Math.pow(Math.pow(pose1[0] - pose2[0], 2) + Math.pow(pose1[1] - pose2[1], 2), 0.5);
-	return (distance < toleranceLinear) && (Math.abs(pose1[2] - pose2[2]) < toleranceAngular);
+	return (poseDistance(pose1, pose2) < toleranceLinear) && (Math.abs(pose1[2] - pose2[2]) < toleranceAngular);
   }
 
   /**
