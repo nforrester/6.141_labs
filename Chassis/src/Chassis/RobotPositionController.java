@@ -228,9 +228,9 @@ public class RobotPositionController {
    **/
   
   public boolean comparePose(double [] pose1, double [] pose2, double tolerance){
-	  if (pose1[0]<pose2[0]+pose2[0]*tolerance)||((pose1[0]>pose2[0]-pose2[0]*tolerance)
-			  && pose1[1]<pose2[1]+pose2[1]*tolerance)||((pose1[1]>pose2[1]-pose2[1]*tolerance)
-					  && pose1[2]<pose2[2]+pose2[2]*tolerance)||((pose1[2]>pose2[2]-pose2[2]*tolerance)){
+	  if (((pose1[0]<pose2[0]+pose2[0]*tolerance)||(pose1[0]>pose2[0]-pose2[0]*tolerance))
+			  && ((pose1[1]<pose2[1]+pose2[1]*tolerance)||(pose1[1]>pose2[1]-pose2[1]*tolerance))
+					  && ((pose1[2]<pose2[2]+pose2[2]*tolerance)||(pose1[2]>pose2[2]-pose2[2]*tolerance))){
 		  return true;
 	  }
 	  else
