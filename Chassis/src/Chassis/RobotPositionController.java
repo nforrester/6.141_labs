@@ -223,7 +223,7 @@ public class RobotPositionController {
 
 	double startTheta = theta;
 	double currentDistance = 0;
-	double distance = Math.abs(rerangeAngle(target_angle - startTheta));
+	double distance = Math.abs(target_angle - startTheta);
 	System.out.println("DST: " + distance);
 
 	double aDist = Math.PI / 5; // acceleration distance
@@ -239,7 +239,7 @@ public class RobotPositionController {
 		myPose[0]=x;
 		myPose[1]=y;
 		myPose[2]=theta;
-		currentDistance = Math.abs(rerangeAngle(theta - startTheta));
+		currentDistance = Math.abs(theta - startTheta);
 
 		System.out.println("-------------");
 		System.out.println("THE: " + theta);
