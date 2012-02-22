@@ -73,7 +73,7 @@ public class Chassis {
 
     if(command == 0) {
 	System.out.println("Manual Command Input: Look at code for commands");
-	robot.getRobotPositionController().translate(-0.5, -0.5);
+	robot.getRobotPositionController().translate(-0.4, -0.5);
 	robot.getRobotPositionController().translate(0.25, 1);
 	robot.getRobotPositionController().translate(-0.15, -0.5);
     }
