@@ -279,9 +279,12 @@ public class RobotPositionController {
 				currentAngVel = minAngVelEnd;
 			}
 		}
+		System.out.println("ANGLE: " + angle);
 		if (angle > 0) {
+			System.out.println("LEFT");
 			robotVelocityController.setDesiredAngularVelocity(-1 * currentAngVel,currentAngVel);
 		} else {
+			System.out.println("RIGHT");
 			robotVelocityController.setDesiredAngularVelocity(currentAngVel,-1 * currentAngVel);
 		}
 
