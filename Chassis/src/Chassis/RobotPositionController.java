@@ -241,6 +241,14 @@ public class RobotPositionController {
 		myPose[2]=theta;
 		currentDistance = Math.abs(rerangeAngle(theta - startTheta));
 
+		System.out.println("-------------");
+		System.out.println("THE: " + theta);
+		System.out.println("TGA: " + target_angle);
+		System.out.println("AVD: " + angularVelocityDesired);
+		System.out.println("DST: " + distance);
+		System.out.println("CDS: " + currentDistance);
+		System.out.println("-------------");
+
 		if (currentDistance < distance * 0.5) {
 			if (currentDistance < aDist) {
 				currentAngVel = (currentDistance / aDist) * angularVelocityDesired;
