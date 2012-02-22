@@ -207,6 +207,8 @@ public class RobotPositionController {
   public boolean rotate(double speed, double angle) {
 	boolean ok = true;
 	// Begin Student Code
+	
+	boolean leftOrRight;
 
 	double angularVelocityDesired = (speed * DISTANCE_BETWEEN_WHEELS / 2) / WHEEL_RADIUS_IN_M;
 
@@ -218,21 +220,43 @@ public class RobotPositionController {
 	System.out.println("ANGLE: " + angle);
 	if (angle > 0) {
 		System.out.println("LEFT");
+		leftOrRight = true;
 		robotVelocityController.setDesiredAngularVelocity(-1 * angularVelocityDesired,angularVelocityDesired);
 	} else {
 		System.out.println("RIGHT");
+		leftOrRight = false;
 		robotVelocityController.setDesiredAngularVelocity(angularVelocityDesired,-1 * angularVelocityDesired);
 	}
 
-	while (!comparePose(myPose, desiredPose, 0.1, 0.05)) {
+	while (!comparePose(myPose, desiredPose, 0.1, 0.01)) {
 		myPose[0] = x;
 		myPose[1] = y;
 		myPose[2] = theta;
 		
 		if (angle < 0 && theta < targetAngle) {
+			if (!leftOrRight) {
+				angularVelocityDesired *= 0.5;
+				leftOrRight = true;
+			}
 			robotVelocityController.setDesiredAngularVelocity(-1 * angularVelocityDesired,angularVelocityDesired);
-		} else {
+		} else if (angle < 0 && theta > targetAngle) {
+			if (leftOrRight) {
+				angularVelocityDesired *= 0.5;
+				leftOrRight = false;
+			}
 			robotVelocityController.setDesiredAngularVelocity(angularVelocityDesired,-1 * angularVelocityDesired);
+		} else if (angle > 0 && theta > targetAngle) {
+			if (leftOrRight) {
+				angularVelocityDesired *= 0.5;
+				leftOrRight = false;
+			}
+			robotVelocityController.setDesiredAngularVelocity(angularVelocityDesired,-1 * angularVelocityDesired);
+		} else if (angle > 0 && theta < targetAngle) {
+			if (!leftOrRight) {
+				angularVelocityDesired *= 0.5;
+				leftOrRight = true;
+			}
+			robotVelocityController.setDesiredAngularVelocity(-1 * angularVelocityDesired,angularVelocityDesired);
 		}
 	}
 
