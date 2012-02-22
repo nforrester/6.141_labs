@@ -139,23 +139,35 @@ public class RobotPositionController {
 		myPose[2]=theta;
 		currentDistance = poseDistance(myPose, startPose);
 
-		if (currentDistance < distance * 0.5) {
+		if (currentDistance < Math.abs(distance) * 0.5) {
 			if (currentDistance < aDist) {
 				currentAngVel = (currentDistance / aDist) * angularVelocityDesired;
 			} else {
 				currentAngVel = angularVelocityDesired;
 			}
-			if (minAngVelStart > currentAngVel) {
-				currentAngVel = minAngVelStart;
+			if (speed > 0) {
+				if (minAngVelStart > currentAngVel) {
+					currentAngVel = minAngVelStart;
+				}
+			} else {
+				if (minAngVelStart > Math.abs(currentAngVel)) {
+					currentAngVel = -1 * minAngVelStart;
+				}
 			}
 		} else {
-			if (currentDistance > distance - dDist) {
-				currentAngVel = ((distance - currentDistance) / dDist) * angularVelocityDesired;
+			if (currentDistance > Math.abs(distance) - dDist) {
+				currentAngVel = ((Math.abs(distance) - currentDistance) / dDist) * angularVelocityDesired;
 			} else {
 				currentAngVel = angularVelocityDesired;
 			}
-			if (minAngVelEnd > currentAngVel) {
-				currentAngVel = minAngVelEnd;
+			if (speed > 0) {
+				if (minAngVelEnd > currentAngVel) {
+					currentAngVel = minAngVelEnd;
+				}
+			} else {
+				if (minAngVelStart > Math.abs(currentAngVel)) {
+					currentAngVel = -1 * minAngVelEnd;
+				}
 			}
 		}
 		robotVelocityController.setDesiredAngularVelocity(currentAngVel,currentAngVel);
