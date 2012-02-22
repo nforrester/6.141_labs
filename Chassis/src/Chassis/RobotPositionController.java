@@ -208,10 +208,10 @@ public class RobotPositionController {
 	boolean ok = true;
 	// Begin Student Code
 
-	angle = rerangeAngle(angle);
-	if (angle > Math.PI) {
-		angle -= 2 * Math.PI;
-	}
+	//angle = rerangeAngle(angle);
+	//if (angle > Math.PI) {
+	//	angle -= 2 * Math.PI;
+	//}
 
 	double target_angle = theta + angle;
 	System.out.println("THE: " + theta);
@@ -228,7 +228,7 @@ public class RobotPositionController {
 	double currentDistance = 0;
 	double absCurrentDistance = 0;
 	double distance = target_angle - startTheta;
-	double absDistance = rerangeAngle(distance);
+	double absDistance = distance;
 	if (absDistance > Math.PI) {
 		absDistance -= 2 * Math.PI;
 	}
@@ -257,7 +257,7 @@ public class RobotPositionController {
 		while (currentDistance < distance - Math.PI) {
 			currentDistance += 2 * Math.PI;
 		}
-		absCurrentDistance = rerangeAngle(currentDistance);
+		absCurrentDistance = currentDistance;
 		if (absCurrentDistance > Math.PI) {
 			absCurrentDistance -= 2 * Math.PI;
 		}
@@ -450,7 +450,7 @@ public class RobotPositionController {
     double yNew = y + Math.sin(thetaTravel) * distAvg;
 
     //keep thetaNew in range
-    thetaNew = rerangeAngle(thetaNew);
+    //thetaNew = rerangeAngle(thetaNew);
 
     //apply the new odometry
     x = xNew;
