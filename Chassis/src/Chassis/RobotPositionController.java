@@ -208,98 +208,32 @@ public class RobotPositionController {
 	boolean ok = true;
 	// Begin Student Code
 
-	//angle = rerangeAngle(angle);
-	//if (angle > Math.PI) {
-	//	angle -= 2 * Math.PI;
-	//}
+	double angularVelocityDesired = (speed * DISTANCE_BETWEEN_WHEELS / 2) / WHEEL_RADIUS_IN_M;
 
-	double target_angle = theta + angle;
-	System.out.println("THE: " + theta);
-	System.out.println("TGA: " + target_angle);
-
-	double[] desiredPose={x,y,target_angle};
+	double targetAngle = theta + angle;
+	double[] desiredPose={x,y,targetAngle};
 	double[] startPose={x,y,theta};
 	double[] myPose={x,y,theta};
 
-	double angularVelocityDesired = (speed * DISTANCE_BETWEEN_WHEELS / 2) / WHEEL_RADIUS_IN_M;
-	System.out.println("AVD: " + angularVelocityDesired);
-
-	double startTheta = theta;
-	double currentDistance = 0;
-	double absCurrentDistance = 0;
-	double distance = target_angle - startTheta;
-	double absDistance = distance;
-	if (absDistance > Math.PI) {
-		absDistance -= 2 * Math.PI;
-	}
-	absDistance = Math.abs(absDistance);
-	System.out.println("DST: " + distance);
 	System.out.println("ANGLE: " + angle);
-	System.out.println("TANGLE: " + target_angle);
+	if (angle > 0) {
+		System.out.println("LEFT");
+		robotVelocityController.setDesiredAngularVelocity(-1 * angularVelocityDesired,angularVelocityDesired);
+	} else {
+		System.out.println("RIGHT");
+		robotVelocityController.setDesiredAngularVelocity(angularVelocityDesired,-1 * angularVelocityDesired);
+	}
 
-	double aDist = Math.PI / 10; // acceleration distance
-	double dDist = Math.PI / 10; // deceleration distance
-	double currentAngVel = 0;
-	double minAngVelStart = (0.1 * DISTANCE_BETWEEN_WHEELS / 2) / WHEEL_RADIUS_IN_M;
-	double minAngVelEnd = (0.1 * DISTANCE_BETWEEN_WHEELS / 2) / WHEEL_RADIUS_IN_M;
-
-	//Set angular velocity to 0
-	robotVelocityController.setDesiredAngularVelocity(0,0);
-
-	while ((currentDistance < distance && angle > 0) || (currentDistance > distance && angle < 0)){
-		myPose[0]=x;
-		myPose[1]=y;
-		myPose[2]=theta;
-		currentDistance = theta - startTheta;
-		while (currentDistance > distance + Math.PI) {
-			currentDistance -= 2 * Math.PI;
-		}
-		while (currentDistance < distance - Math.PI) {
-			currentDistance += 2 * Math.PI;
-		}
-		absCurrentDistance = currentDistance;
-		if (absCurrentDistance > Math.PI) {
-			absCurrentDistance -= 2 * Math.PI;
-		}
-		absCurrentDistance = Math.abs(absCurrentDistance);
-
-		System.out.println("-------------");
-		System.out.println("THE: " + theta);
-		System.out.println("TGA: " + target_angle);
-		System.out.println("AVD: " + angularVelocityDesired);
-		System.out.println("DST: " + distance);
-		System.out.println("CDS: " + currentDistance);
-		System.out.println("-------------");
-
-		if (absCurrentDistance < absDistance * 0.5) {
-			if (absCurrentDistance < aDist) {
-				currentAngVel = (absCurrentDistance / aDist) * angularVelocityDesired;
-			} else {
-				currentAngVel = angularVelocityDesired;
-			}
-			if (minAngVelStart > currentAngVel) {
-				currentAngVel = minAngVelStart;
-			}
+	while (!comparePose(myPose, desiredPose, 0.1, 0.05)) {
+		myPose[0] = x;
+		myPose[1] = y;
+		myPose[2] = theta;
+		
+		if (angle < 0 && theta < targetAngle) {
+			robotVelocityController.setDesiredAngularVelocity(-1 * angularVelocityDesired,angularVelocityDesired);
 		} else {
-			if (absCurrentDistance > absDistance - dDist) {
-				currentAngVel = ((absDistance - absCurrentDistance) / dDist) * angularVelocityDesired;
-			} else {
-				currentAngVel = angularVelocityDesired;
-			}
-			if (minAngVelEnd > currentAngVel) {
-				currentAngVel = minAngVelEnd;
-			}
+			robotVelocityController.setDesiredAngularVelocity(angularVelocityDesired,-1 * angularVelocityDesired);
 		}
-		System.out.println("ANGLE: " + angle);
-		if (angle > 0) {
-			System.out.println("LEFT");
-			robotVelocityController.setDesiredAngularVelocity(-1 * currentAngVel,currentAngVel);
-		} else {
-			System.out.println("RIGHT");
-			robotVelocityController.setDesiredAngularVelocity(currentAngVel,-1 * currentAngVel);
-		}
-
-		Thread.yield();
 	}
 
 	//Set angular velocity to 0
