@@ -283,6 +283,8 @@ public class RobotPositionController {
 		} else {
 			robotVelocityController.setDesiredAngularVelocity(currentAngVel,-1 * currentAngVel);
 		}
+
+		Thread.yield();
 	}
 
 	//Set angular velocity to 0
