@@ -133,7 +133,7 @@ public class RobotPositionController {
 	robotVelocityController.setDesiredAngularVelocity(0,0);
 
 	System.out.println("AVD: " + angularVelocityDesired);
-	while (currentDistance < distance){
+	while (currentDistance < Math.abs(distance)){
 		myPose[0]=x;
 		myPose[1]=y;
 		myPose[2]=theta;
