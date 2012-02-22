@@ -12,6 +12,7 @@ package MotorControl;
  **/
 public abstract class WheelVelocityController extends VelocityController {
 
+  // these constants were made public so they could be reused in other classes, notably those in Chassis.
   /**
    * <p>The maximum pwm command magnitude.</p>
    **/

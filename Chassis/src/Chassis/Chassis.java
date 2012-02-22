@@ -47,6 +47,8 @@ public class Chassis {
 
     //this block to configures *our* solution to lab 2 (yours may or
     //may not be configured the same way)
+
+    //well we don't like these configurations.
 //    final double VELOCITY_BALANCE_GAIN = 1.0; 
 //    final double VELOCITY_WHEEL_GAIN = 6.0;
 //    robotVelocityController.setGain(VELOCITY_BALANCE_GAIN);

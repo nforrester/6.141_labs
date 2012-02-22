@@ -7,7 +7,8 @@ import MotorControl.*;
  * <p>A whole-robot position controller.</p>
  **/
 public class RobotPositionController {
- /**
+  // we like having these constants available.
+  /**
    * <p>The maximum pwm command magnitude.</p>
    **/
   protected static final double MAX_PWM = WheelVelocityController.MAX_PWM;
@@ -51,6 +52,7 @@ public class RobotPositionController {
   /**
    * <p>The whole-robot velocity controller.</p>
    **/
+  // changed to Balanced so the right methods get called
   protected RobotVelocityControllerBalanced robotVelocityController;
 
   /**
@@ -75,6 +77,7 @@ public class RobotPositionController {
    **/
   protected double gain = 1.0;
 
+  // a handy thing to have
   protected final static double DISTANCE_BETWEEN_WHEELS = 0.430;
 
   /**
@@ -313,6 +316,7 @@ public class RobotPositionController {
    * @param vc the whole-robot velocity controller
    **/
   public void setRobotVelocityController(RobotVelocityController vc) {
+    // the cast was made necessary by the type change for robotVelocityController, documented above
     robotVelocityController = (RobotVelocityControllerBalanced)vc;
   }
 
@@ -334,6 +338,9 @@ public class RobotPositionController {
     return gain;
   }
 
+  /**
+   * <p>prints the current pose.</p>
+   **/
   public void printPose(){
 	  System.out.println("Current Pose: X: "+x+" Y: "+y+" Theta: "+theta);
   }
