@@ -21,14 +21,14 @@ public class Photocell {
   protected int port;
 
   /**
-   * <p>The calibration offset.</p>
+   * <p>The ambient raw value.</p>
    **/
-  protected double offset = 0.0;
+  protected double ambient = 0.0;
 
   /**
-   * <p>The calibration scale.</p>
+   * <p>The saturation raw value.</p>
    **/
-  protected double scale = 1.0;
+  protected double saturation = 0.0;
 
   /**
    * <p>Create a new photocell object.</p>
@@ -59,18 +59,22 @@ public class Photocell {
    * @return the calibrated value of the sensor, in the range [0.0, 100.0]
    **/
   public double getValue() {
+	double val = 0.0;
 
-    double val = 0.0;
+	// Begin Student Code
+	val = getRawValue();
+	val -= ambient;
+	val /= saturation;
+	val *= 100;
+	// End Student Code
 
-    // Begin Student Code
-    // End Student Code
+	if (val > 100.0) {
+		val = 100.0;
+	} else if (val < 0.0) {
+		val = 0.0;
+	}
 
-    if (val > 100.0)
-      val = 100.0;
-    if (val < 0.0)
-      val = 0.0;
-
-    return val;
+	return val;
   }
 
   /**
@@ -80,7 +84,17 @@ public class Photocell {
    * #scale}.</p>
    **/
   public void calibrate() {
-    // Begin Student Code
-    // End Student Code
+	// Begin Student Code
+	long endTime = System.currentTimeMillis() + 5000;
+	long samples = 0;
+
+	while (System.currentTimeMillis() < endTime) {
+		ambient += getRawValue();
+		samples++;
+		Thread.sleep(10);
+	}
+
+	ambient /= samples;
+	// End Student Code
   }
 }
