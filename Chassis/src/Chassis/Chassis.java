@@ -69,7 +69,7 @@ public class Chassis {
 
     //COMMANDS:
     //0 = Manual, 1 = Out and Back, 2 = Square
-    int command = 0;
+    int command = 1;
 
     if(command == 0) {
 	System.out.println("Manual Command Input: Look at code for commands");
