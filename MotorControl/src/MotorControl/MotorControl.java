@@ -12,6 +12,7 @@ public class MotorControl {
    **/
   public static void main(String [] args) {
     // Motion Control Lab, Part 7
+    // Motion Control Lab, Part 8
     
     RobotBase robot = new RobotBase();
     

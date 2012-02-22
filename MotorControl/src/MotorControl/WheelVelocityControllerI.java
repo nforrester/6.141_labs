@@ -13,6 +13,7 @@ public class WheelVelocityControllerI extends WheelVelocityController {
    **/
   protected double lastResult = 0;
   
+  // Motor Control Lab, Part 8
   /**
    * <p>The integral of the error.</p>
    */
@@ -31,6 +32,7 @@ public class WheelVelocityControllerI extends WheelVelocityController {
   public double controlStep() {
 
     double result = 0;
+    // Motor Control Lab, Part 8
     // Start Student Code
     double error = desiredAngularVelocity - currentAngularVelocity;
     errorIntegral += error*sampleTime;
