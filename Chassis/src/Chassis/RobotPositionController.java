@@ -247,7 +247,7 @@ public class RobotPositionController {
 		myPose[2]=theta;
 		currentDistance = theta - startTheta;
 		currentDistance = rerangeAngle(currentDistance);
-		if (currentDistance > Math.PI) {
+		if (distance > Math.PI) {
 			currentDistance -= 2 * Math.PI;
 		}
 		absCurrentDistance = Math.abs(currentDistance);
