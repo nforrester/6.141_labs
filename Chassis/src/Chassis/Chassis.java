@@ -73,9 +73,9 @@ public class Chassis {
 
     if(command == 0) {
 	System.out.println("Manual Command Input: Look at code for commands");
-	robot.getRobotPositionController().translate(-0.4, -0.5);
-	robot.getRobotPositionController().translate(0.25, 1);
-	robot.getRobotPositionController().translate(-0.15, -0.5);
+	robot.getRobotPositionController().rotate(-0.4, -0.5 * Math.PI);
+	robot.getRobotPositionController().rotate(0.25, 1 * Math.PI);
+	robot.getRobotPositionController().rotate(-0.15, -0.5 * Math.PI);
     }
     else if(command == 1) {
 	System.out.println("Driving Out and Back");
