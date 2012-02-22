@@ -223,12 +223,13 @@ public class RobotPositionController {
 
 	double startTheta = theta;
 	double currentDistance = 0;
+	double absCurrentDistance = 0;
 	double distance = target_angle - startTheta;
 	distance = rerangeAngle(distance);
 	if (distance > Math.PI) {
 		distance -= 2 * Math.PI;
 	}
-	distance = Math.abs(distance);
+	double absDistance = Math.abs(distance);
 	System.out.println("DST: " + distance);
 
 	double aDist = Math.PI / 5; // acceleration distance
@@ -240,7 +241,7 @@ public class RobotPositionController {
 	//Set angular velocity to 0
 	robotVelocityController.setDesiredAngularVelocity(0,0);
 
-	while (currentDistance < distance){
+	while ((currentDistance < distance && distance > 0) || (currentDistance > distance && distance < 0)){
 		myPose[0]=x;
 		myPose[1]=y;
 		myPose[2]=theta;
@@ -249,7 +250,7 @@ public class RobotPositionController {
 		if (currentDistance > Math.PI) {
 			currentDistance -= 2 * Math.PI;
 		}
-		currentDistance = Math.abs(currentDistance);
+		absCurrentDistance = Math.abs(currentDistance);
 
 		System.out.println("-------------");
 		System.out.println("THE: " + theta);
@@ -259,9 +260,9 @@ public class RobotPositionController {
 		System.out.println("CDS: " + currentDistance);
 		System.out.println("-------------");
 
-		if (currentDistance < distance * 0.5) {
-			if (currentDistance < aDist) {
-				currentAngVel = (currentDistance / aDist) * angularVelocityDesired;
+		if (absCurrentDistance < absDistance * 0.5) {
+			if (absCurrentDistance < aDist) {
+				currentAngVel = (absCurrentDistance / aDist) * angularVelocityDesired;
 			} else {
 				currentAngVel = angularVelocityDesired;
 			}
@@ -269,8 +270,8 @@ public class RobotPositionController {
 				currentAngVel = minAngVelStart;
 			}
 		} else {
-			if (currentDistance > distance - dDist) {
-				currentAngVel = ((distance - currentDistance) / dDist) * angularVelocityDesired;
+			if (absCurrentDistance > absDistance - dDist) {
+				currentAngVel = ((absDistance - absCurrentDistance) / dDist) * angularVelocityDesired;
 			} else {
 				currentAngVel = angularVelocityDesired;
 			}
