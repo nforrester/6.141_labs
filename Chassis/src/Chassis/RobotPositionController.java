@@ -119,6 +119,10 @@ public class RobotPositionController {
 	double[] startPose={x,y,theta};
 	double[] myPose={x,y,theta};
 
+	if (distance < 0) {
+		speed *= -1;
+	}
+
 	double angularVelocityDesired=speed/WHEEL_RADIUS_IN_M;
 
 	double currentDistance = poseDistance(myPose, startPose);
