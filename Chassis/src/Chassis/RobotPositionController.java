@@ -225,11 +225,11 @@ public class RobotPositionController {
 	double currentDistance = 0;
 	double absCurrentDistance = 0;
 	double distance = target_angle - startTheta;
-	distance = rerangeAngle(distance);
-	if (distance > Math.PI) {
-		distance -= 2 * Math.PI;
+	double absDistance = rerangeAngle(distance);
+	if (absDistance > Math.PI) {
+		absDistance -= 2 * Math.PI;
 	}
-	double absDistance = Math.abs(distance);
+	absDistance = Math.abs(absDistance);
 	System.out.println("DST: " + distance);
 
 	double aDist = Math.PI / 5; // acceleration distance
@@ -241,14 +241,14 @@ public class RobotPositionController {
 	//Set angular velocity to 0
 	robotVelocityController.setDesiredAngularVelocity(0,0);
 
-	while ((currentDistance < distance && distance > 0) || (currentDistance > distance && distance < 0)){
+	while ((currentDistance < distance && angle > 0) || (currentDistance > distance && angle < 0)){
 		myPose[0]=x;
 		myPose[1]=y;
 		myPose[2]=theta;
 		currentDistance = theta - startTheta;
-		currentDistance = rerangeAngle(currentDistance);
-		if (distance > Math.PI) {
-			currentDistance -= 2 * Math.PI;
+		absCurrentDistance = rerangeAngle(currentDistance);
+		if (absCurrentDistance > Math.PI) {
+			absCurrentDistance -= 2 * Math.PI;
 		}
 		absCurrentDistance = Math.abs(currentDistance);
 
