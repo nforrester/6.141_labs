@@ -78,6 +78,7 @@ public class Chassis {
 	robot.getRobotPositionController().rotate(0.2, -0.45 * Math.PI);
     }
     else if(command == 1) {
+    	// Motor Control Lab, Part 13
 	System.out.println("Driving Out and Back");
 	robot.getRobotPositionController().translate(.2, 1);
 	robot.getRobotPositionController().rotate(.4, Math.PI);
@@ -85,6 +86,7 @@ public class Chassis {
 	robot.getRobotPositionController().rotate(.4, -Math.PI);
     }
     else if(command == 2) {
+    	// Motor Control Lab, Part 14
 	System.out.println("Driving in a Square");
 	robot.getRobotPositionController().translate(.2,1);
 	robot.getRobotPositionController().rotate(.3,(Math.PI / 2.0));
