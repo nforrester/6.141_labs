@@ -205,6 +205,9 @@ public class RobotPositionController {
 	// Begin Student Code
 
 	angle = rerangeAngle(angle);
+	if (angle > Math.PI) {
+		angle -= 2 * Math.PI;
+	}
 
 	double target_angle = theta + angle;
 	target_angle = rerangeAngle(target_angle);
