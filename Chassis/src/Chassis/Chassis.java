@@ -69,11 +69,13 @@ public class Chassis {
 
     //COMMANDS:
     //0 = Manual, 1 = Out and Back, 2 = Square
-    int command = 2;
+    int command = 0;
 
     if(command == 0) {
 	System.out.println("Manual Command Input: Look at code for commands");
-	robot.getRobotPositionController().rotate(.2, Math.PI);
+	robot.getRobotPositionController().translate(-0.5, -0.5);
+	robot.getRobotPositionController().translate(0.25, 1);
+	robot.getRobotPositionController().translate(-0.15, -0.5);
     }
     else if(command == 1) {
 	System.out.println("Driving Out and Back");
