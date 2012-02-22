@@ -247,10 +247,10 @@ public class RobotPositionController {
 		myPose[1]=y;
 		myPose[2]=theta;
 		currentDistance = theta - startTheta;
-		while (currentDistance > distance + 2 * Math.PI) {
+		while (currentDistance > distance + Math.PI) {
 			currentDistance -= 2 * Math.PI;
 		}
-		while (currentDistance < distance - 2 * Math.PI) {
+		while (currentDistance < distance - Math.PI) {
 			currentDistance += 2 * Math.PI;
 		}
 		absCurrentDistance = rerangeAngle(currentDistance);
