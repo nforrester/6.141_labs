@@ -250,7 +250,7 @@ public class RobotPositionController {
 		if (absCurrentDistance > Math.PI) {
 			absCurrentDistance -= 2 * Math.PI;
 		}
-		absCurrentDistance = Math.abs(currentDistance);
+		absCurrentDistance = Math.abs(absCurrentDistance);
 
 		System.out.println("-------------");
 		System.out.println("THE: " + theta);
