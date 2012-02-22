@@ -232,8 +232,8 @@ public class RobotPositionController {
 	absDistance = Math.abs(absDistance);
 	System.out.println("DST: " + distance);
 
-	double aDist = Math.PI / 5; // acceleration distance
-	double dDist = Math.PI / 5; // deceleration distance
+	double aDist = Math.PI / 10; // acceleration distance
+	double dDist = Math.PI / 10; // deceleration distance
 	double currentAngVel = 0;
 	double minAngVelStart = (0.1 * DISTANCE_BETWEEN_WHEELS / 2) / WHEEL_RADIUS_IN_M;
 	double minAngVelEnd = (0.1 * DISTANCE_BETWEEN_WHEELS / 2) / WHEEL_RADIUS_IN_M;
