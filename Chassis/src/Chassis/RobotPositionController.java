@@ -210,7 +210,6 @@ public class RobotPositionController {
 	}
 
 	double target_angle = theta + angle;
-	target_angle = rerangeAngle(target_angle);
 	System.out.println("THE: " + theta);
 	System.out.println("TGA: " + target_angle);
 
