@@ -211,16 +211,20 @@ public class RobotPositionController {
 
 	double target_angle = theta + angle;
 	target_angle = rerangeAngle(target_angle);
+	System.out.println("THE: " + theta);
+	System.out.println("TGA: " + target_angle);
 
 	double[] desiredPose={x,y,target_angle};
 	double[] startPose={x,y,theta};
 	double[] myPose={x,y,theta};
 
 	double angularVelocityDesired = (speed * DISTANCE_BETWEEN_WHEELS / 2) / WHEEL_RADIUS_IN_M;
+	System.out.println("AVD: " + angularVelocityDesired);
 
 	double startTheta = theta;
 	double currentDistance = 0;
 	double distance = Math.abs(rerangeAngle(target_angle - startTheta));
+	System.out.println("DST: " + distance);
 
 	double aDist = Math.PI / 5; // acceleration distance
 	double dDist = Math.PI / 5; // deceleration distance
