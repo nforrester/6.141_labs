@@ -231,6 +231,8 @@ public class RobotPositionController {
 	}
 	absDistance = Math.abs(absDistance);
 	System.out.println("DST: " + distance);
+	System.out.println("ANGLE: " + angle);
+	System.out.println("TANGLE: " + target_angle);
 
 	double aDist = Math.PI / 10; // acceleration distance
 	double dDist = Math.PI / 10; // deceleration distance
