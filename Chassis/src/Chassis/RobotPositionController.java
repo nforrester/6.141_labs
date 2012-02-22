@@ -228,7 +228,7 @@ public class RobotPositionController {
 		robotVelocityController.setDesiredAngularVelocity(angularVelocityDesired,-1 * angularVelocityDesired);
 	}
 
-	while (!comparePose(myPose, desiredPose, 0.1, 0.01)) {
+	while (!comparePose(myPose, desiredPose, 0.1, 0.01) && angularVelocityDesired > (0.05 * DISTANCE_BETWEEN_WHEELS / 2) / WHEEL_RADIUS_IN_M) {
 		myPose[0] = x;
 		myPose[1] = y;
 		myPose[2] = theta;
