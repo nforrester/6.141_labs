@@ -156,6 +156,7 @@ public class Behavior {
     boolean found = false;
 
     // Begin Student Code
+    setDesiredAngularVelocity(l / 100 * 4, r / 100 * 4);
     // End Student Code
 
     return found;
