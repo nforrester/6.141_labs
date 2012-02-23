@@ -152,14 +152,13 @@ public class Behavior {
    * @return true if the light has been found
    **/
   public boolean search(double l, double r) {
-    
-    boolean found = false;
+	boolean found = false;
 
-    // Begin Student Code
-    setDesiredAngularVelocity(l / 100 * 4, r / 100 * 4);
-    // End Student Code
+	// Begin Student Code
+	setDesiredAngularVelocity(l / 100 * 4, r / 100 * 4);
+	// End Student Code
 
-    return found;
+	return found;
   }
 
   /**
