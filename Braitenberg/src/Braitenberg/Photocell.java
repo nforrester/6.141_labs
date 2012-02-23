@@ -87,8 +87,13 @@ public class Photocell {
 	// Begin Student Code
 	long endTime = System.currentTimeMillis() + 5000;
 	long samples = 0;
+	long printed = 6;
 
 	while (System.currentTimeMillis() < endTime) {
+		if (Math.floor((endTime - System.currentTimeMillis()) / 1000) + 1 < printed) {
+			printed--;
+			System.out.println("Calibrating (" + printed + " seconds)");
+		}
 		ambient += getRawValue();
 		samples++;
 		try {
