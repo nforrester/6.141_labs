@@ -155,7 +155,18 @@ public class Behavior {
 	boolean found = false;
 
 	// Begin Student Code
-	setDesiredAngularVelocity(l / 100 * 4, r / 100 * 4);
+	double threshold = 25;
+	double sameness = 5;
+	if (l > threshold && r > threshold && Math.abs(l - r) < sameness) {
+		found = true;
+		setDesiredAngularVelocity(0, 0);
+	} else {
+		if (l > r) {
+			setDesiredAngularVelocity(-3, 3);
+		} else {
+			setDesiredAngularVelocity(3, -3);
+		}
+	}
 	// End Student Code
 
 	return found;
