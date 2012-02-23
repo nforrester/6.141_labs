@@ -91,7 +91,12 @@ public class Photocell {
 	while (System.currentTimeMillis() < endTime) {
 		ambient += getRawValue();
 		samples++;
-		Thread.sleep(10);
+		try {
+			Thread.sleep(10);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	ambient /= samples;
