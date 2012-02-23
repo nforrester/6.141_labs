@@ -2,7 +2,7 @@
 
   <target name="compile">
 	<mkdir dir="./bin"></mkdir>
-    <javac srcdir="./src" destdir="./bin" sourcepath="..:." classpath="..:.:../MotorControl/bin/:../uORCInterface.jar">
+    <javac srcdir="./src" destdir="./bin" sourcepath="..:." classpath="..:.:../MotorControl/bin/:../uORCInterface.jar:./motorControl.jar">
       <exclude name="pub-staging/**"/>
       <exclude name="attic/**"/>
     </javac>
