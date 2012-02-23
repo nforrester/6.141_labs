@@ -28,7 +28,7 @@ public class Photocell {
   /**
    * <p>The saturation raw value.</p>
    **/
-  protected double saturation = 0.0;
+  protected double saturation = 5.0;
 
   /**
    * <p>Create a new photocell object.</p>
