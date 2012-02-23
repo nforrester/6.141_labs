@@ -157,13 +157,17 @@ public class Behavior {
 	// Begin Student Code
 	double threshold = 25;
 	double sameness = 5;
+	System.out.println("(LR " + l + " " + r + ")");
 	if (l > threshold && r > threshold && Math.abs(l - r) < sameness) {
 		found = true;
+		System.out.println("found!");
 		setDesiredAngularVelocity(0, 0);
 	} else {
 		if (l > r) {
+			System.out.println("Left!");
 			setDesiredAngularVelocity(-3, 3);
 		} else {
+			System.out.println("Right!");
 			setDesiredAngularVelocity(3, -3);
 		}
 	}
