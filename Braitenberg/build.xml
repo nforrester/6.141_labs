@@ -10,7 +10,7 @@
 
 	<target name="run" depends="compile">
         <java
-                classpath="./bin:../MotorControl/bin/:../uORCInterface.jar"
+                classpath="./bin:../MotorControl/bin/:../uORCInterface.jar:./motorControl.jar"
                 classname="Braitenberg.LightSensors"
                 fork="true">
 
