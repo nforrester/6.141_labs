@@ -20,12 +20,12 @@ public class LightSensors extends JFrame implements ActionListener {
   /**
    * <p>Port of the (robot) right photocell.</p>
    **/
-  public static final int RIGHT_PHOTOCELL = 1;
+  public static final int RIGHT_PHOTOCELL = 0;
 
   /**
    * <p>Port of the (robot) left photocell.</p>
    **/
-  public static final int LEFT_PHOTOCELL = 0;
+  public static final int LEFT_PHOTOCELL = 7;
   
   /**
    * <p>The different kinds of behaviors that exist.</p>
