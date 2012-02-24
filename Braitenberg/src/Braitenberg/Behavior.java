@@ -190,11 +190,14 @@ public class Behavior {
   public boolean goToLight(double l, double r) {
 	// Begin Student Code
 	double distance = 100 - (l + r) / 2;
-	double stopDistance = 30;
+	double stopDistance = 40;
+	System.out.println("(LRD " + l + " " + r + " " + distance + ")");
 	if (distance > stopDistance) {
+		System.out.println("gangway!");
 		setDesiredAngularVelocity(3, 3);
 		return false;
 	} else {
+		System.out.println("halt!");
 		setDesiredAngularVelocity(0, 0);
 		return true;
 	}
