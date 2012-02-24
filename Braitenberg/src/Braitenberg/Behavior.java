@@ -157,7 +157,7 @@ public class Behavior {
 
 	// Begin Student Code
 	double threshold = 25;
-	double sameness = 5;
+	double sameness = 1;
 	System.out.println("(LR " + l + " " + r + ")");
 	if (l > threshold && r > threshold && Math.abs(l - r) < sameness) {
 		found = true;
