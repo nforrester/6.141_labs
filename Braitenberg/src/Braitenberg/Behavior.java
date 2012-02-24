@@ -187,7 +187,7 @@ public class Behavior {
    *
    * @return true if the robot has arrived at the light
    **/
-  public void goToLight(double l, double r) {
+  public boolean goToLight(double l, double r) {
 	// Begin Student Code
 	double distance = 100 - (l + r) / 2;
 	double stopDistance = 30;
