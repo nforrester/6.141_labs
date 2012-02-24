@@ -13,7 +13,7 @@ public class Behavior {
   /**
    * <p>Update period between behavior iterations in ms.</p>
    **/
-  public static final long BEHAVIOR_UPDATE_PERIOD_MS = 100;
+  public static final long BEHAVIOR_UPDATE_PERIOD_MS = 5;
 
 
   /**
