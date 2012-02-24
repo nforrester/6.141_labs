@@ -256,5 +256,17 @@ public class Behavior {
 	// End Student Code
   }
 
+  /**
+   * <p>Group 6's vehicle of fear!</p>
+   *
+   * @param l the (robot) left calibrated sensor reading
+   * @param r the (robot) right calibrated sensor reading
+   **/
+  public void vehicle3b(double l, double r) {
+	// Begin Student Code
+	setDesiredAngularVelocity(l / 100 * -4, r / 100 * -4);
+	// End Student Code
+  }
+
 }
 
