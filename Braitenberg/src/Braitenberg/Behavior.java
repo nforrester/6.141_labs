@@ -158,7 +158,7 @@ public class Behavior {
 	// Begin Student Code
 	double possibilityThreshold = 10;
 	double foundThreshold = 25;
-	double sameness = 0.1;
+	double sameness = 0.2;
 	double angvel;
 
 	System.out.println("(LR " + l + " " + r + ")");
@@ -192,10 +192,11 @@ public class Behavior {
    **/
   public boolean goToLight(double l, double r) {
 	// Begin Student Code
-	double distance = 100 - (l + r) / 2;
+	double distancel = 100 - l;
+	double distancer = 100 - r;
 	double stopDistance = 40;
-	System.out.println("(LRD " + l + " " + r + " " + distance + ")");
-	if (distance > stopDistance) {
+	System.out.println("(LRD " + distancel + " " + distancer + ")");
+	if (distancel > stopDistance && distancer > stopDistance) {
 		System.out.println("gangway!");
 		setDesiredAngularVelocity(3, 3);
 		return false;
