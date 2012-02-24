@@ -98,6 +98,7 @@ public class Behavior {
     robot.enableMotors(true);
 
     boolean found = false;
+    boolean arrived = false;
 
     for (;;) {
       
@@ -112,8 +113,8 @@ public class Behavior {
 	      if (!found)
 	        found |= search(l, r);
 	
-	      if (found) 
-	        goToLight(l, r);    	  
+	      if (found && !arrived) 
+	        arrived |= goToLight(l, r);    	  
       }
       else if (currentBehavior == Behaviors.TWO_A) {
     	  vehicle2a(l, r);    	  
@@ -183,10 +184,21 @@ public class Behavior {
    *
    * @param l the (robot) left calibrated sensor reading
    * @param r the (robot) right calibrated sensor reading
+   *
+   * @return true if the robot has arrived at the light
    **/
   public void goToLight(double l, double r) {
-    // Begin Student Code
-    // End Student Code
+	// Begin Student Code
+	double distance = 100 - (l + r) / 2;
+	double stopDistance = 30;
+	if (distance > stopDistance) {
+		setDesiredAngularVelocity(3, 3);
+		return false;
+	} else {
+		setDesiredAngularVelocity(0, 0);
+		return true;
+	}
+	// End Student Code
   }
 
   /**
