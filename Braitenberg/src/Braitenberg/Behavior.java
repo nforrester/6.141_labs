@@ -168,7 +168,7 @@ public class Behavior {
 		setDesiredAngularVelocity(3, -3);
 	} else if (!(l > foundThreshold && r > foundThreshold && Math.abs(l - r) < sameness)) {
 		found = false;
-		angvel = (r - l) / possibilityThreshold * 3;
+		angvel = (r - l) / possibilityThreshold * 1;
 		setDesiredAngularVelocity(angvel, -1 * angvel);
 	} else {
 		found = true;
