@@ -71,7 +71,7 @@ public class LightSensors extends JFrame implements ActionListener {
 	  chooser.addActionListener(this);
 	  
 	  //TODO: Change this to the default behavior you would like!
-	  chooser.setSelectedItem("Search and Find");
+	  chooser.setSelectedItem("Braitenburg 2A");
 	  
 	  JPanel content = new JPanel();
 	  content.add(lbl);
