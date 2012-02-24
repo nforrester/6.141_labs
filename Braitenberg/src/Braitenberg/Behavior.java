@@ -130,6 +130,7 @@ public class Behavior {
       }
       else if (currentBehavior == Behaviors.CREATIVE) {
       // Begin Student Code
+    	  fear(l, r);
       // End Student Code
       }
 
@@ -262,7 +263,7 @@ public class Behavior {
    * @param l the (robot) left calibrated sensor reading
    * @param r the (robot) right calibrated sensor reading
    **/
-  public void vehicle3b(double l, double r) {
+  public void fear(double l, double r) {
 	// Begin Student Code
 	setDesiredAngularVelocity(l / 100 * -4, r / 100 * -4);
 	// End Student Code
