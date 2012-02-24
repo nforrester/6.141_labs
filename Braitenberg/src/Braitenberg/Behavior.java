@@ -158,7 +158,7 @@ public class Behavior {
 	// Begin Student Code
 	double possibilityThreshold = 10;
 	double foundThreshold = 25;
-	double sameness = 1;
+	double sameness = 0.1;
 	double angvel;
 
 	System.out.println("(LR " + l + " " + r + ")");
