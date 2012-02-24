@@ -156,21 +156,24 @@ public class Behavior {
 	boolean found = false;
 
 	// Begin Student Code
-	double threshold = 25;
+	double possibilityThreshold = 10;
+	double foundThreshold = 25;
 	double sameness = 1;
+	double angvel;
+
 	System.out.println("(LR " + l + " " + r + ")");
-	if (l > threshold && r > threshold && Math.abs(l - r) < sameness) {
-		found = true;
-		System.out.println("found!");
-		setDesiredAngularVelocity(0, 0);
+
+	if (l < possibilityThreshold && r < possibilityThreshold) {
+		System.out.println("We ain't found shit! Veer left! Left! Left!");
+		setDesiredAngularVelocity(3, -3);
+	} else if (!(l > foundThreshold && r > foundThreshold && Math.abs(l - r) < sameness)) {
+		found = false;
+		angvel = (r - l) / possibilityThreshold * 3;
+		setDesiredAngularVelocity(angvel, -1 * angvel);
 	} else {
-		if (l > r) {
-			System.out.println("Left!");
-			setDesiredAngularVelocity(-3, 3);
-		} else {
-			System.out.println("Right!");
-			setDesiredAngularVelocity(3, -3);
-		}
+		found = true;
+		System.out.println("Found!");
+		setDesiredAngularVelocity(0, 0);
 	}
 	// End Student Code
 
