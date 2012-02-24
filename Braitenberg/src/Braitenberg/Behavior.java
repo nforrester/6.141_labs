@@ -194,7 +194,7 @@ public class Behavior {
 	// Begin Student Code
 	double distancel = 100 - l;
 	double distancer = 100 - r;
-	double stopDistance = 40;
+	double stopDistance = 50;
 	System.out.println("(LRD " + distancel + " " + distancer + ")");
 	if (distancel > stopDistance && distancer > stopDistance) {
 		System.out.println("gangway!");
