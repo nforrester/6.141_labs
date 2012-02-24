@@ -215,8 +215,8 @@ public class Behavior {
    * @param r the (robot) right calibrated sensor reading
    **/
   public void vehicle2a(double l, double r) {
-    // Begin Student Code
-    // End Student Code
+	// Begin Student Code
+	// End Student Code
   }
 
   /**
@@ -226,8 +226,8 @@ public class Behavior {
    * @param r the (robot) right calibrated sensor reading
    **/
   public void vehicle2b(double l, double r) {
-    // Begin Student Code
-    // End Student Code
+	// Begin Student Code
+	// End Student Code
   }
 
   /**
@@ -237,8 +237,8 @@ public class Behavior {
    * @param r the (robot) right calibrated sensor reading
    **/
   public void vehicle3a(double l, double r) {
-    // Begin Student Code
-    // End Student Code
+	// Begin Student Code
+	// End Student Code
   }
 
   /**
@@ -248,8 +248,8 @@ public class Behavior {
    * @param r the (robot) right calibrated sensor reading
    **/
   public void vehicle3b(double l, double r) {
-    // Begin Student Code
-    // End Student Code
+	// Begin Student Code
+	// End Student Code
   }
 
 }
