@@ -228,6 +228,7 @@ public class Behavior {
    **/
   public void vehicle2b(double l, double r) {
 	// Begin Student Code
+	setDesiredAngularVelocity(r / 100 * 4, l / 100 * 4);
 	// End Student Code
   }
 
