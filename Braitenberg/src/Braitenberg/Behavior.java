@@ -202,13 +202,13 @@ public class Behavior {
 	double distancel = 100 - l;
 	double distancer = 100 - r;
 	double proportionl = (100 -l)/100;
-	double porportionr = (100 -r)/100;
+	double proportionr = (100 -r)/100;
 	double stopDistance = 50;
 	System.out.println("(LRD " + distancel + " " + distancer + ")");
 	if (distancel > stopDistance && distancer > stopDistance) {
 		System.out.println("gangway!");
 		//setDesiredAngularVelocity(3, 3); //this line was there before
-		setDesiredAngularVelocity(porportionl*3, porportionr*3); //gives a proportion with the distance from the bot.
+		setDesiredAngularVelocity(proportionl*3, proportionr*3); //gives a proportion with the distance from the bot.
 		return false;
 	} else {
 		System.out.println("halt!");
