@@ -148,8 +148,8 @@ public class Behavior {
    *
    * <p>Rotates until a light is found (according to some criteria).</p>
    *
-   * @param l the (robot) left calibrated sensor reading
-   * @param r the (robot) right calibrated sensor reading
+   * @param l the (robot) left calibrated sensor reading , ranges from 0-100
+   * @param r the (robot) right calibrated sensor reading, ranges from 0-100
    *
    * @return true if the light has been found
    **/
@@ -166,7 +166,13 @@ public class Behavior {
 
 	if (l < possibilityThreshold && r < possibilityThreshold) {
 		System.out.println("We ain't found shit! Veer left! Left! Left!");
-		setDesiredAngularVelocity(3, -3);
+		//setDesiredAngularVelocity(3, -3); //only this line was there before
+		if (l > r){
+		    setDesiredAngularVelocity(3, -3);
+		}
+		else{
+		    setDesiredAngularVelocity(-3, 3);
+		}
 	} else if (!(l > foundThreshold && r > foundThreshold && Math.abs(l - r) < sameness)) {
 		found = false;
 		angvel = (r - l) / possibilityThreshold * 1;
@@ -195,11 +201,14 @@ public class Behavior {
 	// Begin Student Code
 	double distancel = 100 - l;
 	double distancer = 100 - r;
+	double proportionl = (100 -l)/100;
+	double porportionr = (100 -r)/100;
 	double stopDistance = 50;
 	System.out.println("(LRD " + distancel + " " + distancer + ")");
 	if (distancel > stopDistance && distancer > stopDistance) {
 		System.out.println("gangway!");
-		setDesiredAngularVelocity(3, 3);
+		//setDesiredAngularVelocity(3, 3); //this line was there before
+		setDesiredAngularVelocity(porportionl*3, porportionr*3); //gives a proportion with the distance from the bot.
 		return false;
 	} else {
 		System.out.println("halt!");

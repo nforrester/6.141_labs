@@ -74,7 +74,7 @@ public class Photocell {
 		val = 0.0;
 	}
 
-	return val;
+	return val; //this value increases as the Illumination increases.
   }
 
   /**
@@ -99,7 +99,6 @@ public class Photocell {
 		try {
 			Thread.sleep(10);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
