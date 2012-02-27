@@ -157,9 +157,9 @@ public class Behavior {
 	boolean found = false;
 
 	// Begin Student Code
-	double possibilityThreshold = 35;
-	double foundThreshold = 50;
-	double sameness = 0.5;
+	double possibilityThreshold = 30;
+	double foundThreshold = 40;
+	double sameness = 4;
 	double angvel;
 
 	System.out.println("(LR " + l + " " + r + ")");
@@ -197,12 +197,12 @@ public class Behavior {
 	double distancer = 100 - r;
 	double proportionl = (100 -l)/100;
 	double proportionr = (100 -r)/100;
-	double stopDistance = 30;
+	double stopDistance = 20;
 	System.out.println("(LRD " + distancel + " " + distancer + ")");
 	if (distancel > stopDistance && distancer > stopDistance) {
 		System.out.println("gangway!");
 		//setDesiredAngularVelocity(3, 3); //this line was there before
-		setDesiredAngularVelocity(proportionl*3, proportionr*3); //gives a proportion with the distance from the bot.
+		setDesiredAngularVelocity(proportionl*5, proportionr*5); //gives a proportion with the distance from the bot.
 		return false;
 	} else {
 		System.out.println("halt!");
