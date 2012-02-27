@@ -64,7 +64,7 @@ public class Photocell {
 	// Begin Student Code
 	val = getRawValue();
 	val -= ambient;
-	val /= saturation;
+	val /= saturation - ambient;
 	val *= 100;
 	// End Student Code
 
