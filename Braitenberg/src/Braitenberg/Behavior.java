@@ -157,9 +157,9 @@ public class Behavior {
 	boolean found = false;
 
 	// Begin Student Code
-	double possibilityThreshold = 10;
-	double foundThreshold = 25;
-	double sameness = 0.2;
+	double possibilityThreshold = 25;
+	double foundThreshold = 40;
+	double sameness = 0.5;
 	double angvel;
 
 	System.out.println("(LR " + l + " " + r + ")");
@@ -197,7 +197,7 @@ public class Behavior {
 	double distancer = 100 - r;
 	double proportionl = (100 -l)/100;
 	double proportionr = (100 -r)/100;
-	double stopDistance = 50;
+	double stopDistance = 30;
 	System.out.println("(LRD " + distancel + " " + distancer + ")");
 	if (distancel > stopDistance && distancer > stopDistance) {
 		System.out.println("gangway!");
