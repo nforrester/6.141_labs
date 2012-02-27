@@ -1,0 +1,20 @@
+<package>
+  <description brief="odometry">
+
+     odometry
+
+  </description>
+  <author>rss-staff</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/odometry</url>
+  <depend package="rosjava"/>
+  <depend package="rss_msgs"/>
+
+  <export>
+    <rosjava-pathelement location="target/" groupId="org.ros" artifactId="odometry" version="0.0" built="true" />
+  </export>
+
+</package>
+
+

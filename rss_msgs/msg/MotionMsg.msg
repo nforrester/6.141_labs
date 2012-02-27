@@ -1,0 +1,2 @@
+float64 translationalVelocity
+float64 rotationalVelocity

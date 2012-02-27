@@ -1,0 +1,27 @@
+<package>
+  <description brief="lab4">
+
+     lab4
+
+  </description>
+  <author>rss-staff</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/lab4</url>
+  <depend package="rosjava"/>
+  <depend package="roscv"/>
+  <depend package="rss_msgs"/>
+  <depend package="sensor_msgs"/>
+  <depend package="image_transport"/>
+
+  <export>
+    <rosjava-src location="src" />
+    <rosjava-pathelement location="target/" groupId="org.ros" artifactId="org.ros.rss.lab4" version="0.0" built="true" />
+  </export>
+
+    
+
+
+</package>
+
+

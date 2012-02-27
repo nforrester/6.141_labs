@@ -1,0 +1,24 @@
+<package>
+  <description brief="orc_utils">
+
+     orc_utils
+
+  </description>
+  <author>rss-staff</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/orc_utils</url>
+  <depend package="rosjava"/>
+
+
+  <export>
+    <rosjava-pathelement location="lib/" groupId="org.ros" artifactId="motorControl" version="0.0" built="true" />
+
+    <rosjava-pathelement location="lib/" groupId="org.ros" artifactId="uORCInterface" version="0.0" built="true" />
+
+    <rosjava-pathelement location="lib/" groupId="org.ros" artifactId="orc" version="0.0" built="true" />
+
+  </export>
+</package>
+
+

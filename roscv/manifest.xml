@@ -1,0 +1,22 @@
+<package>
+  <description brief="roscv">
+
+     roscv
+
+  </description>
+  <author>rss-staff</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/roscv</url>
+
+  <export>
+    <rosjava-pathelement location="lib/" groupId="org.ros" artifactId="javacv" version="0.0" built="true" />
+
+    <rosjava-pathelement location="lib/" groupId="org.ros" artifactId="javacv-linux-x86" version="0.0" built="true" />
+
+    <rosjava-pathelement location="lib/" groupId="org.ros" artifactId="javacpp" version="0.0" built="true" />
+  </export>
+
+</package>
+
+
