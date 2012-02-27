@@ -166,13 +166,7 @@ public class Behavior {
 
 	if (l < possibilityThreshold && r < possibilityThreshold) {
 		System.out.println("We ain't found shit! Veer left! Left! Left!");
-		//setDesiredAngularVelocity(3, -3); //only this line was there before
-		if (l > r){
-		    setDesiredAngularVelocity(3, -3);
-		}
-		else{
-		    setDesiredAngularVelocity(-3, 3);
-		}
+		setDesiredAngularVelocity(3, -3);
 	} else if (!(l > foundThreshold && r > foundThreshold && Math.abs(l - r) < sameness)) {
 		found = false;
 		angvel = (r - l) / possibilityThreshold * 1;
