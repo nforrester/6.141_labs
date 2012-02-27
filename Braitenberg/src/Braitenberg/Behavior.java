@@ -157,8 +157,8 @@ public class Behavior {
 	boolean found = false;
 
 	// Begin Student Code
-	double possibilityThreshold = 25;
-	double foundThreshold = 40;
+	double possibilityThreshold = 35;
+	double foundThreshold = 50;
 	double sameness = 0.5;
 	double angvel;
 
