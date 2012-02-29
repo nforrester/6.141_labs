@@ -116,38 +116,38 @@ public class Histogram {
    * @return 2D histogram array
    **/
   static public float[][] makeHistogram(Image source, boolean hsbHistogram){
-    int width = source.getWidth();
-    int height = source.getHeight();
+	int width = source.getWidth();
+	int height = source.getHeight();
 
-    //Scale the number of histogram boxes if our image is smaller than
-    //256 pixels wide.
-    double scale;
-    if(width < 256) {
-	    scale = (double)256 / width;
-    }
-    else {
-	    // just limit it to 256 bins
-	    scale = 1;
-    }
+	//Scale the number of histogram boxes if our image is smaller than
+	//256 pixels wide.
+	double scale;
+	if(width < 256) {
+		scale = (double)256 / width;
+	} else {
+		// just limit it to 256 bins
+		scale = 1;
+	}
 
-    //Allocate the bins, 3 channels for rgb or hsb
-    float histogram[][] = new float[Math.min(width, 256)][3];
+	//Allocate the bins, 3 channels for rgb or hsb
+	float histogram[][] = new float[Math.min(width, 256)][3];
 
-    // Begin Student Code
+	// Begin Student Code
 
-    //Give the histogram some default values, this can be removed when
-    //working on your own solution
-    for(int i = 0; i < histogram.length;i++){
-      histogram[i][0] = i;
-      histogram[i][1] = 50;
-      histogram[i][2] = i%50;
-    }
+	//Give the histogram some default values, this can be removed when
+	//working on your own solution
+	for(int i = 0; i < histogram.length;i++){
+		histogram[i][0] = i;
+		histogram[i][1] = 50;
+		histogram[i][2] = i%50;
+	}
 
-    // Tally pixel-channel values in histogram bins.  If hsbHistogram
-    // is true make it an hsb histogram, else an rgb histogram.
-    // End Student Code
+	// Tally pixel-channel values in histogram bins.  If hsbHistogram
+	// is true make it an hsb histogram, else an rgb histogram.
 
-    return histogram;
+	// End Student Code
+
+	return histogram;
   }
 
   /**
