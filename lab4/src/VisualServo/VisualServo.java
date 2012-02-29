@@ -12,6 +12,8 @@ import org.ros.node.topic.Subscriber;
 
 import VisualServo.Image.Pixel;
 
+import MotorControlSolution.*;
+
 /**
  * 
  * @author previous TA's, prentice, vona
@@ -22,7 +24,21 @@ public class VisualServo implements NodeMain, Runnable{
 	private static final int width = 160;
 
 	private static final int height = 120;
-
+	
+    //Lab 4 part 9 parameters
+    private double distanceDesired=.5;
+    private double distanceError=0;
+    private double distanceErrorOld=0;
+    private double distanceKp=1;
+    private double distanceKd=0;
+    private double distanceOutput=0;
+    private double headingDesired=0;
+    private double headingError=0;
+    private double headingErrorOld=0;
+    private double headingKp=1;
+    private double headingKd=0;
+    private double headingOutput=0;
+    private double sensorData[]={0,0};
 
 
 	/**
@@ -48,6 +64,38 @@ public class VisualServo implements NodeMain, Runnable{
 
 		gui = new VisionGUI();
 	}
+	
+	/**
+	 * <p>Converts the area and position of the ball in the image</p>
+	 *
+	 * @param input The desired blobPresent output to convert, assuming blobPresent returns (area,x,y) of units ([px^2],[px],[px]).
+	 */
+	public double[] blobFix(double [] input){		
+		
+		/*
+		 * Measurements of environment:
+		 * Physical ball diameter = 4.000 [inches] or 101.60 [mm]
+		 * Pixel Area of ball 1 meter away = n [px] 
+		 */
+		
+		//Scaling factors for area,x, and y. Found through experimentation.
+		double kA=1; //units [m]/[px^2]
+		double kX=1; //units [m]/[px] normalized to exactly 1 meter away
+		double kY=1; //units [m]/[px] normalized to exactly 1 meter away
+		
+		double area=input[0];
+		double x=input[1];
+		double y=input[2];
+		
+		/*
+		 * toDo: 
+		 * -make more robust calculations based on camera lens angle specs.
+		 * -Edit kA, kX, kY after experimentation.
+		 */
+		
+		double output[]={kA*area,kX*x};
+		return output;
+	}
 
 	protected void setInitialParams() {
 
@@ -63,6 +111,20 @@ public class VisualServo implements NodeMain, Runnable{
 
 		visionImage.offer(rawImage);		
 	}
+	
+	  /**
+	   * <p>Convenience method to {@link
+	   * RobotVelocityController#setDesiredAngularVelocity} on {@link
+	   * #robotVelocityController}.</p>
+	   *
+	   * @param left the desired left wheel angular velocity in rad/s, positive
+	   * means corresp side moves forward
+	   * @param right the desired right wheel angular velocity in rad/s, positive
+	   * means corresp side moves forward
+	   **/
+	  protected void setDesiredAngularVelocity(double left, double right) {
+	    robotVelocityController.setDesiredAngularVelocity(left, right);
+	  }	
 	
 	@Override
 	public void run(){
@@ -84,9 +146,35 @@ public class VisualServo implements NodeMain, Runnable{
 		    gui.setVisionImage(dest.toArray(), width, height);
 		    
 		    // Begin Student Code
-
+		    
+		    /*Lab 4 Part 9 implemented by Daniel Gonzalez [dgonz@mit.edu]
+		     * -Assuming blobFix returns {range,bearing} of units {[m],[radians]}
+		     * --Assuming positive blob bearing means blob is to the left of the robot
+		     */
+		    
+		    //Acquire sensor feedback data
+		    double sensorData[]=blobFix(blobTrack.blobPresent(dest));
+		    
+		    //PD control of heading		    
+		    headingError=headingDesired-sensorData[1];
+		    headingOutput=headingKp*headingError+headingKd*(headingError-headingErrorOld);
+		    
+		    //PD control of distance
+		    distanceError=distanceDesired-sensorData[0];
+		    distanceOutput=distanceKp*distanceError+distanceKd*(distanceError-distanceErrorOld);
+		    
 		    // publish velocity messages to move the robot towards the target
-
+		    setDesiredAngularVelocity(distanceOutput+headingOutput, -(distanceOutput+headingOutput));
+		    
+		    //update variables for the next step
+		    headingErrorOld=headingError;
+		    distanceErrorOld=distanceError;
+		    /*
+		     * To Do:
+		     * -Determine distanceKp, distanceKd, headingKp, headingKd via experimentation. 
+		     * -do ROS stuff
+		     */
+		    
 		    // End Student Code
 		}
 	}
