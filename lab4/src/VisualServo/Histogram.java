@@ -134,6 +134,7 @@ public class Histogram {
 
 	// Begin Student Code
 
+	/*
 	//Give the histogram some default values, this can be removed when
 	//working on your own solution
 	for(int i = 0; i < histogram.length;i++){
@@ -141,9 +142,23 @@ public class Histogram {
 		histogram[i][1] = 50;
 		histogram[i][2] = i%50;
 	}
+	*/
 
 	// Tally pixel-channel values in histogram bins.  If hsbHistogram
 	// is true make it an hsb histogram, else an rgb histogram.
+	
+	int histLen = histogram.length;
+	for (Image.Pixel pix : source.getAllPixels()) {
+		if (hsbHistogram) {
+			histogram[(int)Math.round(pix.getHue() * histLen)][0]++;
+			histogram[(int)Math.round(pix.getSaturation() * histLen)][1]++;
+			histogram[(int)Math.round(pix.getBrightness() * histLen)][2]++;
+		} else {
+			histogram[(int)Math.round(((float)pix.getRed()) / 255.0 * histLen)][0]++;
+			histogram[(int)Math.round(((float)pix.getGreen()) / 255.0 * histLen)][1]++;
+			histogram[(int)Math.round(((float)pix.getBlue()) / 255.0 * histLen)][2]++;
+		}
+	}
 
 	// End Student Code
 
