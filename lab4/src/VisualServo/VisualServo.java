@@ -164,7 +164,7 @@ public class VisualServo implements NodeMain, Runnable{
 		    distanceOutput=distanceKp*distanceError+distanceKd*(distanceError-distanceErrorOld);
 		    
 		    // publish velocity messages to move the robot towards the target
-		    setDesiredAngularVelocity(distanceOutput+headingOutput, -(distanceOutput+headingOutput));
+		    setDesiredAngularVelocity(distanceOutput+headingOutput, distanceOutput-headingOutput);
 		    
 		    //update variables for the next step
 		    headingErrorOld=headingError;
