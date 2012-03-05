@@ -235,7 +235,7 @@ public class BlobTracking {
 			}
 		}
 		
-		if(matchingPixels !=0){
+		if(!(matchingPixels >50)){
 			matchingPixelsXCount /= (long)matchingPixels;
 			matchingPixelsYCount /= (long)matchingPixels;
 		}
