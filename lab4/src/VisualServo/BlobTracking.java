@@ -25,9 +25,9 @@ public class BlobTracking {
 	 * Variable thresholds for methods like apply(),classify()
 	 * and blobTracking().
 	 */
-	private int RED_THRESHOLD = 100;
+	private int RED_THRESHOLD = 60;
 	private int BLUE_THRESHOLD = 60;
-	private int GREEN_THRESHOLD = 60;
+	private int GREEN_THRESHOLD = 100;
 
 	// Variables used for velocity controller that are available to calling
 	// process.  Visual results are valid only if targetDetected==true; motor
