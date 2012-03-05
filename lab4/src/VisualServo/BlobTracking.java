@@ -12,7 +12,8 @@ import VisualServo.Image.Pixel;
  * @author previous TA's, prentice
  */
 public class BlobTracking {
-	   public Node log_node;
+	public Node log_node;
+
 	protected int stepCounter = 0;
 	protected double lastStepTime = 0.0;
 
@@ -91,7 +92,16 @@ public class BlobTracking {
 		stepTiming();  // monitors the frame rate
 		//log_node.getLog().info( src.getPixel(100, 100).getBlue());
 		// Begin Student Code
-		
+		log_node.getlog().info("print success");
+		for(int i=0;i<src.getWidth();i++) {
+		    for(int j=0;j<src.getHeight();j++) {
+		        Pixel testPixel = src.getPixel(i, j);
+		        if(testPixel.getRed() > 220 && testPixel.getBlue() < 20 && testPixel.getGreen() < 20) {
+		            System.out.println("Pixel at i = " + i + " j = " + j);
+		        }
+		    }
+		}
+
 		Histogram.getHistogram(src, dest, false);
 		
 		for(int i=0;i<src.getWidth();i++){
@@ -232,8 +242,6 @@ public class BlobTracking {
 			}
 			
 		}
-		
-		
 	}
 	
 	public void setGreenThreshold(int x){
