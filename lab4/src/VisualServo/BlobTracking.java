@@ -197,7 +197,7 @@ public class BlobTracking {
 	 * This  method counts the number of target pixels in the frame, calculates the centroid and
 	 * draws a cross at the centroid of the ball. 
 	 */
-	public void blobTracking(Image src, Image dest){
+	public int[] BlobPresent(Image src, Image dest){
 		
 		classify(src,dest);
 		
@@ -206,6 +206,7 @@ public class BlobTracking {
 		
 		stepTiming(); 
 		
+		int[] returnArray = new int[3];
 		int matchingPixels = 0;
 		long matchingPixelsXCount = 0;
 		long matchingPixelsYCount = 0;
@@ -232,6 +233,10 @@ public class BlobTracking {
 			matchingPixelsYCount /= (long)matchingPixels;
 		}
 		
+		returnArray[0] = (int) matchingPixels; //area
+		returnArray[1] = (int)matchingPixelsXCount; // Averaged X
+		returnArray[2] = (int)matchingPixelsYCount; // Averaged Y
+		
 		if(matchingPixelsXCount > 0 && matchingPixelsYCount > 0){
 			for (int i = (int)matchingPixelsXCount - 8; i< (int)matchingPixelsXCount + 9;i++){
 				Pixel whitePixel = new Pixel(255,255,255);
@@ -247,6 +252,8 @@ public class BlobTracking {
 			}
 			
 		}
+		
+		return returnArray;
 	}
 	
 	public void setGreenThreshold(int x){
