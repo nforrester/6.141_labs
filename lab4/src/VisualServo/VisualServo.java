@@ -129,7 +129,7 @@ public class VisualServo implements NodeMain, Runnable{
 	@Override
 	public void run(){
 		while(true){
-	
+
 		    Image src = null;
 		    try {
 			src = new Image(visionImage.take(), width, height);
@@ -140,7 +140,11 @@ public class VisualServo implements NodeMain, Runnable{
 		    Pixel p = src.getPixel(width/2, height/2);
 		    
 		    Image dest = new Image(src.toArray(), width, height);
-		    blobTrack.apply(src, dest);
+		    //blobTrack.apply(src, dest);
+		    //blobTrack.classify(src, dest);
+		    
+		    blobTrack.blobTracking(src, dest);
+		    
 		    
 		    // update newly formed vision message
 		    gui.setVisionImage(dest.toArray(), width, height);
@@ -190,12 +194,12 @@ public class VisualServo implements NodeMain, Runnable{
 	@Override
 	public void onStart(Node node) {
 		blobTrack = new BlobTracking(width, height);
-
+		blobTrack.log_node = node;
 		// Begin Student Code
 
 		// set parameters on blobTrack as you desire
 
-
+		
 
 		// initialize the ROS publication to command/Motors
 

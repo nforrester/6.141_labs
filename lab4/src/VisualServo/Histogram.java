@@ -1,6 +1,7 @@
 package VisualServo;
 
 import VisualServo.Image;
+import VisualServo.Image.Pixel;
 
 /**
  * Histogram functions for generating, normalizing, and overlaying
