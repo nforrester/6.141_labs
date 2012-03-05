@@ -141,8 +141,13 @@ public class BlobTracking {
 	public void classify(Image src, Image dest) {
 	
 		
-		int preference = (RED_THRESHOLD >BLUE_THRESHOLD && RED_THRESHOLD >GREEN_THRESHOLD) ? RED_THRESHOLD :
-						(BLUE_THRESHOLD >RED_THRESHOLD && BLUE_THRESHOLD >GREEN_THRESHOLD) ? BLUE_THRESHOLD : GREEN_THRESHOLD;
+		int preference = (RED_THRESHOLD > BLUE_THRESHOLD &&
+		                  RED_THRESHOLD > GREEN_THRESHOLD) ?
+		                      (RED_THRESHOLD) :
+		                      (BLUE_THRESHOLD > RED_THRESHOLD &&
+                                       BLUE_THRESHOLD > GREEN_THRESHOLD) ?
+                                           (BLUE_THRESHOLD) :
+                                           (GREEN_THRESHOLD);
 		
 		
 		stepTiming(); 
@@ -154,17 +159,17 @@ public class BlobTracking {
 				Pixel testPixel = src.getPixel(i, j);
 				
 				//check what are we looking for
-				boolean condition = (preference == RED_THRESHOLD) ? (testPixel.getRed() >RED_THRESHOLD && 
-																	testPixel.getGreen() <GREEN_THRESHOLD &&
-																	testPixel.getBlue() <BLUE_THRESHOLD):
-									
-								(preference == BLUE_THRESHOLD) ? (testPixel.getRed() <RED_THRESHOLD && 
-																	testPixel.getGreen() <GREEN_THRESHOLD &&
-																		testPixel.getBlue() >BLUE_THRESHOLD):
-																			
-																			(testPixel.getRed() <RED_THRESHOLD && 
-																			testPixel.getGreen() >GREEN_THRESHOLD &&
-																			testPixel.getBlue() <BLUE_THRESHOLD);
+				boolean condition = (preference == RED_THRESHOLD) ?
+				                       (testPixel.getRed()   > RED_THRESHOLD &&
+				                        testPixel.getGreen() < GREEN_THRESHOLD &&
+				                        testPixel.getBlue()  < BLUE_THRESHOLD): 
+				                       (preference == BLUE_THRESHOLD) ?
+				                          (testPixel.getRed()   < RED_THRESHOLD &&
+				                           testPixel.getGreen() < GREEN_THRESHOLD &&
+				                           testPixel.getBlue()  > BLUE_THRESHOLD):
+				                          (testPixel.getRed()   < RED_THRESHOLD &&
+				                           testPixel.getGreen() > GREEN_THRESHOLD &&
+				                           testPixel.getBlue()  < BLUE_THRESHOLD);
 						
 						
 						
