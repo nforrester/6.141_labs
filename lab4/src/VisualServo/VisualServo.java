@@ -13,7 +13,7 @@ import org.ros.node.topic.Subscriber;
 
 import VisualServo.Image.Pixel;
 
-//import MotorControlSolution.*;
+import MotorControlSolution.*;
 
 /**
  * 
@@ -30,17 +30,18 @@ public class VisualServo implements NodeMain, Runnable{
     private double distanceDesired=.5;
     private double distanceError=0;
     private double distanceErrorOld=0;
-    private double distanceKp=1;
-    private double distanceKd=0;
+    private double distanceKp=5;
+    private double distanceKd=1;
     private double distanceOutput=0;
     private double headingDesired=0;
     private double headingError=0;
     private double headingErrorOld=0;
-    private double headingKp=1;
-    private double headingKd=0;
+    private double headingKp=5;
+    private double headingKd=1;
     private double headingOutput=0;
     private double sensorData[]={0,0};
-
+    protected RobotVelocityController robotVelocityController;
+    protected RobotBase robot = new RobotBase();
 
 	/**
 	 * <p>The blob tracker.</p>
@@ -78,7 +79,7 @@ public class VisualServo implements NodeMain, Runnable{
 		 * Physical ball diameter = 4.000 [inches] or 101.60 [mm]
 		 * Pixel Area of ball 1 meter away = n [px] 
 		 */
-		
+		double output[]=new double[2];
 		//Scaling factors for area,x, and y. Found through experimentation.
 		double kA=1; //units [m]/[px^2]
 		double kX=1; //units [m]/[px] normalized to exactly 1 meter away
@@ -94,7 +95,14 @@ public class VisualServo implements NodeMain, Runnable{
 		 * -Edit kA, kX, kY after experimentation.
 		 */
 		
-		double output[]={kA*area,kX*x};
+		if (area==0){
+			output[0]=.5;
+			output[1]=kX*x;
+		}
+		else{
+			output[0]=kA*area;
+			output[1]=kX*x;
+		}
 		return output;
 	}
 
@@ -124,7 +132,7 @@ public class VisualServo implements NodeMain, Runnable{
 	   * means corresp side moves forward
 	   **/
 	  protected void setDesiredAngularVelocity(double left, double right) {
-	    //robotVelocityController.setDesiredAngularVelocity(left, right);
+	    robotVelocityController.setDesiredAngularVelocity(left, right);
 	  }	
 	
 	@Override
@@ -203,7 +211,9 @@ public class VisualServo implements NodeMain, Runnable{
 		
 
 		// initialize the ROS publication to command/Motors
-
+	    this.robotVelocityController = new RobotVelocityController(new WheelVelocityControllerI(), new WheelVelocityControllerI());
+	    this.robot.setRobotVelocityController(robotVelocityController);
+	    this.robot.enableMotors(true);
 
 		// End Student Code
 
