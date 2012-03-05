@@ -71,7 +71,7 @@ public class VisualServo implements NodeMain, Runnable{
 	 *
 	 * @param input The desired blobPresent output to convert, assuming blobPresent returns (area,x,y) of units ([px^2],[px],[px]).
 	 */
-	public double[] blobFix(double [] input){		
+	public double[] blobFix(int [] input){		
 		
 		/*
 		 * Measurements of environment:
@@ -84,9 +84,9 @@ public class VisualServo implements NodeMain, Runnable{
 		double kX=1; //units [m]/[px] normalized to exactly 1 meter away
 		double kY=1; //units [m]/[px] normalized to exactly 1 meter away
 		
-		double area=input[0];
-		double x=input[1];
-		double y=input[2];
+		double area=(double)input[0];
+		double x=(double)input[1];
+		double y=(double)input[2];
 		
 		/*
 		 * toDo: 
@@ -144,7 +144,7 @@ public class VisualServo implements NodeMain, Runnable{
 		    //blobTrack.apply(src, dest);
 		    //blobTrack.classify(src, dest);
 		    
-		    blobTrack.blobTracking(src, dest);
+		    //blobTrack.blobTracking(src, dest);
 		    
 		    
 		    // update newly formed vision message
@@ -158,7 +158,7 @@ public class VisualServo implements NodeMain, Runnable{
 		     */
 		    
 		    //Acquire sensor feedback data
-		    //double sensorData[]=blobFix(blobTrack.blobPresent(dest));
+		    double sensorData[]=blobFix(blobTrack.blobPresent(src,dest));
 		    
 		    //PD control of heading		    
 		    headingError=headingDesired-sensorData[1];

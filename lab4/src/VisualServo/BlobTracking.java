@@ -66,9 +66,6 @@ public class BlobTracking {
 			lastStepTime = currTime;
 		}
 	}
-
-	
-	
 	
 	
 	/**
@@ -197,7 +194,7 @@ public class BlobTracking {
 	 * This  method counts the number of target pixels in the frame, calculates the centroid and
 	 * draws a cross at the centroid of the ball. 
 	 */
-	public int[] BlobPresent(Image src, Image dest){
+	public int[] blobPresent(Image src, Image dest){
 		
 		classify(src,dest);
 		
