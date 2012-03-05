@@ -2,6 +2,7 @@ package VisualServo;
 
 import java.util.concurrent.ArrayBlockingQueue;
 
+
 import org.ros.message.MessageListener;
 import org.ros.message.rss_msgs.MotionMsg;
 import org.ros.namespace.GraphName;
@@ -12,7 +13,7 @@ import org.ros.node.topic.Subscriber;
 
 import VisualServo.Image.Pixel;
 
-import MotorControlSolution.*;
+//import MotorControlSolution.*;
 
 /**
  * 
@@ -123,7 +124,7 @@ public class VisualServo implements NodeMain, Runnable{
 	   * means corresp side moves forward
 	   **/
 	  protected void setDesiredAngularVelocity(double left, double right) {
-	    robotVelocityController.setDesiredAngularVelocity(left, right);
+	    //robotVelocityController.setDesiredAngularVelocity(left, right);
 	  }	
 	
 	@Override
@@ -157,7 +158,7 @@ public class VisualServo implements NodeMain, Runnable{
 		     */
 		    
 		    //Acquire sensor feedback data
-		    double sensorData[]=blobFix(blobTrack.blobPresent(dest));
+		    //double sensorData[]=blobFix(blobTrack.blobPresent(dest));
 		    
 		    //PD control of heading		    
 		    headingError=headingDesired-sensorData[1];

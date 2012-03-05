@@ -92,7 +92,7 @@ public class BlobTracking {
 		stepTiming();  // monitors the frame rate
 		//log_node.getLog().info( src.getPixel(100, 100).getBlue());
 		// Begin Student Code
-		log_node.getlog().info("print success");
+		log_node.getLog().info("adjbgvfqaj");
 		for(int i=0;i<src.getWidth();i++) {
 		    for(int j=0;j<src.getHeight();j++) {
 		        Pixel testPixel = src.getPixel(i, j);
