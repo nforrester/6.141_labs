@@ -192,7 +192,17 @@ public class BlobTracking {
 	
 	/*
 	 * This  method counts the number of target pixels in the frame, calculates the centroid and
-	 * draws a cross at the centroid of the ball. 
+	 * draws a cross at the centroid of the ball.It also does the classification of the image using 
+	 * classify(Image,Image) in BlobTracking.
+	 * 
+	 * @param
+	 * src - Source image from the camera
+	 * dest - The Destination image that is going to 
+	 * 		  the display for being displayed.
+	 * 
+	 * @return
+	 * returns an int[]  consisting of Area,X,Y of the blob found on the screen.  
+	 * 
 	 */
 	public int[] blobPresent(Image src, Image dest){
 		
