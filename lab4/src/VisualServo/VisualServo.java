@@ -30,13 +30,13 @@ public class VisualServo implements NodeMain, Runnable{
     private double distanceDesired=.5;
     private double distanceError=0;
     private double distanceErrorOld=0;
-    private double distanceKp=-0.05;
+    private double distanceKp=1;
     private double distanceKd=0;
     private double distanceOutput=0;
     private double headingDesired=0;
     private double headingError=0;
     private double headingErrorOld=0;
-    private double headingKp=-0.01;
+    private double headingKp=0.5;
     private double headingKd=0;
     private double headingOutput=0;
     private double sensorData[]={0,0};
@@ -74,7 +74,7 @@ public class VisualServo implements NodeMain, Runnable{
 	 *
 	 * @param input The desired blobPresent output to convert, assuming blobPresent returns (area,x,y) of units ([px^2],[px],[px]).
 	 */
-	public double[] blobFix(int [] input){		
+	public double[] blobFix(int [] input) {
 		
 		/*
 		 * Measurements of environment:
@@ -86,26 +86,40 @@ public class VisualServo implements NodeMain, Runnable{
 		double kA=(double)1/(double)200; //units [m]/[px^2]
 		double kX=-1;
 		double kY=1;
-		
+
+		double width = 160.0; // educated guess, subject to being wrong, error unlikely to matter much
+		double height = 120.0; // educated guess, subject to being wrong, error unlikely to matter much
+
+		double fovX = 25.0 * 2 / 360 * 2 * Math.PI; // field of view in the X direction in radians, based on measurement that half the field of view is ~25 degrees
+		double fovY = fovX / width * height; // field of view in the Y direction in radians, assuming pixels are square
+
+		double pixelsPerRadian = width / fovX; // assuming pixels are square
+
+		double ballDiameter = .115; // approx, in meters, measured
+		double ballArea = Math.pow(ballDiameter / 2, 2) * Math.PI; // in square meters, assuming ball is spherical
+
 		double area=(double)input[0];
 		double x=(double)input[1];
 		double y=(double)input[2];
+
+		double observedDiameter = Math.pow(area / Math.PI, 0.5) * 2; // in pixels, assuming our pixel blob is approximately circular
 		
+		blobTrack.log_node.getLog().info("A: " + area + " OD: " + observedDiameter + " Xp: " + x + " Yp: " + y);
+
 		/*
 		 * toDo: 
 		 * -make more robust calculations based on camera lens angle specs.
 		 * -Edit kA, kX, kY after experimentation.
 		 */
 		
-		if (area==0){
-			output[0]=.5;
-			output[1]=kX*x;
-			output[2]=kY*y;
-		}
-		else{
-			output[0]=kA*area;
-			output[1]=kX*x;
-			output[2]=kY*y;
+		if (area == 0) {
+			output[0] = distanceDesired; // we don't have this data, so assume it's ok so the robot doesn't run away
+			output[1] = 0;
+			output[2] = 0;
+		} else {
+			output[0] = ballDiameter / (observedDiameter / pixelsPerRadian); // distance
+			output[1] = x / pixelsPerRadian;
+			output[2] = y / pixelsPerRadian;
 		}
 		return output;
 	}
@@ -149,12 +163,12 @@ public class VisualServo implements NodeMain, Runnable{
 		    //blobTrack.setBlueThreshold(80);
 		    
 		    
-		 // Begin Student Code
-		  //Acquire sensor feedback data
+		    // Begin Student Code
+		    //Acquire sensor feedback data
+		    blobTrack.log_node.getLog().info("W: " + src.getWidth() + " H: " + src.getHeight());
 		    double sensorData[]=blobFix(blobTrack.blobPresent(src,dest));
 		    
-		    blobTrack.log_node.getLog().info("Area is -> " + sensorData[0] + " X is -> " + 
-		    								sensorData[1] + " Y is -> " + sensorData[2]);
+		    blobTrack.log_node.getLog().info("D: " + sensorData[0] + " X: " + sensorData[1] + " Y: " + sensorData[2]);
 		    
 		    // update newly formed vision message
 		    gui.setVisionImage(dest.toArray(), width, height);
