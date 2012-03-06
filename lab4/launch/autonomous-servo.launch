@@ -1,5 +1,5 @@
 <launch>
-  <include file="$(find lab4)/launch/autonomous-config.launch" />
+  <include file="$(find lab4)/launch/config.launch" />
 
   <node name="rep" pkg="image_transport" type="republish" args="compressed in:=/gscam/image_raw raw out:=/rss/video" machine="netbook" output="screen" />
   <node name="view" pkg="image_view" type="image_view" args="image:=/rss/video" machine="netbook" output="screen" />
