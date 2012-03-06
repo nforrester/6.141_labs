@@ -144,17 +144,17 @@ public class VisualServo implements NodeMain, Runnable{
 		    //blobTrack.classify(src, dest);
 		    
 		    //blobTrack.blobTracking(src, dest);
-		    blobTrack.setRedThreshold(100);
-		    blobTrack.setGreenThreshold(80);
-		    blobTrack.setBlueThreshold(80);
+		    //blobTrack.setRedThreshold(100);
+		    //blobTrack.setGreenThreshold(80);
+		    //blobTrack.setBlueThreshold(80);
 		    
 		    
 		 // Begin Student Code
 		  //Acquire sensor feedback data
 		    double sensorData[]=blobFix(blobTrack.blobPresent(src,dest));
 		    
-		    blobTrack.log_node.getLog().info("Area is -> " + sensorData[0] +"X is -> " + 
-		    								sensorData[1] +"Y is -> " + sensorData[2]);
+		    blobTrack.log_node.getLog().info("Area is -> " + sensorData[0] + " X is -> " + 
+		    								sensorData[1] + " Y is -> " + sensorData[2]);
 		    
 		    // update newly formed vision message
 		    gui.setVisionImage(dest.toArray(), width, height);

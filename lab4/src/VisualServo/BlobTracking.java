@@ -21,10 +21,10 @@ public class BlobTracking {
 	public int height;
 	public int numChannels = 3;
 
-	private double RED_HUE   = 2 * Math.PI * 0 / 3;
-	private double GREEN_HUE = 2 * Math.PI * 1 / 3;
-	private double BLUE_HUE  = 2 * Math.PI * 2 / 3;
-	private double hues[3] = {RED_HUE, GREEN_HUE, BLUE_HUE};
+	private double RED_HUE   = 0.0 / 3.0;
+	private double GREEN_HUE = 1.0 / 3.0;
+	private double BLUE_HUE  = 2.0 / 3.0;
+	private double hues[] = {RED_HUE, GREEN_HUE, BLUE_HUE};
 
 	private int RED   = 0;
 	private int GREEN = 1;
@@ -134,24 +134,30 @@ public class BlobTracking {
 	}
 	
 	/*
-	 * Tests if a pixel is a particular hue
+	 * Tests if a pixel is a particular hue,
+         * with reasonable saturation and brightness
+         * to make such a determination
 	 */
 	public boolean isHue(Pixel p, double hue) {
-		return isHue(p, hue, 2 * Math.PI / 6);
+		return isHue(p, hue, 0.05);
 	}
 	public boolean isHue(Pixel p, double hue, double tolerance) {
-		double pixHue = p.getHue()
+		double pixHue = p.getHue();
+
+		if (p.getBrightness() < 0.35 || p.getSaturation() < 0.5) {
+			return false;
+		}
 
 		pixHue -= hue;
 
-		while (pixHue > Math.PI) {
-			pixHue -= 2 * Math.PI;
+		while (pixHue > 0.5) {
+			pixHue -= 1;
 		}
-		while (pixHue < -1 * Math.PI) {
-			pixHue += 2 * Math.PI;
+		while (pixHue < -0.5) {
+			pixHue += 1;
 		}
 
-		return Math.abs(pixHue) < Math.PI * 2 / 6;
+		return Math.abs(pixHue) < tolerance;
 	}
 
 	/*
@@ -176,7 +182,7 @@ public class BlobTracking {
 						saturatedPixel = new Pixel(255,   0,   0);
 					} else if (preference == GREEN) {
 						saturatedPixel = new Pixel(  0, 255,   0);
-					} else if (preference == BLUE) {
+					} else {
 						saturatedPixel = new Pixel(  0,   0, 255);
 					}
 
@@ -269,27 +275,5 @@ public class BlobTracking {
 		}
 		
 		return returnArray;
-	}
-	
-	public void setGreenThreshold(int x){
-		this.GREEN_THRESHOLD = x;
-	}
-	public void setBlueThreshold(int x){
-		this.BLUE_THRESHOLD = x;
-	}
-	public void setRedThreshold(int x){
-		this.RED_THRESHOLD = x;
-	}
-	
-	public int getGreenThreshold(){
-		return this.GREEN_THRESHOLD;
-	}
-	
-	public int getBlueThreshold(){
-		return this.BLUE_THRESHOLD;
-	}
-	
-	public int getRedThreshold(){
-		return this.GREEN_THRESHOLD;
 	}
 }
