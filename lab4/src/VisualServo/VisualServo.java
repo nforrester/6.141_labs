@@ -51,6 +51,7 @@ public class VisualServo implements NodeMain, Runnable{
 
 
 
+	private static boolean RUN_VISION_GUI = false;
 	private VisionGUI gui;
 	private ArrayBlockingQueue<byte[]> visionImage = new ArrayBlockingQueue<byte[]>(1);
 
@@ -66,7 +67,9 @@ public class VisualServo implements NodeMain, Runnable{
 		
 		setInitialParams();
 
-		gui = new VisionGUI();
+		if (RUN_VISION_GUI) {
+			gui = new VisionGUI();
+		}
 	}
 	
 	/**
@@ -170,8 +173,10 @@ public class VisualServo implements NodeMain, Runnable{
 		    
 		    blobTrack.log_node.getLog().info("D: " + sensorData[0] + " X: " + sensorData[1] + " Y: " + sensorData[2]);
 		    
-		    // update newly formed vision message
-		    gui.setVisionImage(dest.toArray(), width, height);
+		    if (RUN_VISION_GUI) {
+			    // update newly formed vision message
+			    gui.setVisionImage(dest.toArray(), width, height);
+		    }
 		    
 		    
 		    
@@ -254,9 +259,13 @@ public class VisualServo implements NodeMain, Runnable{
 			public void onNewMessage(org.ros.message.rss_msgs.OdometryMsg message) {
 				if ( firstUpdate ) {
 					firstUpdate = false;
-					gui.resetWorldToView(message.x, message.y);
+					if (RUN_VISION_GUI) {
+						gui.resetWorldToView(message.x, message.y);
+					}
 				}
-				gui.setRobotPose(message.x, message.y, message.theta);
+				if (RUN_VISION_GUI) {
+					gui.setRobotPose(message.x, message.y, message.theta);
+				}
 			}
 		}
 				);
