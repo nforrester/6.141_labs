@@ -21,13 +21,16 @@ public class BlobTracking {
 	public int height;
 	public int numChannels = 3;
 
-	/*
-	 * Variable thresholds for methods like apply(),classify()
-	 * and blobTracking().
-	 */
-	private int RED_THRESHOLD = 100;
-	private int BLUE_THRESHOLD = 60;
-	private int GREEN_THRESHOLD = 60;
+	private double RED_HUE   = 2 * Math.PI * 0 / 3;
+	private double GREEN_HUE = 2 * Math.PI * 1 / 3;
+	private double BLUE_HUE  = 2 * Math.PI * 2 / 3;
+	private double hues[3] = {RED_HUE, GREEN_HUE, BLUE_HUE};
+
+	private int RED   = 0;
+	private int GREEN = 1;
+	private int BLUE  = 2;
+
+	private int preference = RED;
 
 	// Variables used for velocity controller that are available to calling
 	// process.  Visual results are valid only if targetDetected==true; motor
@@ -107,7 +110,7 @@ public class BlobTracking {
 		
 				Pixel testPixel = src.getPixel(i, j);
 				
-				if(testPixel.getRed() >RED_THRESHOLD && testPixel.getGreen() <GREEN_THRESHOLD &&testPixel.getBlue() <BLUE_THRESHOLD){
+				if(isHue(testPixel, hues[RED])){
 					Pixel redPixel = new Pixel(255,255,255);
 					dest.setPixel(i, j, redPixel); //replaces desired pixels with white pixels.
 					numberOfPixels++;
@@ -131,21 +134,32 @@ public class BlobTracking {
 	}
 	
 	/*
+	 * Tests if a pixel is a particular hue
+	 */
+	public boolean isHue(Pixel p, double hue) {
+		return isHue(p, hue, 2 * Math.PI / 6);
+	}
+	public boolean isHue(Pixel p, double hue, double tolerance) {
+		double pixHue = p.getHue()
+
+		pixHue -= hue;
+
+		while (pixHue > Math.PI) {
+			pixHue -= 2 * Math.PI;
+		}
+		while (pixHue < -1 * Math.PI) {
+			pixHue += 2 * Math.PI;
+		}
+
+		return Math.abs(pixHue) < Math.PI * 2 / 6;
+	}
+
+	/*
 	 * Classifies each pixel in the image as target pixel or not and converts 
 	 * classified targetPixels into saturated colors, eg. Pixel(255,0,0) for a 
 	 * red ball and non- blob pixels are converted into gray-scale.
 	 */
 	public void classify(Image src, Image dest) {
-	
-		
-		int preference = (RED_THRESHOLD > BLUE_THRESHOLD &&
-		                  RED_THRESHOLD > GREEN_THRESHOLD) ?
-		                      (RED_THRESHOLD) :
-		                      (BLUE_THRESHOLD > RED_THRESHOLD &&
-                                       BLUE_THRESHOLD > GREEN_THRESHOLD) ?
-                                           (BLUE_THRESHOLD) :
-                                           (GREEN_THRESHOLD);
-		
 		
 		stepTiming(); 
 		
@@ -155,35 +169,28 @@ public class BlobTracking {
 				
 				Pixel testPixel = src.getPixel(i, j);
 				
-				//check what are we looking for
-				boolean condition = (preference == RED_THRESHOLD) ?
-				                       (testPixel.getRed()   > RED_THRESHOLD &&
-				                        testPixel.getGreen() < GREEN_THRESHOLD &&
-				                        testPixel.getBlue()  < BLUE_THRESHOLD): 
-				                       (preference == BLUE_THRESHOLD) ?
-				                          (testPixel.getRed()   < RED_THRESHOLD &&
-				                           testPixel.getGreen() < GREEN_THRESHOLD &&
-				                           testPixel.getBlue()  > BLUE_THRESHOLD):
-				                          (testPixel.getRed()   < RED_THRESHOLD &&
-				                           testPixel.getGreen() > GREEN_THRESHOLD &&
-				                           testPixel.getBlue()  < BLUE_THRESHOLD);
-						
-						
-						
-					if(condition){
-						Pixel saturatedPixel = (preference == RED_THRESHOLD) ? (new Pixel(255,0,0)) :
-												(preference == GREEN_THRESHOLD) ? new Pixel(0,255,0):new Pixel(0,0,255);
-						dest.setPixel(i, j, saturatedPixel); 
+				if(isHue(testPixel, hues[preference])){
+					Pixel saturatedPixel;
+
+					if (preference == RED) {
+						saturatedPixel = new Pixel(255,   0,   0);
+					} else if (preference == GREEN) {
+						saturatedPixel = new Pixel(  0, 255,   0);
+					} else if (preference == BLUE) {
+						saturatedPixel = new Pixel(  0,   0, 255);
 					}
-					else{
-						int redValue = testPixel.getRed();
-						int blueValue = testPixel.getBlue();
-						int greenValue = testPixel.getGreen();
-						int grayScale = (redValue + blueValue + greenValue)/3;
-						
-						Pixel grayPixel = new Pixel(grayScale,grayScale,grayScale);
-						dest.setPixel(i, j, grayPixel); 
-					}	
+
+					dest.setPixel(i, j, saturatedPixel); 
+				}
+				else{
+					int redValue = testPixel.getRed();
+					int blueValue = testPixel.getBlue();
+					int greenValue = testPixel.getGreen();
+					int grayScale = (redValue + blueValue + greenValue)/3;
+					
+					Pixel grayPixel = new Pixel(grayScale,grayScale,grayScale);
+					dest.setPixel(i, j, grayPixel); 
+				}	
 			}
 		}
 		
@@ -208,9 +215,6 @@ public class BlobTracking {
 		
 		classify(src,dest);
 		
-		int preference = (RED_THRESHOLD >BLUE_THRESHOLD && RED_THRESHOLD >GREEN_THRESHOLD) ? RED_THRESHOLD :
-			(BLUE_THRESHOLD >RED_THRESHOLD && BLUE_THRESHOLD >GREEN_THRESHOLD) ? BLUE_THRESHOLD : GREEN_THRESHOLD;
-		
 		stepTiming(); 
 		
 		int[] returnArray = new int[3];
@@ -222,9 +226,9 @@ public class BlobTracking {
 			for(int j=0;j<dest.getHeight();j++){
 				Pixel nextPixel = dest.getPixel(i, j);
 				
-				boolean condition = (preference == RED_THRESHOLD) ? (nextPixel.getRed() == 255) :
-								(preference == GREEN_THRESHOLD) ? (nextPixel.getGreen() == 255):
-									(nextPixel.getBlue() == 255);
+				boolean condition = (preference == RED   && nextPixel.getRed() == 255 && nextPixel.getGreen() ==   0 && nextPixel.getBlue() ==   0) ||
+				                    (preference == GREEN && nextPixel.getRed() ==   0 && nextPixel.getGreen() == 255 && nextPixel.getBlue() ==   0) ||
+				                    (preference == BLUE  && nextPixel.getRed() ==   0 && nextPixel.getGreen() ==   0 && nextPixel.getBlue() == 255);
 								
 				if (condition){
 					matchingPixels++;
