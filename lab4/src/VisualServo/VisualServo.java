@@ -30,18 +30,19 @@ public class VisualServo implements NodeMain, Runnable{
     private double distanceDesired=.5;
     private double distanceError=0;
     private double distanceErrorOld=0;
-    private double distanceKp=5;
-    private double distanceKd=1;
+    private double distanceKp=-0.05;
+    private double distanceKd=0;
     private double distanceOutput=0;
     private double headingDesired=0;
     private double headingError=0;
     private double headingErrorOld=0;
-    private double headingKp=5;
-    private double headingKd=1;
+    private double headingKp=-0.01;
+    private double headingKd=0;
     private double headingOutput=0;
     private double sensorData[]={0,0};
     protected RobotVelocityController robotVelocityController;
-    protected RobotBase robot = new RobotBase();
+    private MotionMsg commandMotors;
+    private Publisher<MotionMsg> k;
 
 	/**
 	 * <p>The blob tracker.</p>
@@ -62,6 +63,7 @@ public class VisualServo implements NodeMain, Runnable{
 	 */
 	public VisualServo() {
 
+		
 		setInitialParams();
 
 		gui = new VisionGUI();
@@ -79,11 +81,11 @@ public class VisualServo implements NodeMain, Runnable{
 		 * Physical ball diameter = 4.000 [inches] or 101.60 [mm]
 		 * Pixel Area of ball 1 meter away = n [px] 
 		 */
-		double output[]=new double[2];
+		double output[]=new double[3];
 		//Scaling factors for area,x, and y. Found through experimentation.
-		double kA=1; //units [m]/[px^2]
-		double kX=1; //units [m]/[px] normalized to exactly 1 meter away
-		double kY=1; //units [m]/[px] normalized to exactly 1 meter away
+		double kA=(double)1/(double)200; //units [m]/[px^2]
+		double kX=-1;
+		double kY=1;
 		
 		double area=(double)input[0];
 		double x=(double)input[1];
@@ -98,10 +100,12 @@ public class VisualServo implements NodeMain, Runnable{
 		if (area==0){
 			output[0]=.5;
 			output[1]=kX*x;
+			output[2]=kY*y;
 		}
 		else{
 			output[0]=kA*area;
 			output[1]=kX*x;
+			output[2]=kY*y;
 		}
 		return output;
 	}
@@ -120,20 +124,7 @@ public class VisualServo implements NodeMain, Runnable{
 
 		visionImage.offer(rawImage);		
 	}
-	
-	  /**
-	   * <p>Convenience method to {@link
-	   * RobotVelocityController#setDesiredAngularVelocity} on {@link
-	   * #robotVelocityController}.</p>
-	   *
-	   * @param left the desired left wheel angular velocity in rad/s, positive
-	   * means corresp side moves forward
-	   * @param right the desired right wheel angular velocity in rad/s, positive
-	   * means corresp side moves forward
-	   **/
-	  protected void setDesiredAngularVelocity(double left, double right) {
-	    robotVelocityController.setDesiredAngularVelocity(left, right);
-	  }	
+
 	
 	@Override
 	public void run(){
@@ -154,8 +145,12 @@ public class VisualServo implements NodeMain, Runnable{
 		    
 		    //blobTrack.blobTracking(src, dest);
 		    blobTrack.setRedThreshold(100);
-		    blobTrack.setGreenThreshold(60);
-		    blobTrack.setBlueThreshold(60);
+		    blobTrack.setGreenThreshold(80);
+		    blobTrack.setBlueThreshold(80);
+		    
+		    
+		 // Begin Student Code
+		  //Acquire sensor feedback data
 		    double sensorData[]=blobFix(blobTrack.blobPresent(src,dest));
 		    
 		    blobTrack.log_node.getLog().info("Area is -> " + sensorData[0] +"X is -> " + 
@@ -164,16 +159,15 @@ public class VisualServo implements NodeMain, Runnable{
 		    // update newly formed vision message
 		    gui.setVisionImage(dest.toArray(), width, height);
 		    
-		    // Begin Student Code
+		    
 		    
 		    /*Lab 4 Part 9 implemented by Daniel Gonzalez [dgonz@mit.edu]
 		     * -Assuming blobFix returns {range,bearing} of units {[m],[radians]}
 		     * --Assuming positive blob bearing means blob is to the left of the robot
 		     */
 		    
-		    //Acquire sensor feedback data
 		    
-		
+		    
 		    
 		    
 		    //PD control of heading		    
@@ -181,11 +175,12 @@ public class VisualServo implements NodeMain, Runnable{
 		    headingOutput=headingKp*headingError+headingKd*(headingError-headingErrorOld);
 		    
 		    //PD control of distance
-		    distanceError=distanceDesired-sensorData[0];
+		    distanceError=sensorData[0]-distanceDesired;
 		    distanceOutput=distanceKp*distanceError+distanceKd*(distanceError-distanceErrorOld);
 		    
 		    // publish velocity messages to move the robot towards the target
-		    setDesiredAngularVelocity(distanceOutput+headingOutput, distanceOutput-headingOutput);
+			commandMotors.rotationalVelocity =headingOutput;
+			commandMotors.translationalVelocity =distanceOutput;
 		    
 		    //update variables for the next step
 		    headingErrorOld=headingError;
@@ -195,6 +190,8 @@ public class VisualServo implements NodeMain, Runnable{
 		     * -Determine distanceKp, distanceKd, headingKp, headingKd via experimentation. 
 		     * -do ROS stuff
 		     */
+		    
+		    k.publish(commandMotors);
 		    
 		    // End Student Code
 		}
@@ -212,17 +209,17 @@ public class VisualServo implements NodeMain, Runnable{
 	public void onStart(Node node) {
 		blobTrack = new BlobTracking(width, height);
 		blobTrack.log_node = node;
-		// Begin Student Code
+		k= node.newPublisher("/command/Motors","rss_msgs/MotionMsg");
+		commandMotors = new MotionMsg();
+
+		// Begin Student CMotionMsg;ode
 
 		// set parameters on blobTrack as you desire
 
 		
 
 		// initialize the ROS publication to command/Motors
-	    this.robotVelocityController = new RobotVelocityController(new WheelVelocityControllerI(), new WheelVelocityControllerI());
-	    this.robot.setRobotVelocityController(robotVelocityController);
-	    this.robot.enableMotors(true);
-
+		
 		// End Student Code
 
 		vidSub = node.newSubscriber("/rss/video", "sensor_msgs/Image");

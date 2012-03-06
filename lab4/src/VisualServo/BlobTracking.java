@@ -25,9 +25,9 @@ public class BlobTracking {
 	 * Variable thresholds for methods like apply(),classify()
 	 * and blobTracking().
 	 */
-	private int RED_THRESHOLD = 60;
+	private int RED_THRESHOLD = 100;
 	private int BLUE_THRESHOLD = 60;
-	private int GREEN_THRESHOLD = 100;
+	private int GREEN_THRESHOLD = 60;
 
 	// Variables used for velocity controller that are available to calling
 	// process.  Visual results are valid only if targetDetected==true; motor
@@ -235,14 +235,18 @@ public class BlobTracking {
 			}
 		}
 		
-		if(!(matchingPixels >50)){
+		if(matchingPixels >50){
 			matchingPixelsXCount /= (long)matchingPixels;
 			matchingPixelsYCount /= (long)matchingPixels;
 		}
+		else{
+			matchingPixelsXCount = 0;
+			matchingPixelsYCount = 0;
+		}
 		
 		returnArray[0] = (int) matchingPixels; //area
-		returnArray[1] = (int)matchingPixelsXCount; // Averaged X
-		returnArray[2] = (int)matchingPixelsYCount; // Averaged Y
+		returnArray[1] = (int)matchingPixelsXCount - (int)(dest.getWidth()/2); // Averaged X with (0,0) as center of image
+		returnArray[2] = (int)matchingPixelsYCount - (int)(dest.getHeight()/2); // Averaged Y with (0,0) as center of image
 		
 		if(matchingPixelsXCount > 0 && matchingPixelsYCount > 0){
 			for (int i = (int)matchingPixelsXCount - 8; i< (int)matchingPixelsXCount + 9;i++){
