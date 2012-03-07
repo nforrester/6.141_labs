@@ -90,8 +90,8 @@ public class VisualServo implements NodeMain, Runnable{
 		double kX=-1;
 		double kY=1;
 
-		double width = 160.0; // educated guess, subject to being wrong, error unlikely to matter much
-		double height = 120.0; // educated guess, subject to being wrong, error unlikely to matter much
+		double width = 160.0;
+		double height = 120.0;
 
 		double fovX = 25.0 * 2 / 360 * 2 * Math.PI; // field of view in the X direction in radians, based on measurement that half the field of view is ~25 degrees
 		double fovY = fovX / width * height; // field of view in the Y direction in radians, assuming pixels are square
