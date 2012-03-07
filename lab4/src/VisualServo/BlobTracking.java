@@ -21,8 +21,8 @@ public class BlobTracking {
 	public int height;
 	public int numChannels = 3;
 
-	private boolean DRAW_HISTOGRAM = true;
-	private boolean HSB_HISTOGRAM = false;
+	private boolean DRAW_HISTOGRAM = false;
+	private boolean HSB_HISTOGRAM = true;
 	private boolean PERFORM_CLASSIFICATION = true;
 
 	private double RED_HUE   = 0.0 / 3.0;
