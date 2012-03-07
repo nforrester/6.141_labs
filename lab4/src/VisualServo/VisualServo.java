@@ -51,7 +51,7 @@ public class VisualServo implements NodeMain, Runnable{
 
 
 
-	private static boolean RUN_VISION_GUI = false;
+	private static boolean RUN_VISION_GUI = true;
 	private VisionGUI gui;
 	private ArrayBlockingQueue<byte[]> visionImage = new ArrayBlockingQueue<byte[]>(1);
 

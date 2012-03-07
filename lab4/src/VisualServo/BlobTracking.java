@@ -274,6 +274,10 @@ public class BlobTracking {
 			
 		}
 		
+		if (true) {
+			Histogram.getHistogram(src, dest, false);
+		}
+
 		return returnArray;
 	}
 }
