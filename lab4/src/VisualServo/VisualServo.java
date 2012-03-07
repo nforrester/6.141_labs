@@ -31,13 +31,13 @@ public class VisualServo implements NodeMain, Runnable{
     private double distanceError=0;
     private double distanceErrorOld=0;
     private double distanceKp=1;
-    private double distanceKd=0;
+    private double distanceKd=0.15;
     private double distanceOutput=0;
     private double headingDesired=0;
     private double headingError=0;
     private double headingErrorOld=0;
     private double headingKp=0.5;
-    private double headingKd=0;
+    private double headingKd=0.07;
     private double headingOutput=0;
     private double sensorData[]={0,0};
     protected RobotVelocityController robotVelocityController;
