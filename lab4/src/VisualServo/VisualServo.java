@@ -168,7 +168,8 @@ public class VisualServo implements NodeMain, Runnable{
 		    
 		    // Begin Student Code
 		    //Acquire sensor feedback data
-		    blobTrack.log_node.getLog().info("W: " + src.getWidth() + " H: " + src.getHeight());
+		    blobTrack.log_node.getLog().info("R: " + p.getRed() + "G: " + p.getGreen() + "B: " + p.getBlue());
+		    blobTrack.log_node.getLog().info("H: " + p.getHue() + "S: " + p.getSaturation() + "B: " + p.getBrightness());
 		    double sensorData[]=blobFix(blobTrack.blobPresent(src,dest));
 		    
 		    blobTrack.log_node.getLog().info("D: " + sensorData[0] + " X: " + sensorData[1] + " Y: " + sensorData[2]);

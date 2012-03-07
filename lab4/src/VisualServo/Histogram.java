@@ -151,19 +151,29 @@ public class Histogram {
 	int histLen = histogram.length;
 	for (Image.Pixel pix : source.getAllPixels()) {
 		if (hsbHistogram) {
-			histogram[(int)Math.round(pix.getHue() * histLen)][0]++;
-			histogram[(int)Math.round(pix.getSaturation() * histLen)][1]++;
-			histogram[(int)Math.round(pix.getBrightness() * histLen)][2]++;
+			histogram[clamp(0, histLen - 1, (int)Math.round(pix.getHue() * histLen))][0]++;
+			histogram[clamp(0, histLen - 1, (int)Math.round(pix.getSaturation() * histLen))][1]++;
+			histogram[clamp(0, histLen - 1, (int)Math.round(pix.getBrightness() * histLen))][2]++;
 		} else {
-			histogram[(int)Math.round(((float)pix.getRed()) / 255.0 * histLen)][0]++;
-			histogram[(int)Math.round(((float)pix.getGreen()) / 255.0 * histLen)][1]++;
-			histogram[(int)Math.round(((float)pix.getBlue()) / 255.0 * histLen)][2]++;
+			histogram[clamp(0, histLen - 1, (int)Math.round(((double)pix.getRed()) / 255.0 * histLen))][0]++;
+			histogram[clamp(0, histLen - 1, (int)Math.round(((double)pix.getGreen()) / 255.0 * histLen))][1]++;
+			histogram[clamp(0, histLen - 1, (int)Math.round(((double)pix.getBlue()) / 255.0 * histLen))][2]++;
 		}
 	}
 
 	// End Student Code
 
 	return histogram;
+  }
+
+  private static int clamp(int min, int max, int value) {
+  	if (value < min) {
+		return min;
+	}
+	if (value > max) {
+		return max;
+	}
+	return value;
   }
 
   /**

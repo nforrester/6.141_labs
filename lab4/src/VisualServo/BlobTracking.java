@@ -21,6 +21,10 @@ public class BlobTracking {
 	public int height;
 	public int numChannels = 3;
 
+	private boolean DRAW_HISTOGRAM = true;
+	private boolean HSB_HISTOGRAM = false;
+	private boolean PERFORM_CLASSIFICATION = true;
+
 	private double RED_HUE   = 0.0 / 3.0;
 	private double GREEN_HUE = 1.0 / 3.0;
 	private double BLUE_HUE  = 2.0 / 3.0;
@@ -219,7 +223,9 @@ public class BlobTracking {
 	 */
 	public int[] blobPresent(Image src, Image dest){
 		
-		classify(src,dest);
+		if (PERFORM_CLASSIFICATION) {
+			classify(src,dest);
+		}
 		
 		stepTiming(); 
 		
@@ -274,8 +280,8 @@ public class BlobTracking {
 			
 		}
 		
-		if (true) {
-			Histogram.getHistogram(src, dest, false);
+		if (DRAW_HISTOGRAM) {
+			Histogram.getHistogram(src, dest, HSB_HISTOGRAM);
 		}
 
 		return returnArray;
