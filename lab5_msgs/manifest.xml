@@ -1,0 +1,16 @@
+<package>
+  <description brief="lab5_msgs">
+
+     lab5_msgs
+
+  </description>
+  <author>rss-staff</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/lab5_msgs</url>
+
+  <depend package="std_msgs"/>
+
+</package>
+
+

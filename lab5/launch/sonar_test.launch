@@ -1,0 +1,8 @@
+<launch>
+  <include file="$(find lab4)/launch/config.launch" />
+
+  <node name="plo" pkg="rxtools"           type="rxplot" args="/rss/Sonars/Front/range /rss/Sonars/Back/range" machine="workstation"/>
+  <node name="lis" pkg="rosjava_bootstrap" type="run.py" args="uorc_listener Listener" machine="netbook" /> 
+  <node name="pub" pkg="rosjava_bootstrap" type="run.py" args="uorc_publisher Publisher" machine="netbook" />
+  <node name="odo" pkg="rosjava_bootstrap" type="run.py" args="odometry odometry.Odometry" machine="netbook" /> 
+</launch>

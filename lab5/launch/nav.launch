@@ -1,0 +1,4 @@
+<launch>
+	<include file="$(find lab5)/launch/sonarGUI.launch" />
+	<node name="nav" pkg="rosjava_bootstrap" type="run.py" args="lab5 LocalNavigation.LocalNavigation" machine="workstation" />
+</launch>

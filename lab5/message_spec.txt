@@ -1,0 +1,26 @@
+Message Spec for Local Navigation Lab
+
+ColorMsg
+	int64 r
+	int64 g
+	int64 b
+
+GUILineMsg
+	float64 lineA
+	float64 lineB
+	float64 lineC
+	ColorMsg color
+
+
+GUIPointMsg
+	float64 x
+	float64 y
+	int64 shape
+	ColorMsg color
+
+GUISegmentMSg
+	float64 startX
+	float64 endX
+	float64 startY
+	float64 endY
+	ColorMsg color
