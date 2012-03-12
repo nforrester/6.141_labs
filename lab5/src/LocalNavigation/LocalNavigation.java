@@ -29,7 +29,8 @@ public class VisualServo implements NodeMain, Runnable{
 
 	protected boolean firstUpdate = true;
 
-	public Subscriber<org.ros.message.sensor_msgs.Image> vidSub;
+	public Subscriber<org.ros.message.rss_msgs.SonarMsg> sonarFrontSub;
+	public Subscriber<org.ros.message.rss_msgs.SonarMsg> sonarBackSub;
 	public Subscriber<org.ros.message.rss_msgs.OdometryMsg> odoSub;
 	/**
 	 * <p>Create a new LocalNavigation object.</p>
@@ -52,8 +53,10 @@ public class VisualServo implements NodeMain, Runnable{
 	 * 
 	 * @param some shit
 	 */
-	public void handleSonar(/*TODO: some shit*/) {
-		//TODO: some shit
+	public void handleSonar(org.ros.message.rss_msgs.SonarMsg message) {
+		//TODO: some shit here
+		// message.isFront
+		// message.range
 	}
 
 	
@@ -83,30 +86,26 @@ public class VisualServo implements NodeMain, Runnable{
 	 */
 	@Override
 	public void onStart(Node node) {
+		// initialize the ROS publication to command/Motors
 		k = node.newPublisher("/command/Motors","rss_msgs/MotionMsg");
 		commandMotors = new MotionMsg();
 
-		// Begin Student CMotionMsg;ode
+		// initialize the ROS subscriptions to rss/Sonars
+		sonarFrontSub = node.newSubscriber("/rss/Sonars/Front", "rss_msgs/SonarMsg");
+		sonarFrontSub.addMessageListener(new MessageListener<org.ros.message.rss_msgs.SonarMsg>() {
+				@Override
+				public void onNewMessage(org.ros.message.rss_msgs.SonarMsg message) {
+					handleSonar(message);
+				}
+			});
 
-		// set parameters on blobTrack as you desire
-
-		
-
-		// initialize the ROS publication to command/Motors
-		
-		// End Student Code
-
-		vidSub = node.newSubscriber("/rss/video", "sensor_msgs/Image");
-		vidSub.addMessageListener(new MessageListener<org.ros.message.sensor_msgs.Image>() {
-			@Override
-			public void onNewMessage(org.ros.message.sensor_msgs.Image message) {
-				byte[] rgbData = Image.RGB2BGR(message.data,  (int)message.width, (int)message.height);
-				assert((int)message.width == width);
-				assert((int)message.height == height);
-				handleSonar(rgbData);
-			}
-		}
-				);
+		sonarBackSub = node.newSubscriber("/rss/Sonars/Front", "rss_msgs/SonarMsg");
+		sonarBackSub.addMessageListener(new MessageListener<org.ros.message.rss_msgs.SonarMsg>() {
+				@Override
+				public void onNewMessage(org.ros.message.rss_msgs.SonarMsg message) {
+					handleSonar(message);
+				}
+			});
 
 		odoSub = node.newSubscriber("/rss/odometry", "rss_msgs/OdometryMsg");
 		odoSub.addMessageListener(new MessageListener<org.ros.message.rss_msgs.OdometryMsg>() {
