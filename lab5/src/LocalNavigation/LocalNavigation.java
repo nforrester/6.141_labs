@@ -19,21 +19,40 @@ import MotorControlSolution.*;
  *
  */
 public class VisualServo implements NodeMain, Runnable{
-
 	protected RobotVelocityController robotVelocityController;
-	private MotionMsg commandMotors;
-	private Publisher<MotionMsg> k;
 
 	private Node logNode;
 
 	private static boolean RUN_SONAR_GUI = true;
 	private SonarGUI gui;
 
+	public static int STOP_ON_BUMP  = 0;
+	public static int ALIGN_ON_BUMP = 1;
+	public static int ALIGNING      = 2;
+	public static int ALIGNED       = 3;
+	private int state = STOP_ON_BUMP;
+
 	protected boolean firstUpdate = true;
 
-	public Subscriber<org.ros.message.rss_msgs.SonarMsg> sonarFrontSub;
-	public Subscriber<org.ros.message.rss_msgs.SonarMsg> sonarBackSub;
-	public Subscriber<org.ros.message.rss_msgs.OdometryMsg> odoSub;
+	private boolean bumpLeft = false;
+	private boolean bumpRight = false;
+
+	private double sonarFront = 0.0;
+	private double sonarBack = 0.0;
+
+	private static double transSlow = 1;
+	private static double rotSlow = 1;
+
+	private Subscriber<org.ros.message.rss_msgs.SonarMsg> sonarFrontSub;
+	private Subscriber<org.ros.message.rss_msgs.SonarMsg> sonarBackSub;
+	private Subscriber<org.ros.message.rss_msgs.OdometryMsg> odoSub;
+
+	private Publisher<MotionMsg> motorPub;
+	private MotionMsg commandMotors;
+
+	private Publisher<org.ros.message.std_msgs.String> statePub;
+	private ors.ros.message.std_msgs.String stateMsg;
+
 	/**
 	 * <p>Create a new LocalNavigation object.</p>
 	 */
@@ -59,8 +78,10 @@ public class VisualServo implements NodeMain, Runnable{
 		String sensor = new String();
 		if (message.isFront) {
 			sensor = "Front";
+			sonarFront = message.range;
 		} else {
 			sensor = "Back";
+			sonarBack = message.range;
 		}
 		logNode.getLog().info("SONAR: Sensor: " + sensor + " Range: " message.range);
 	}
@@ -71,6 +92,8 @@ public class VisualServo implements NodeMain, Runnable{
 	 * @param the message
 	 */
 	public void handleBump(org.ros.message.rss_msgs.BumpMsg message) {
+		bumpLeft = message.left;
+		bumpRight = message.right;
 		logNode.getLog().info("BUMP: Left: " + message.left + " Right: " message.right);
 	}
 	
@@ -82,11 +105,38 @@ public class VisualServo implements NodeMain, Runnable{
 				gui.setVisionImage(dest.toArray(), width, height);
 			}
 
-			// publish velocity messages to move the robot
-			commandMotors.rotationalVelocity = 0; //TODO
-			commandMotors.translationalVelocity = 0; //TODO
+			if (state == STOP_ON_BUMP) {
+				if (bumpLeft || bumpRight) {
+					commandMotors.rotationalVelocity = 0;
+					commandMotors.translationalVelocity = 0;
+				} else {
+					commandMotors.rotationalVelocity = 0;
+					commandMotors.translationalVelocity = transSlow;
+				}
+			} else if (state == ALIGN_ON_BUMP || state == ALIGNING) {
+				if (state == ALIGN_ON_BUMP && (bumpLeft || bumpRight)) {
+					changeState(ALIGNING);
+				}
+				if (state == ALIGNING) {
+					if (bumpLeft && bumpRight) {
+						commandMotors.rotationalVelocity = 0;
+						commandMotors.translationalVelocity = 0;
+						changeState(ALIGNED);
+					} else if (bumpLeft) {
+						commandMotors.rotationalVelocity = rotSlow;
+						commandMotors.translationalVelocity = 0;
+					} else if (bumpRight) {
+						commandMotors.rotationalVelocity = -1 * rotSlow;
+						commandMotors.translationalVelocity = 0;
+					} else {
+						commandMotors.rotationalVelocity = 0;
+						commandMotors.translationalVelocity = transSlow;
+					}
+				}
+			}
 
-			k.publish(commandMotors);
+			// publish velocity messages to move the robot
+			motorPub.publish(commandMotors);
 		}
 	}
 
@@ -101,10 +151,6 @@ public class VisualServo implements NodeMain, Runnable{
 	@Override
 	public void onStart(Node node) {
 		logNode = node;
-
-		// initialize the ROS publication to command/Motors
-		k = node.newPublisher("/command/Motors","rss_msgs/MotionMsg");
-		commandMotors = new MotionMsg();
 
 		// initialize the ROS subscriptions to rss/Sonars
 		sonarFrontSub = node.newSubscriber("/rss/Sonars/Front", "rss_msgs/SonarMsg");
@@ -148,6 +194,15 @@ public class VisualServo implements NodeMain, Runnable{
 					}
 				}
 			});
+
+		// initialize the ROS publication to command/Motors
+		motorPub = node.newPublisher("/command/Motors","rss_msgs/MotionMsg");
+		commandMotors = new MotionMsg();
+
+		// initialize the ROS publication to rss/state
+		statePub = node.newPublisher("/rss/state","std_msgs/String");
+		stateMsg = new org.ros.message.std_msgs.String();
+
 		Thread runningStuff = new Thread(this);
 		runningStuff.start();
 	}
@@ -166,5 +221,20 @@ public class VisualServo implements NodeMain, Runnable{
 	@Override
 	public GraphName getDefaultNodeName() {
 		return new GraphName("rss/localnavigation");
+	}
+
+	private void changeState(int newState) {
+		state = newState;
+		if (state == STOP_ON_BUMP) {
+			statePub.publish("STOP_ON_BUMP");
+		} else if (state == ALIGN_ON_BUMP) {
+			statePub.publish("ALIGN_ON_BUMP");
+		} else if (state == ALIGNING) {
+			statePub.publish("ALIGNING");
+		} else if (state == ALIGNED) {
+			statePub.publish("ALIGNED");
+		} else {
+			statePub.publish("ERROR: unknown state");
+		}
 	}
 }
