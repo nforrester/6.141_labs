@@ -1,0 +1,12 @@
+For Bumpsensors
+
+topic to subscribe to -----   /rss/BumpSensors
+messageType ------    rss_msgs/BumpMsg
+
+
+For sonar 
+
+topic to subscribe to -----  /rss/Sonars/Front
+      	 	      ----  /rss/Sonars/Back
+
+Message type  -----    rss_msgs/SonarMsg
