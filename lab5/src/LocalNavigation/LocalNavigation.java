@@ -129,20 +129,19 @@ public class VisualServo implements NodeMain, Runnable{
 		// initialize the ROS subscription to rss/odometry
 		odoSub = node.newSubscriber("/rss/odometry", "rss_msgs/OdometryMsg");
 		odoSub.addMessageListener(new MessageListener<org.ros.message.rss_msgs.OdometryMsg>() {
-			@Override
-			public void onNewMessage(org.ros.message.rss_msgs.OdometryMsg message) {
-				if ( firstUpdate ) {
-					firstUpdate = false;
+				@Override
+				public void onNewMessage(org.ros.message.rss_msgs.OdometryMsg message) {
+					if ( firstUpdate ) {
+						firstUpdate = false;
+						if (RUN_SONAR_GUI) {
+							gui.resetWorldToView(message.x, message.y);
+						}
+					}
 					if (RUN_SONAR_GUI) {
-						gui.resetWorldToView(message.x, message.y);
+						gui.setRobotPose(message.x, message.y, message.theta);
 					}
 				}
-				if (RUN_SONAR_GUI) {
-					gui.setRobotPose(message.x, message.y, message.theta);
-				}
-			}
-		}
-				);
+			});
 		Thread runningStuff = new Thread(this);
 		runningStuff.start();
 	}
@@ -160,6 +159,6 @@ public class VisualServo implements NodeMain, Runnable{
 
 	@Override
 	public GraphName getDefaultNodeName() {
-		return new GraphName("rss/visualservo");
+		return new GraphName("rss/localnavigation");
 	}
 }
