@@ -24,6 +24,8 @@ public class VisualServo implements NodeMain, Runnable{
 	private MotionMsg commandMotors;
 	private Publisher<MotionMsg> k;
 
+	private Node logNode;
+
 	private static boolean RUN_SONAR_GUI = true;
 	private SonarGUI gui;
 
@@ -54,9 +56,13 @@ public class VisualServo implements NodeMain, Runnable{
 	 * @param the message
 	 */
 	public void handleSonar(org.ros.message.rss_msgs.SonarMsg message) {
-		//TODO: some shit here
-		// message.isFront
-		// message.range
+		String sensor = new String();
+		if (message.isFront) {
+			sensor = "Front";
+		} else {
+			sensor = "Back";
+		}
+		logNode.getLog().info("SONAR: Sensor: " + sensor + " Range: " message.range);
 	}
 	
 	/**
@@ -65,9 +71,7 @@ public class VisualServo implements NodeMain, Runnable{
 	 * @param the message
 	 */
 	public void handleBump(org.ros.message.rss_msgs.BumpMsg message) {
-		//TODO: some shit here
-		// message.left
-		// message.right
+		logNode.getLog().info("BUMP: Left: " + message.left + " Right: " message.right);
 	}
 	
 	@Override
@@ -96,6 +100,8 @@ public class VisualServo implements NodeMain, Runnable{
 	 */
 	@Override
 	public void onStart(Node node) {
+		logNode = node;
+
 		// initialize the ROS publication to command/Motors
 		k = node.newPublisher("/command/Motors","rss_msgs/MotionMsg");
 		commandMotors = new MotionMsg();
