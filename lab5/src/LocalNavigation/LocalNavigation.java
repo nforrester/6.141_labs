@@ -60,12 +60,11 @@ public class VisualServo implements NodeMain, Runnable{
 	@Override
 	public void run() {
 		while (true) {
-
 			Image src = null;
 			try {
-			src = new Image(visionImage.take(), width, height);
+				src = new Image(visionImage.take(), width, height);
 			} catch (InterruptedException e) {
-			e.printStackTrace();
+				e.printStackTrace();
 			}
 			Pixel p = src.getPixel(width/2, height/2);
 
@@ -88,41 +87,13 @@ public class VisualServo implements NodeMain, Runnable{
 			blobTrack.log_node.getLog().info("D: " + sensorData[0] + " X: " + sensorData[1] + " Y: " + sensorData[2]);
 
 			if (RUN_SONAR_GUI) {
-			    // update newly formed vision message
-			    gui.setVisionImage(dest.toArray(), width, height);
+				// update newly formed vision message
+				gui.setVisionImage(dest.toArray(), width, height);
 			}
 
-
-
-			/*Lab 4 Part 9 implemented by Daniel Gonzalez [dgonz@mit.edu]
-			* -Assuming blobFix returns {range,bearing} of units {[m],[radians]}
-			* --Assuming positive blob bearing means blob is to the left of the robot
-			*/
-
-
-
-
-
-			//PD control of heading		    
-			headingError=headingDesired-sensorData[1];
-			headingOutput=headingKp*headingError+headingKd*(headingError-headingErrorOld);
-
-			//PD control of distance
-			distanceError=sensorData[0]-distanceDesired;
-			distanceOutput=distanceKp*distanceError+distanceKd*(distanceError-distanceErrorOld);
-
-			// publish velocity messages to move the robot towards the target
-			commandMotors.rotationalVelocity =headingOutput;
-			commandMotors.translationalVelocity =distanceOutput;
-
-			//update variables for the next step
-			headingErrorOld=headingError;
-			distanceErrorOld=distanceError;
-			/*
-			* To Do:
-			* -Determine distanceKp, distanceKd, headingKp, headingKd via experimentation. 
-			* -do ROS stuff
-			*/
+			// publish velocity messages to move the robot
+			commandMotors.rotationalVelocity = 0; //TODO
+			commandMotors.translationalVelocity = 0; //TODO
 
 			k.publish(commandMotors);
 
