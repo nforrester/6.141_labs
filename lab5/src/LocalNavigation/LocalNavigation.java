@@ -18,7 +18,7 @@ import MotorControlSolution.*;
  * @author previous TA's, prentice, vona, nforrest, raga, wyken, dgonz
  *
  */
-public class VisualServo implements NodeMain, Runnable{
+public class LocalNavigation implements NodeMain, Runnable{
 	protected RobotVelocityController robotVelocityController;
 
 	private Node logNode;
@@ -83,7 +83,7 @@ public class VisualServo implements NodeMain, Runnable{
 			sensor = "Back";
 			sonarBack = message.range;
 		}
-		logNode.getLog().info("SONAR: Sensor: " + sensor + " Range: " message.range);
+		logNode.getLog().info("SONAR: Sensor: " + sensor + " Range: " + message.range);
 	}
 	
 	/**
@@ -94,7 +94,7 @@ public class VisualServo implements NodeMain, Runnable{
 	public void handleBump(org.ros.message.rss_msgs.BumpMsg message) {
 		bumpLeft = message.left;
 		bumpRight = message.right;
-		logNode.getLog().info("BUMP: Left: " + message.left + " Right: " message.right);
+		logNode.getLog().info("BUMP: Left: " + message.left + " Right: " + message.right);
 	}
 	
 	@Override
@@ -102,7 +102,7 @@ public class VisualServo implements NodeMain, Runnable{
 		while (true) {
 			if (RUN_SONAR_GUI) {
 				//TODO: Change this approprately to update gui however necessary
-				gui.setVisionImage(dest.toArray(), width, height);
+				//gui.setVisionImage(dest.toArray(), width, height);
 			}
 
 			if (state == STOP_ON_BUMP) {
