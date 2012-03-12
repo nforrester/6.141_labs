@@ -60,34 +60,8 @@ public class VisualServo implements NodeMain, Runnable{
 	@Override
 	public void run() {
 		while (true) {
-			Image src = null;
-			try {
-				src = new Image(visionImage.take(), width, height);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			Pixel p = src.getPixel(width/2, height/2);
-
-			Image dest = new Image(src.toArray(), width, height);
-			//blobTrack.apply(src, dest);
-			//blobTrack.classify(src, dest);
-
-			//blobTrack.blobTracking(src, dest);
-			//blobTrack.setRedThreshold(100);
-			//blobTrack.setGreenThreshold(80);
-			//blobTrack.setBlueThreshold(80);
-
-
-			// Begin Student Code
-			//Acquire sensor feedback data
-			blobTrack.log_node.getLog().info("R: " + p.getRed() + "G: " + p.getGreen() + "B: " + p.getBlue());
-			blobTrack.log_node.getLog().info("H: " + p.getHue() + "S: " + p.getSaturation() + "B: " + p.getBrightness());
-			double sensorData[]=blobFix(blobTrack.blobPresent(src,dest));
-
-			blobTrack.log_node.getLog().info("D: " + sensorData[0] + " X: " + sensorData[1] + " Y: " + sensorData[2]);
-
 			if (RUN_SONAR_GUI) {
-				// update newly formed vision message
+				//TODO: Change this approprately to update gui however necessary
 				gui.setVisionImage(dest.toArray(), width, height);
 			}
 
@@ -96,14 +70,12 @@ public class VisualServo implements NodeMain, Runnable{
 			commandMotors.translationalVelocity = 0; //TODO
 
 			k.publish(commandMotors);
-
-			// End Student Code
 		}
 	}
 
 	/**
 	 * <p>
-	 * Run the VisualServo process
+	 * Run the LocalNavigation process
 	 * </p>
 	 * 
 	 * @param optional
@@ -111,9 +83,7 @@ public class VisualServo implements NodeMain, Runnable{
 	 */
 	@Override
 	public void onStart(Node node) {
-		blobTrack = new BlobTracking(width, height);
-		blobTrack.log_node = node;
-		k= node.newPublisher("/command/Motors","rss_msgs/MotionMsg");
+		k = node.newPublisher("/command/Motors","rss_msgs/MotionMsg");
 		commandMotors = new MotionMsg();
 
 		// Begin Student CMotionMsg;ode
