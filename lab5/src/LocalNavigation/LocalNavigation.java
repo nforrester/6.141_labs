@@ -162,7 +162,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 				}
 			});
 
-		sonarBackSub = node.newSubscriber("/rss/Sonars/Front", "rss_msgs/SonarMsg");
+		sonarBackSub = node.newSubscriber("/rss/Sonars/Back", "rss_msgs/SonarMsg");
 		sonarBackSub.addMessageListener(new MessageListener<org.ros.message.rss_msgs.SonarMsg>() {
 				@Override
 				public void onNewMessage(org.ros.message.rss_msgs.SonarMsg message) {
