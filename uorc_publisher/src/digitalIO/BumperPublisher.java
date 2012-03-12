@@ -1,6 +1,7 @@
 package digitalIO;
 
 import orc.AnalogInput;
+import orc.DigitalInput;
 import orc.Orc;
 
 import org.ros.message.rss_msgs.BumpMsg;
@@ -17,17 +18,16 @@ public class BumperPublisher implements Runnable {
 	
 	private Node node;
 	private Orc orc;
-	private AnalogInput left;
-	private AnalogInput right;
+	private DigitalInput left;
+	private DigitalInput right;
 	private BumpMsg msg;
 	private Publisher<BumpMsg> pub;
-	private double epsilon = .01;
 	
 	public BumperPublisher(Node node, Orc orc){
 		this.node = node;
 		this.orc = orc;
-		left = new AnalogInput(orc, 0);
-		right = new AnalogInput(orc, 1);
+		left = new DigitalInput(orc, 0, true, true);
+		right = new DigitalInput(orc, 1, true, true);
 		pub = node.newPublisher(BUMP_CHANNEL, BUMP_MSG);
 	}
 	
@@ -35,10 +35,8 @@ public class BumperPublisher implements Runnable {
 	public void run() {
 		msg = new BumpMsg();
 		while(true){
-			double leftVal = left.getVoltage();
-			double rightVal = right.getVoltage();
-			msg.left = (leftVal < epsilon );
-			msg.right = (rightVal < epsilon);
+			msg.left = left.getValue();
+			msg.right = right.getValue();
 			pub.publish(msg);
 			try {
 				Thread.sleep(50);

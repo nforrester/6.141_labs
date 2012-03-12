@@ -49,9 +49,24 @@ public class ServoListener implements MessageListener<ArmMsg>{
 		long bigPWM = msg.pwms[0];
 		long wristPWM = msg.pwms[1];
 		long gripperPWM = msg.pwms[2];
-		bigServo.setPulseWidth((int) bigPWM);
-		gripperServo.setPulseWidth((int)gripperPWM);
-		wristServo.setPulseWidth((int) wristPWM);
+		if(bigPWM == 0){
+			bigServo.idle();
+		} else{
+			bigServo.setPulseWidth((int) bigPWM);
+		} 
+		
+		if (wristPWM == 0){
+			wristServo.idle();
+		} else {
+			wristServo.setPulseWidth((int) wristPWM);
+		}
+		
+		if (gripperPWM == 0){
+			gripperServo.idle();
+		} else {
+			gripperServo.setPulseWidth((int)gripperPWM);
+		}
+		
 		this.armThreadBase.update(msg);
 		//System.out.println("got servo message: " + bigPWM + ", " + gripperPWM + ", " + wristPWM);
 	}
