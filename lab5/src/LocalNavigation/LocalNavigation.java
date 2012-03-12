@@ -11,7 +11,7 @@ import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
-import MotorControlSolution.*;
+import VisualServo.VisionGUI;
 
 /**
  * 
@@ -19,12 +19,10 @@ import MotorControlSolution.*;
  *
  */
 public class LocalNavigation implements NodeMain, Runnable{
-	protected RobotVelocityController robotVelocityController;
-
 	private Node logNode;
 
 	private static boolean RUN_SONAR_GUI = true;
-	private SonarGUI gui;
+	public SonarGUI gui;
 
 	public static int STOP_ON_BUMP  = 0;
 	public static int ALIGN_ON_BUMP = 1;
@@ -45,13 +43,14 @@ public class LocalNavigation implements NodeMain, Runnable{
 
 	private Subscriber<org.ros.message.rss_msgs.SonarMsg> sonarFrontSub;
 	private Subscriber<org.ros.message.rss_msgs.SonarMsg> sonarBackSub;
+	private Subscriber<org.ros.message.rss_msgs.BumpMsg> bumpSub;
 	private Subscriber<org.ros.message.rss_msgs.OdometryMsg> odoSub;
 
 	private Publisher<MotionMsg> motorPub;
 	private MotionMsg commandMotors;
 
 	private Publisher<org.ros.message.std_msgs.String> statePub;
-	private ors.ros.message.std_msgs.String stateMsg;
+	private org.ros.message.std_msgs.String stateMsg;
 
 	/**
 	 * <p>Create a new LocalNavigation object.</p>
@@ -62,6 +61,8 @@ public class LocalNavigation implements NodeMain, Runnable{
 
 		if (RUN_SONAR_GUI) {
 			gui = new SonarGUI();
+			gui.resetWorldToView(1.0,1.0,1.0);
+			gui.funfun();
 		}
 	}
 	
@@ -170,8 +171,8 @@ public class LocalNavigation implements NodeMain, Runnable{
 			});
 
 		// initialize the ROS subscription to rss/BumpSensors
-		sonarBackSub = node.newSubscriber("/rss/BumpSensors", "rss_msgs/BumpMsg");
-		sonarBackSub.addMessageListener(new MessageListener<org.ros.message.rss_msgs.BumpMsg>() {
+		bumpSub = node.newSubscriber("/rss/BumpSensors", "rss_msgs/BumpMsg");
+		bumpSub.addMessageListener(new MessageListener<org.ros.message.rss_msgs.BumpMsg>() {
 				@Override
 				public void onNewMessage(org.ros.message.rss_msgs.BumpMsg message) {
 					handleBump(message);
@@ -226,15 +227,16 @@ public class LocalNavigation implements NodeMain, Runnable{
 	private void changeState(int newState) {
 		state = newState;
 		if (state == STOP_ON_BUMP) {
-			statePub.publish("STOP_ON_BUMP");
+			stateMsg.data = "STOP_ON_BUMP";
 		} else if (state == ALIGN_ON_BUMP) {
-			statePub.publish("ALIGN_ON_BUMP");
+			stateMsg.data = "ALIGN_ON_BUMP";
 		} else if (state == ALIGNING) {
-			statePub.publish("ALIGNING");
+			stateMsg.data = "ALIGNING";
 		} else if (state == ALIGNED) {
-			statePub.publish("ALIGNED");
+			stateMsg.data = "ALIGNED";
 		} else {
-			statePub.publish("ERROR: unknown state");
+			stateMsg.data = "ERROR: unknown state";
 		}
+		statePub.publish(stateMsg);
 	}
 }

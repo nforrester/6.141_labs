@@ -734,4 +734,7 @@ public class SonarGUI extends VisionGUI {
     Thread.sleep(1000);
     eraseLine();
   }
+
+  public void funfun() {
+  }
 }
