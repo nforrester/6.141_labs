@@ -51,14 +51,24 @@ public class VisualServo implements NodeMain, Runnable{
 	/**
 	 * <p>Handle a SonarMsg.</p>
 	 * 
-	 * @param some shit
+	 * @param the message
 	 */
 	public void handleSonar(org.ros.message.rss_msgs.SonarMsg message) {
 		//TODO: some shit here
 		// message.isFront
 		// message.range
 	}
-
+	
+	/**
+	 * <p>Handle a BumpMsg.</p>
+	 * 
+	 * @param the message
+	 */
+	public void handleBump(org.ros.message.rss_msgs.BumpMsg message) {
+		//TODO: some shit here
+		// message.left
+		// message.right
+	}
 	
 	@Override
 	public void run() {
@@ -107,6 +117,16 @@ public class VisualServo implements NodeMain, Runnable{
 				}
 			});
 
+		// initialize the ROS subscription to rss/BumpSensors
+		sonarBackSub = node.newSubscriber("/rss/BumpSensors", "rss_msgs/BumpMsg");
+		sonarBackSub.addMessageListener(new MessageListener<org.ros.message.rss_msgs.BumpMsg>() {
+				@Override
+				public void onNewMessage(org.ros.message.rss_msgs.BumpMsg message) {
+					handleBump(message);
+				}
+			});
+
+		// initialize the ROS subscription to rss/odometry
 		odoSub = node.newSubscriber("/rss/odometry", "rss_msgs/OdometryMsg");
 		odoSub.addMessageListener(new MessageListener<org.ros.message.rss_msgs.OdometryMsg>() {
 			@Override
