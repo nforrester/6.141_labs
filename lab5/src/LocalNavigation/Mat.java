@@ -83,6 +83,10 @@ public class Mat {
 	/**
 	 * <p>Encode a pose matrix</p>
 	 */
+	public static Mat encodePose(double[] pose) {
+		return encodePose(pose[0], pose[1], pose[2]);
+	}
+	
 	public static Mat encodePose(double x, double y, double theta) {
 		Mat pose = new Mat(4, 1);
 		pose.data[0][0] = x;
