@@ -55,6 +55,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 	private Subscriber<org.ros.message.rss_msgs.OdometryMsg> odoSub;
 
 	private Publisher<MotionMsg> motorPub;
+	private Publisher<GUIPointMsg> pointPub;
 	private MotionMsg commandMotors;
 
 	private Publisher<org.ros.message.std_msgs.String> statePub;
@@ -84,13 +85,26 @@ public class LocalNavigation implements NodeMain, Runnable{
 	 * @param the message
 	 */
 	public void handleSonar(org.ros.message.rss_msgs.SonarMsg message) {
-		String sensor = new String();
+		String sensor = new String();		
 		if (message.isFront) {
 			sensor = "Front";
 			sonarFront = message.range;
+			double pingX=x-(.1016)*Math.cos(theta)-(message.range+.2286)*Math.cos(theta+Math.PI/2);
+			double pingY=y+(.1016)*Math.sin(theta)+(message.range+.2286)*Math.sin(theta+Math.PI/2);
+			org.ros.message.lab5_msgs.GUIPointMsg myMessage;
+			myMessage.x=pingX;
+			myMessage.y=pingY;
+			myMessage.shape=1;
+			
 		} else {
 			sensor = "Back";
 			sonarBack = message.range;
+			double pingX=x+(.254)*Math.cos(theta)-(message.range+.2286)*Math.cos(theta+Math.PI/2);
+			double pingY=y-(.254)*Math.sin(theta)+(message.range+.2286)*Math.sin(theta+Math.PI/2);
+			org.ros.message.lab5_msgs.GUIPointMsg myMessage;
+			myMessage.x=pingX;
+			myMessage.y=pingY;
+			myMessage.shape=2;
 		}
 		logNode.getLog().info("SONAR: Sensor: " + sensor + " Range: " + message.range);
 	}
@@ -270,6 +284,9 @@ public class LocalNavigation implements NodeMain, Runnable{
 		// initialize the ROS publication to command/Motors
 		motorPub = node.newPublisher("/command/Motors","rss_msgs/MotionMsg");
 		commandMotors = new MotionMsg();
+		
+		// initialize the ROS publication to graph points
+		pointPub = node.newPublisher("/gui/Point","lab5_msgs/GUIPointMsg");
 
 		// initialize the ROS publication to rss/state
 		statePub = node.newPublisher("/rss/state","std_msgs/String");
