@@ -180,7 +180,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 		return rot;
 	}
 
-	public double[][] matrixMultiply(double[][]mA, double[][]mB) {
+	public double[][] matrixMultiply(double[][] mA, double[][] mB) {
 		int hA = mA.length;
 		int wA = mA[0].length;
 
