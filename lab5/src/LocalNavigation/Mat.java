@@ -36,7 +36,7 @@ public class Mat {
 	/**
 	 * <p>Print a matrix</p>
 	 */
-	public static void print(Mat m) {
+	public static Mat print(Mat m) {
 		System.out.println("(" + m.rows + " " + m.columns + ")");
 
 		int row;
@@ -57,6 +57,8 @@ public class Mat {
 				System.out.println(" ]");
 			}
 		}
+
+		return m;
 	}
 
 	/**

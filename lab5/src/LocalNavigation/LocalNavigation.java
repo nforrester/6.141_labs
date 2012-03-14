@@ -36,19 +36,32 @@ public class LocalNavigation implements NodeMain, Runnable{
 	private boolean bumpLeft = false;
 	private boolean bumpRight = false;
 
-	private double sonarFront = 0.0;
-	private double sonarBack = 0.0;
-
 	private static double transSlow = 1;
 	private static double rotSlow = 1;
 
-	// x, y, and theta record the robot's current position in the robot's frame of reference.
-	private double x;
-	private double y;
-	private double theta;
-	
-	// transforms between odometry and robot frames
-	private Mat coordinateTransformMatrix;
+	/* Frames of reference:
+	 *
+	 * World frame: Relative to the robot's starting position, x front, y left, theta up
+	 * Robot frame: Relative to the robot right now, x front, y left, theta up
+	 * Sonar frame: Relative to the sonar, x points along the sonar axis, y left, theta up
+	 * Odometry frame: Whatever stupid frame of reference the odometry module uses
+	 */
+
+	// x, y, and theta record the robot's current position in the world frame
+	private double x;     // continuously updated in handleOdometry
+	private double y;     // continuously updated in handleOdometry
+	private double theta; // continuously updated in handleOdometry
+
+	// transforms between odometry and world frames
+	private Mat odoToWorld; // initialized in handleOdometry
+
+	// transforms between robot and world frames
+	private Mat robotToWorld; // continuously updated in handleOdometry
+
+	// transforms between sonar and robot frames
+	private static final Mat sonarToRobotRot = Mat.rotation(Math.PI / 2);
+	private static final Mat sonarFrontToRobot = Mat.multiply(Mat.translation( 0.1016, 0.2286), sonarToRobotRot);
+	private static final Mat sonarBackToRobot  = Mat.multiply(Mat.translation(-0.2540, 0.2286), sonarToRobotRot);
 
 	private Subscriber<org.ros.message.rss_msgs.SonarMsg> sonarFrontSub;
 	private Subscriber<org.ros.message.rss_msgs.SonarMsg> sonarBackSub;
@@ -88,27 +101,23 @@ public class LocalNavigation implements NodeMain, Runnable{
 	 */
 	public void handleSonar(org.ros.message.rss_msgs.SonarMsg message) {
 		String sensor = new String();		
+
+		Mat sonarToWorld;
+
 		if (message.isFront) {
 			sensor = "Front";
-			double kVoltsToMeters=1;
-			sonarFront =kVoltsToMeters* message.range;
-			double pingX=x-(.1016)*Math.cos(theta)-(message.range+.2286)*Math.cos(theta+Math.PI/2);
-			double pingY=y+(.1016)*Math.sin(theta)+(message.range+.2286)*Math.sin(theta+Math.PI/2);
-			//pointPlot.x=pingX;
-			pointPlot.x=sonarFront;
-			pointPlot.y=pingY;
-			pointPlot.shape=0;
+			sonarToWorld = Mat.multiply(robotToWorld, sonarFrontToRobot);
+			pointPlot.shape = 0;
 			
 		} else {
 			sensor = "Back";
-			sonarBack = message.range;
-			double pingX=x+(.254)*Math.cos(theta)-(message.range+.2286)*Math.cos(theta+Math.PI/2);
-			double pingY=y-(.254)*Math.sin(theta)+(message.range+.2286)*Math.sin(theta+Math.PI/2);
-			//pointPlot.x=pingX;
-			pointPlot.x=sonarBack;
-			pointPlot.y=pingY;
-			pointPlot.shape=1;
+			sonarToWorld  = Mat.multiply(robotToWorld, sonarBackToRobot);
+			pointPlot.shape = 1;
 		}
+
+		double[] echoWorld = Mat.decodePose(Mat.multiply(sonarToWorld, Mat.encodePose(message.range, 0, 0)));
+		pointPlot.x = echoWorld[0];
+		pointPlot.y = echoWorld[1];
 		pointPub.publish(pointPlot);
 		logNode.getLog().info("SONAR: Sensor: " + sensor + " Range: " + message.range);
 	}
@@ -124,6 +133,35 @@ public class LocalNavigation implements NodeMain, Runnable{
 		logNode.getLog().info("BUMP: Left: " + message.left + " Right: " + message.right);
 	}
 	
+	/**
+	 * <p>Handle an OdometryMsg.</p>
+	 * 
+	 * @param the message
+	 */
+	public void handleOdometry(org.ros.message.rss_msgs.OdometryMsg message) {
+		if ( firstUpdate ) {
+			firstUpdate = false;
+
+			odoToWorld = Mat.multiply(Mat.rotation(-message.theta), Mat.translation(-message.x, -message.y));
+
+			if (RUN_SONAR_GUI) {
+				gui.resetWorldToView(0, 0);
+			}
+		}
+
+		double[] robotPose = Mat.decodePose(Mat.multiply(odoToWorld, Mat.encodePose(message.x, message.y, message.theta)));
+
+		x     = robotPose[0];
+		y     = robotPose[1];
+		theta = robotPose[2];
+
+		robotToWorld = Mat.multiply(Mat.translation(x, y), Mat.rotation(theta));
+
+		if (RUN_SONAR_GUI) {
+			gui.setRobotPose(x, y, theta);
+		}
+	}
+
 	@Override
 	public void run() {
 		while (true) {
@@ -210,28 +248,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 		odoSub.addMessageListener(new MessageListener<org.ros.message.rss_msgs.OdometryMsg>() {
 				@Override
 				public void onNewMessage(org.ros.message.rss_msgs.OdometryMsg message) {
-					if ( firstUpdate ) {
-						firstUpdate = false;
-
-						Mat trans = Mat.translation(-message.x, -message.y);
-						Mat rot = Mat.rotation(-message.theta);
-
-						coordinateTransformMatrix = Mat.multiply(rot, trans);
-
-						if (RUN_SONAR_GUI) {
-							gui.resetWorldToView(0, 0);
-						}
-					}
-
-					double[] robotPose = Mat.decodePose(Mat.multiply(coordinateTransformMatrix, Mat.encodePose(message.x, message.y, message.theta)));
-
-					x     = robotPose[0];
-					y     = robotPose[1];
-					theta = robotPose[2];
-
-					if (RUN_SONAR_GUI) {
-						gui.setRobotPose(x, y, theta);
-					}
+					handleOdometry(message);
 				}
 			});
 
