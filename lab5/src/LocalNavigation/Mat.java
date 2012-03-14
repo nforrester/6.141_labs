@@ -84,7 +84,7 @@ public class Mat {
 	 * <p>Encode a pose matrix</p>
 	 */
 	public static Mat encodePose(double x, double y, double theta) {
-		pose = new Mat(4, 1);
+		Mat pose = new Mat(4, 1);
 		pose.data[0][0] = x;
 		pose.data[1][0] = y;
 		pose.data[2][0] = theta;
