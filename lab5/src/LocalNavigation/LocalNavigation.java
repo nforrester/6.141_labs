@@ -58,6 +58,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 	private Publisher<MotionMsg> motorPub;
 	private Publisher<GUIPointMsg> pointPub;
 	private MotionMsg commandMotors;
+	private GUIPointMsg pointPlot;
 
 	private Publisher<org.ros.message.std_msgs.String> statePub;
 	private org.ros.message.std_msgs.String stateMsg;
@@ -92,10 +93,9 @@ public class LocalNavigation implements NodeMain, Runnable{
 			sonarFront = message.range;
 			double pingX=x-(.1016)*Math.cos(theta)-(message.range+.2286)*Math.cos(theta+Math.PI/2);
 			double pingY=y+(.1016)*Math.sin(theta)+(message.range+.2286)*Math.sin(theta+Math.PI/2);
-			org.ros.message.lab5_msgs.GUIPointMsg myMessage;
-			myMessage.x=pingX;
-			myMessage.y=pingY;
-			myMessage.shape=1;
+			pointPlot.x=pingX;
+			pointPlot.y=pingY;
+			pointPlot.shape=1;
 			
 		} else {
 			sensor = "Back";
@@ -103,9 +103,9 @@ public class LocalNavigation implements NodeMain, Runnable{
 			double pingX=x+(.254)*Math.cos(theta)-(message.range+.2286)*Math.cos(theta+Math.PI/2);
 			double pingY=y-(.254)*Math.sin(theta)+(message.range+.2286)*Math.sin(theta+Math.PI/2);
 			org.ros.message.lab5_msgs.GUIPointMsg myMessage;
-			myMessage.x=pingX;
-			myMessage.y=pingY;
-			myMessage.shape=2;
+			pointPlot.x=pingX;
+			pointPlot.y=pingY;
+			pointPlot.shape=2;
 		}
 		logNode.getLog().info("SONAR: Sensor: " + sensor + " Range: " + message.range);
 	}
@@ -288,6 +288,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 		
 		// initialize the ROS publication to graph points
 		pointPub = node.newPublisher("/gui/Point","lab5_msgs/GUIPointMsg");
+		pointPlot=new GUIPointMsg();
 
 		// initialize the ROS publication to rss/state
 		statePub = node.newPublisher("/rss/state","std_msgs/String");
