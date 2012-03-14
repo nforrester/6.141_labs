@@ -105,10 +105,10 @@ public class Matrix {
 	 */
 	public static Matrix translation(double x, double y) {
 		Matrix trans = new Matrix(4, 4);
-		trans.data = {{1, 0, 0, x},
-			      {0, 1, 0, y},
-			      {0, 0, 1, 0},
-			      {0, 0, 0, 1}};
+		trans.data = new double[][] {{1, 0, 0, x},
+			                     {0, 1, 0, y},
+               			             {0, 0, 1, 0},
+	               		             {0, 0, 0, 1}};
 		return trans;
 	}
 
@@ -117,10 +117,10 @@ public class Matrix {
 	 */
 	public static Matrix rotation(double theta) {
 		Matrix rot = new Matrix(4, 4);
-		rot.data = {{Math.cos(theta), -Math.sin(theta), 0, 0    },
-			    {Math.sin(theta),  Math.cos(theta), 0, 0    },
-			    {              0,                0, 1, theta},
-			    {              0,                0, 0, 1    }};
+		rot.data = new double[][] {{Math.cos(theta), -Math.sin(theta), 0, 0    },
+			                   {Math.sin(theta),  Math.cos(theta), 0, 0    },
+			                   {              0,                0, 1, theta},
+			                   {              0,                0, 0, 1    }};
 		return rot;
 	}
 
