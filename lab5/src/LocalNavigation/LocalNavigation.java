@@ -90,12 +90,13 @@ public class LocalNavigation implements NodeMain, Runnable{
 		String sensor = new String();		
 		if (message.isFront) {
 			sensor = "Front";
-			sonarFront = message.range;
+			double kVoltsToMeters=5;
+			sonarFront =kVoltsToMeters* message.range;
 			double pingX=x-(.1016)*Math.cos(theta)-(message.range+.2286)*Math.cos(theta+Math.PI/2);
 			double pingY=y+(.1016)*Math.sin(theta)+(message.range+.2286)*Math.sin(theta+Math.PI/2);
 			pointPlot.x=pingX;
 			pointPlot.y=pingY;
-			pointPlot.shape=1;
+			pointPlot.shape=0;
 			
 		} else {
 			sensor = "Back";
@@ -104,7 +105,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 			double pingY=y-(.254)*Math.sin(theta)+(message.range+.2286)*Math.sin(theta+Math.PI/2);
 			pointPlot.x=pingX;
 			pointPlot.y=pingY;
-			pointPlot.shape=2;
+			pointPlot.shape=1;
 		}
 		pointPub.publish(pointPlot);
 		logNode.getLog().info("SONAR: Sensor: " + sensor + " Range: " + message.range);
