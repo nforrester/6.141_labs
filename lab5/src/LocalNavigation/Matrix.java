@@ -96,7 +96,8 @@ public class Matrix {
 		double x     = pose.data[0][0];
 		double y     = pose.data[1][0];
 		double theta = pose.data[2][0];
-		return {x, y, theta};
+		double[] ret = {x, y, theta};
+		return ret;
 	}
 	
 	/**
