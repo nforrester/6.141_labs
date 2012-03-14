@@ -29,7 +29,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 	public static int ALIGN_ON_BUMP = 1;
 	public static int ALIGNING      = 2;
 	public static int ALIGNED       = 3;
-	private int state = STOP_ON_BUMP;
+	private int state = ALIGNED;
 
 	protected boolean firstUpdate = true;
 
@@ -90,11 +90,12 @@ public class LocalNavigation implements NodeMain, Runnable{
 		String sensor = new String();		
 		if (message.isFront) {
 			sensor = "Front";
-			double kVoltsToMeters=5;
+			double kVoltsToMeters=1;
 			sonarFront =kVoltsToMeters* message.range;
 			double pingX=x-(.1016)*Math.cos(theta)-(message.range+.2286)*Math.cos(theta+Math.PI/2);
 			double pingY=y+(.1016)*Math.sin(theta)+(message.range+.2286)*Math.sin(theta+Math.PI/2);
-			pointPlot.x=pingX;
+			//pointPlot.x=pingX;
+			pointPlot.x=sonarFront;
 			pointPlot.y=pingY;
 			pointPlot.shape=0;
 			
@@ -103,7 +104,8 @@ public class LocalNavigation implements NodeMain, Runnable{
 			sonarBack = message.range;
 			double pingX=x+(.254)*Math.cos(theta)-(message.range+.2286)*Math.cos(theta+Math.PI/2);
 			double pingY=y-(.254)*Math.sin(theta)+(message.range+.2286)*Math.sin(theta+Math.PI/2);
-			pointPlot.x=pingX;
+			//pointPlot.x=pingX;
+			pointPlot.x=sonarBack;
 			pointPlot.y=pingY;
 			pointPlot.shape=1;
 		}
