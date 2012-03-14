@@ -149,6 +149,22 @@ public class LocalNavigation implements NodeMain, Runnable{
 		}
 	}
 
+	public double[][] translationMatrix(double x, double y) {
+		double[][] trans = {{1, 0, 0, x},
+				    {0, 1, 0, y},
+				    {0, 0, 1, 0},
+				    {0, 0, 0, 1}};
+		return trans;
+	}
+
+	public double[][] rotationMatrix(double theta) {
+		double[][] rot = {{Math.cos(theta), -Math.sin(theta), 0, 0    },
+				  {Math.sin(theta),  Math.cos(theta), 0, 0    },
+				  {              0,                0, 1, theta},
+				  {              0,                0, 0, 1    }};
+		return rot;
+	}
+
 	public double[][] matrixMultiply(double[][]mA, double[][]mB) {
 		int hA = mA.length;
 		int wA = mA[0].length;
@@ -224,17 +240,10 @@ public class LocalNavigation implements NodeMain, Runnable{
 					if ( firstUpdate ) {
 						firstUpdate = false;
 
-						double[][] translationMatrix = {{1, 0, 0, -message.x},
-						                                {0, 1, 0, -message.y},
-						                                {0, 0, 1,  0        },
-						                                {0, 0, 0,  1        }};
+						double[][] trans = translationMatrix(-message.x, -message.y);
+						double[][] rot = rotationMatrix(-message.theta);
 
-						double[][] rotationMatrix = {{Math.cos(-message.theta), -Math.sin(-message.theta), 0,  0            },
-						                             {Math.sin(-message.theta),  Math.cos(-message.theta), 0,  0            },
-						                             {                       0,                         0, 1, -message.theta},
-						                             {                       0,                         0, 0,  1            }};
-
-						coordinateTransformMatrix = matrixMultiply(rotationMatrix, translationMatrix);
+						coordinateTransformMatrix = matrixMultiply(rot, trans);
 
 						if (RUN_SONAR_GUI) {
 							gui.resetWorldToView(0, 0);
