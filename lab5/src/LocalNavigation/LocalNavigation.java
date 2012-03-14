@@ -102,11 +102,11 @@ public class LocalNavigation implements NodeMain, Runnable{
 			sonarBack = message.range;
 			double pingX=x+(.254)*Math.cos(theta)-(message.range+.2286)*Math.cos(theta+Math.PI/2);
 			double pingY=y-(.254)*Math.sin(theta)+(message.range+.2286)*Math.sin(theta+Math.PI/2);
-			org.ros.message.lab5_msgs.GUIPointMsg myMessage;
 			pointPlot.x=pingX;
 			pointPlot.y=pingY;
 			pointPlot.shape=2;
 		}
+		pointPub.publish(pointPlot);
 		logNode.getLog().info("SONAR: Sensor: " + sensor + " Range: " + message.range);
 	}
 	
