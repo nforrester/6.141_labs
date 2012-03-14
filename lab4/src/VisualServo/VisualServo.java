@@ -13,8 +13,6 @@ import org.ros.node.topic.Subscriber;
 
 import VisualServo.Image.Pixel;
 
-import MotorControlSolution.*;
-
 /**
  * 
  * @author previous TA's, prentice, vona
@@ -40,7 +38,6 @@ public class VisualServo implements NodeMain, Runnable{
     private double headingKd=0.07;
     private double headingOutput=0;
     private double sensorData[]={0,0};
-    protected RobotVelocityController robotVelocityController;
     private MotionMsg commandMotors;
     private Publisher<MotionMsg> k;
 
