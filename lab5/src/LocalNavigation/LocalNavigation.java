@@ -31,13 +31,14 @@ public class LocalNavigation implements NodeMain, Runnable{
 	public static int ALIGNED       = 3;
 	private int state = ALIGNED;
 
+
 	protected boolean firstUpdate = true;
 
 	private boolean bumpLeft = false;
 	private boolean bumpRight = false;
 
-	private static double transSlow = 1;
-	private static double rotSlow = 1;
+	private static double transSlow = 0.05;
+	private static double rotSlow = 0.05;
 
 	/* Frames of reference:
 	 *
@@ -120,6 +121,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 		pointPlot.y = echoWorld[1];
 		pointPub.publish(pointPlot);
 		logNode.getLog().info("SONAR: Sensor: " + sensor + " Range: " + message.range);
+		motorUpdate();
 	}
 	
 	/**
@@ -131,6 +133,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 		bumpLeft = message.left;
 		bumpRight = message.right;
 		logNode.getLog().info("BUMP: Left: " + message.left + " Right: " + message.right);
+		motorUpdate();
 	}
 	
 	/**
@@ -139,6 +142,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 	 * @param the message
 	 */
 	public void handleOdometry(org.ros.message.rss_msgs.OdometryMsg message) {
+		motorUpdate();
 		if ( firstUpdate ) {
 			firstUpdate = false;
 
@@ -162,47 +166,51 @@ public class LocalNavigation implements NodeMain, Runnable{
 		}
 	}
 
-	@Override
-	public void run() {
-		while (true) {
-			if (RUN_SONAR_GUI) {
-				//TODO: Change this approprately to update gui however necessary
-				//gui.setVisionImage(dest.toArray(), width, height);
-			}
+	private void motorUpdate() {
+		if (RUN_SONAR_GUI) {
+			//TODO: Change this approprately to update gui however necessary
+			//gui.setVisionImage(dest.toArray(), width, height);
+		}
 
-			if (state == STOP_ON_BUMP) {
-				if (bumpLeft || bumpRight) {
+		if (state == STOP_ON_BUMP) {
+			if (bumpLeft || bumpRight) {
+				commandMotors.rotationalVelocity = 0;
+				commandMotors.translationalVelocity = 0;
+			} else {
+				commandMotors.rotationalVelocity = 0;
+				commandMotors.translationalVelocity = transSlow;
+			}
+		} else if (state == ALIGN_ON_BUMP || state == ALIGNING) {
+			if (state == ALIGN_ON_BUMP && (bumpLeft || bumpRight)) {
+				changeState(ALIGNING);
+			} else if (state == ALIGN_ON_BUMP) {
+				commandMotors.rotationalVelocity = 0;
+				commandMotors.translationalVelocity = transSlow;
+			}
+			if (state == ALIGNING) {
+				if (bumpLeft && bumpRight) {
 					commandMotors.rotationalVelocity = 0;
+					commandMotors.translationalVelocity = 0;
+					changeState(ALIGNED);
+				} else if (bumpLeft) {
+					commandMotors.rotationalVelocity = rotSlow;
+					commandMotors.translationalVelocity = 0;
+				} else if (bumpRight) {
+					commandMotors.rotationalVelocity = -1 * rotSlow;
 					commandMotors.translationalVelocity = 0;
 				} else {
 					commandMotors.rotationalVelocity = 0;
 					commandMotors.translationalVelocity = transSlow;
 				}
-			} else if (state == ALIGN_ON_BUMP || state == ALIGNING) {
-				if (state == ALIGN_ON_BUMP && (bumpLeft || bumpRight)) {
-					changeState(ALIGNING);
-				}
-				if (state == ALIGNING) {
-					if (bumpLeft && bumpRight) {
-						commandMotors.rotationalVelocity = 0;
-						commandMotors.translationalVelocity = 0;
-						changeState(ALIGNED);
-					} else if (bumpLeft) {
-						commandMotors.rotationalVelocity = rotSlow;
-						commandMotors.translationalVelocity = 0;
-					} else if (bumpRight) {
-						commandMotors.rotationalVelocity = -1 * rotSlow;
-						commandMotors.translationalVelocity = 0;
-					} else {
-						commandMotors.rotationalVelocity = 0;
-						commandMotors.translationalVelocity = transSlow;
-					}
-				}
 			}
-
-			// publish velocity messages to move the robot
-			motorPub.publish(commandMotors);
 		}
+
+		// publish velocity messages to move the robot
+		motorPub.publish(commandMotors);
+	}
+	
+	@Override
+	public void run() {
 	}
 
 	/**
