@@ -48,7 +48,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 	private double theta;
 	
 	// transforms between odometry and robot frames
-	private Matrix coordinateTransformMatrix;
+	private Mat coordinateTransformMatrix;
 
 	private Subscriber<org.ros.message.rss_msgs.SonarMsg> sonarFrontSub;
 	private Subscriber<org.ros.message.rss_msgs.SonarMsg> sonarBackSub;
@@ -210,17 +210,17 @@ public class LocalNavigation implements NodeMain, Runnable{
 					if ( firstUpdate ) {
 						firstUpdate = false;
 
-						Matrix trans = Matrix.translation(-message.x, -message.y);
-						Matrix rot = Matrix.rotation(-message.theta);
+						Mat trans = Mat.translation(-message.x, -message.y);
+						Mat rot = Mat.rotation(-message.theta);
 
-						coordinateTransformMatrix = Matrix.multiply(rot, trans);
+						coordinateTransformMatrix = Mat.multiply(rot, trans);
 
 						if (RUN_SONAR_GUI) {
 							gui.resetWorldToView(0, 0);
 						}
 					}
 
-					double[] robotPose = Matrix.decodePose(Matrix.multiply(coordinateTransformMatrix, Matrix.encodePose(message.x, message.y, message.theta)));
+					double[] robotPose = Mat.decodePose(Mat.multiply(coordinateTransformMatrix, Mat.encodePose(message.x, message.y, message.theta)));
 
 					x     = robotPose[0];
 					y     = robotPose[1];
