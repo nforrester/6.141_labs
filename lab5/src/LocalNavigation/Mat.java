@@ -19,8 +19,6 @@
  *
  */
 
-package LocalNavigation;
-
 public class Mat {
 	public double[][] data;
 	public int rows;
@@ -33,6 +31,32 @@ public class Mat {
 		rows = nrows;
 		columns = ncolumns;
 		data = new double[rows][columns];
+	}
+
+	/**
+	 * <p>Print a matrix</p>
+	 */
+	public static void print(Mat m) {
+		System.out.println("(" + m.rows + " " + m.columns + ")");
+
+		int row;
+		int column;
+
+		for (row = 0; row < m.rows; row++) {
+			if (row == 0) {
+				System.out.print("[");
+			} else {
+				System.out.print(" ");
+			}
+			for (column = 0; column < m.columns; column++) {
+				System.out.print(" " + m.data[row][column]);
+			}
+			if (row != m.rows - 1) {
+				System.out.println("");
+			} else {
+				System.out.println(" ]");
+			}
+		}
 	}
 
 	/**
