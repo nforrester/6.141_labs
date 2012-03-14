@@ -41,6 +41,14 @@ public class LocalNavigation implements NodeMain, Runnable{
 	private static double transSlow = 1;
 	private static double rotSlow = 1;
 
+	// x, y, and theta record the robot's current position in the robot's frame of reference.
+	private double x;
+	private double y;
+	private double theta;
+	
+	// transforms between odometry and robot frames
+	private double[][] coordinateTransformMatrix;
+
 	private Subscriber<org.ros.message.rss_msgs.SonarMsg> sonarFrontSub;
 	private Subscriber<org.ros.message.rss_msgs.SonarMsg> sonarBackSub;
 	private Subscriber<org.ros.message.rss_msgs.BumpMsg> bumpSub;
@@ -141,6 +149,35 @@ public class LocalNavigation implements NodeMain, Runnable{
 		}
 	}
 
+	public double[][] matrixMultiply(double[][]mA, double[][]mB) {
+		int hA = mA.length;
+		int wA = mA[0].length;
+
+		int hB = mB.length;
+		int wB = mB[0].length;
+
+		assert wA == hB;
+
+		double[][]mC = new double[hA][wB];
+
+		int row;
+		int column;
+		int element;
+		double total;
+
+		for (row = 0; row < hA; row++) {
+			for (column = 0; column < wB; column++) {
+				total = 0;
+				for (element = 0; element < wA; element++) {
+					total += mA[row][element] * mB[element][column];
+				}
+				mC[row][column] = total;
+			}
+		}
+
+		return mC;
+	}
+
 	/**
 	 * <p>
 	 * Run the LocalNavigation process
@@ -186,12 +223,37 @@ public class LocalNavigation implements NodeMain, Runnable{
 				public void onNewMessage(org.ros.message.rss_msgs.OdometryMsg message) {
 					if ( firstUpdate ) {
 						firstUpdate = false;
+
+						double[][] translationMatrix = {{1, 0, 0, -message.x},
+						                                {0, 1, 0, -message.y},
+						                                {0, 0, 1,  0        },
+						                                {0, 0, 0,  1        }};
+
+						double[][] rotationMatrix = {{Math.cos(-message.theta), -Math.sin(-message.theta), 0,  0            },
+						                             {Math.sin(-message.theta),  Math.cos(-message.theta), 0,  0            },
+						                             {                       0,                         0, 1, -message.theta},
+						                             {                       0,                         0, 0,  1            }};
+
+						coordinateTransformMatrix = matrixMultiply(rotationMatrix, translationMatrix);
+
 						if (RUN_SONAR_GUI) {
-							gui.resetWorldToView(message.x, message.y);
+							gui.resetWorldToView(0, 0);
 						}
 					}
+
+					double[][] odoPos = {{message.x    },
+					                     {message.y    },
+					                     {message.theta},
+					                     {1            }};
+
+					double[][] robotPos = matrixMultiply(coordinateTransformMatrix, odoPos);
+
+					x     = robotPos[0][0];
+					y     = robotPos[1][0];
+					theta = robotPos[2][0];
+
 					if (RUN_SONAR_GUI) {
-						gui.setRobotPose(message.x, message.y, message.theta);
+						gui.setRobotPose(x, y, theta);
 					}
 				}
 			});
