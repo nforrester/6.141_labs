@@ -177,4 +177,21 @@ public class Mat {
 
 		return mC;
 	}
+	/**
+	 * <p>Multiply a scalar and a matrix</p>
+	 */
+	public static Mat multiply(double a, Mat mB) {
+		Mat mC = new Mat(mB.rows, mB.columns);
+
+		int row;
+		int column;
+
+		for (row = 0; row < mB.rows; row++) {
+			for (column = 0; column < mB.columns; column++) {
+				mC.data[row][column] = a * mB.data[row][column];
+			}
+		}
+
+		return mC;
+	}
 }
