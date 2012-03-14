@@ -48,7 +48,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 	private double theta;
 	
 	// transforms between odometry and robot frames
-	private double[][] coordinateTransformMatrix;
+	private Matrix coordinateTransformMatrix;
 
 	private Subscriber<org.ros.message.rss_msgs.SonarMsg> sonarFrontSub;
 	private Subscriber<org.ros.message.rss_msgs.SonarMsg> sonarBackSub;
@@ -164,51 +164,6 @@ public class LocalNavigation implements NodeMain, Runnable{
 		}
 	}
 
-	public double[][] translationMatrix(double x, double y) {
-		double[][] trans = {{1, 0, 0, x},
-				    {0, 1, 0, y},
-				    {0, 0, 1, 0},
-				    {0, 0, 0, 1}};
-		return trans;
-	}
-
-	public double[][] rotationMatrix(double theta) {
-		double[][] rot = {{Math.cos(theta), -Math.sin(theta), 0, 0    },
-				  {Math.sin(theta),  Math.cos(theta), 0, 0    },
-				  {              0,                0, 1, theta},
-				  {              0,                0, 0, 1    }};
-		return rot;
-	}
-
-	public double[][] matrixMultiply(double[][] mA, double[][] mB) {
-		int hA = mA.length;
-		int wA = mA[0].length;
-
-		int hB = mB.length;
-		int wB = mB[0].length;
-
-		assert wA == hB;
-
-		double[][]mC = new double[hA][wB];
-
-		int row;
-		int column;
-		int element;
-		double total;
-
-		for (row = 0; row < hA; row++) {
-			for (column = 0; column < wB; column++) {
-				total = 0;
-				for (element = 0; element < wA; element++) {
-					total += mA[row][element] * mB[element][column];
-				}
-				mC[row][column] = total;
-			}
-		}
-
-		return mC;
-	}
-
 	/**
 	 * <p>
 	 * Run the LocalNavigation process
@@ -255,26 +210,21 @@ public class LocalNavigation implements NodeMain, Runnable{
 					if ( firstUpdate ) {
 						firstUpdate = false;
 
-						double[][] trans = translationMatrix(-message.x, -message.y);
-						double[][] rot = rotationMatrix(-message.theta);
+						Matrix trans = Matrix.translation(-message.x, -message.y);
+						Matrix rot = Matrix.rotation(-message.theta);
 
-						coordinateTransformMatrix = matrixMultiply(rot, trans);
+						coordinateTransformMatrix = Matrix.multiply(rot, trans);
 
 						if (RUN_SONAR_GUI) {
 							gui.resetWorldToView(0, 0);
 						}
 					}
 
-					double[][] odoPos = {{message.x    },
-					                     {message.y    },
-					                     {message.theta},
-					                     {1            }};
+					double[] robotPose = Matrix.decodePose(Matrix.multiply(coordinateTransformMatrix, Matrix.encodePose(message.x, message.y, message.theta)));
 
-					double[][] robotPos = matrixMultiply(coordinateTransformMatrix, odoPos);
-
-					x     = robotPos[0][0];
-					y     = robotPos[1][0];
-					theta = robotPos[2][0];
+					x     = robotPose[0];
+					y     = robotPose[1];
+					theta = robotPose[2];
 
 					if (RUN_SONAR_GUI) {
 						gui.setRobotPose(x, y, theta);
