@@ -19,6 +19,8 @@
  *
  */
 
+package LocalNavigation;
+
 public class Mat {
 	public double[][] data;
 	public int rows;
