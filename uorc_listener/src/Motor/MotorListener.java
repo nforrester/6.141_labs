@@ -25,14 +25,6 @@ public class MotorListener implements MessageListener<MotionMsg> {
 		double left = msg.translationalVelocity;
 		double right = msg.translationalVelocity;
 
-		log_node.getLog().info("######################################################");
-		log_node.getLog().info("######################################################");
-		log_node.getLog().info("left: " + left);
-		log_node.getLog().info("######################################################");
-		log_node.getLog().info("right: " + right);
-		log_node.getLog().info("######################################################");
-		log_node.getLog().info("######################################################");
-
 		left -= msg.rotationalVelocity;
 		right += msg.rotationalVelocity;
 
