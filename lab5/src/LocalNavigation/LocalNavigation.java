@@ -22,7 +22,7 @@ import VisualServo.VisionGUI;
 public class LocalNavigation implements NodeMain, Runnable{
 	private Node logNode;
 
-	private static boolean RUN_SONAR_GUI = true;
+	private static boolean RUN_SONAR_GUI = false;
 	public SonarGUI gui;
 
 	public static int STOP_ON_BUMP  = 0;
@@ -30,7 +30,6 @@ public class LocalNavigation implements NodeMain, Runnable{
 	public static int ALIGNING      = 2;
 	public static int ALIGNED       = 3;
 	private int state = ALIGNED;
-
 
 	protected boolean firstUpdate = true;
 
@@ -87,7 +86,6 @@ public class LocalNavigation implements NodeMain, Runnable{
 		if (RUN_SONAR_GUI) {
 			gui = new SonarGUI();
 			gui.resetWorldToView(1.0,1.0,1.0);
-			gui.funfun();
 		}
 	}
 	
@@ -120,7 +118,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 		pointPlot.x = echoWorld[0];
 		pointPlot.y = echoWorld[1];
 		pointPub.publish(pointPlot);
-		logNode.getLog().info("SONAR: Sensor: " + sensor + " Range: " + message.range);
+//		logNode.getLog().info("SONAR: Sensor: " + sensor + " Range: " + message.range);
 		motorUpdate();
 	}
 	
@@ -132,7 +130,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 	public void handleBump(org.ros.message.rss_msgs.BumpMsg message) {
 		bumpLeft = message.left;
 		bumpRight = message.right;
-		logNode.getLog().info("BUMP: Left: " + message.left + " Right: " + message.right);
+//		logNode.getLog().info("BUMP: Left: " + message.left + " Right: " + message.right);
 		motorUpdate();
 	}
 	
@@ -164,14 +162,11 @@ public class LocalNavigation implements NodeMain, Runnable{
 		if (RUN_SONAR_GUI) {
 			gui.setRobotPose(x, y, theta);
 		}
+		logNode.getLog().info("ODOM raw:       " + message.x + " " + message.y + " " + message.theta +
+		                    "\nODOM processed: " +         x + " " +         y + " " +         theta);
 	}
 
 	private void motorUpdate() {
-		if (RUN_SONAR_GUI) {
-			//TODO: Change this approprately to update gui however necessary
-			//gui.setVisionImage(dest.toArray(), width, height);
-		}
-
 		if (state == STOP_ON_BUMP) {
 			if (bumpLeft || bumpRight) {
 				commandMotors.rotationalVelocity = 0;
@@ -224,6 +219,10 @@ public class LocalNavigation implements NodeMain, Runnable{
 	@Override
 	public void onStart(Node node) {
 		logNode = node;
+
+		if (RUN_SONAR_GUI) {
+			gui.onStart(node);
+		}
 
 		// initialize the ROS subscriptions to rss/Sonars
 		sonarFrontSub = node.newSubscriber("/rss/Sonars/Front", "rss_msgs/SonarMsg");
