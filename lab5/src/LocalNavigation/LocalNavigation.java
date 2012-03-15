@@ -6,6 +6,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import org.ros.message.MessageListener;
 import org.ros.message.rss_msgs.MotionMsg;
 import org.ros.message.lab5_msgs.GUIPointMsg;
+import org.ros.message.lab5_msgs.ColorMsg;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
