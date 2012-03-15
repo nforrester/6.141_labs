@@ -71,7 +71,8 @@ public class LocalNavigation implements NodeMain, Runnable{
 	private static final Mat sonarFrontToRobot = Mat.mul(Mat.translation( 0.1016, 0.2286), sonarToRobotRot);
 	private static final Mat sonarBackToRobot  = Mat.mul(Mat.translation(-0.2540, 0.2286), sonarToRobotRot);
 
-	private LeastSquareLine lsq;
+	private LeastSquareLine lsqWorld;
+	private LeastSquareLine lsqOdo;
 
 	private Subscriber<org.ros.message.rss_msgs.SonarMsg> sonarFrontSub;
 	private Subscriber<org.ros.message.rss_msgs.SonarMsg> sonarBackSub;
@@ -100,7 +101,8 @@ public class LocalNavigation implements NodeMain, Runnable{
 
 		setInitialParams();
 
-		lsq = new LeastSquareLine();
+		lsqWorld = new LeastSquareLine();
+		lsqOdo = new LeastSquareLine();
 
 		if (RUN_SONAR_GUI) {
 			gui = new SonarGUI();
@@ -151,8 +153,9 @@ public class LocalNavigation implements NodeMain, Runnable{
 				pointPlotColor.g = 0;
 				pointPlotColor.b = 0;
 
-				lsq.addPoint(echoWorldL[0], echoWorldL[1]);
-				double[] line = lsq.getLine();
+				lsqWorld.addPoint(echoWorldL[0], echoWorldL[1]);
+				lsqOdo.addPoint(echoOdoL[0], echoOdoL[1]);
+				double[] line = lsqOdo.getLine();
 				if (line.length > 0) {
 					linePlot.lineA = line[0];
 					linePlot.lineB = line[1];
