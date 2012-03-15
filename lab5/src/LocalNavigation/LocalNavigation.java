@@ -128,10 +128,12 @@ public class LocalNavigation implements NodeMain, Runnable{
 		}
 		pointPlot.color = pointPlotColor;
 
-		double[] echoOdo = Mat.decodePose(Mat.multiply(worldToOdo, robotToWorld, sonarToRobot, Mat.encodePose(message.range, 0, 0)));
-		pointPlot.x = echoOdo[0];
-		pointPlot.y = echoOdo[1];
-		pointPub.publish(pointPlot);
+		if (!firstUpdate) {
+			double[] echoOdo = Mat.decodePose(Mat.multiply(worldToOdo, robotToWorld, sonarToRobot, Mat.encodePose(message.range, 0, 0)));
+			pointPlot.x = echoOdo[0];
+			pointPlot.y = echoOdo[1];
+			pointPub.publish(pointPlot);
+		}
 		logNode.getLog().info("SONAR: Sensor: " + sensor + " Range: " + message.range);
 		motorUpdate();
 	}
@@ -154,16 +156,14 @@ public class LocalNavigation implements NodeMain, Runnable{
 	 * @param the message
 	 */
 	public void handleOdometry(org.ros.message.rss_msgs.OdometryMsg message) {
-		motorUpdate();
 		if ( firstUpdate ) {
-			firstUpdate = false;
-
 			odoToWorld = Mat.multiply(Mat.rotation(-message.theta), Mat.translation(-message.x, -message.y));
 			worldToOdo = Mat.inverse(odoToWorld);
 
 			if (RUN_SONAR_GUI) {
 				gui.resetWorldToView(0, 0);
 			}
+			firstUpdate = false;
 		}
 
 		double[] robotPose = Mat.decodePose(Mat.multiply(odoToWorld, Mat.encodePose(message.x, message.y, message.theta)));
@@ -179,6 +179,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 		}
 		logNode.getLog().info("ODOM raw: " + message.x + " " + message.y + " " + message.theta +
 		                    "\nODOM processed: " +         x + " " +         y + " " +         theta);
+		motorUpdate();
 	}
 
 	private void motorUpdate() {
@@ -216,6 +217,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 		}
 
 		// publish velocity messages to move the robot
+		logNode.getLog().info("MOTORs: " + commandMotors.translationalVelocity + " " + commandMotors.rotationalVelocity);
 		motorPub.publish(commandMotors);
 	}
 	
