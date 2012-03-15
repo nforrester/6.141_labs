@@ -26,11 +26,14 @@ public class LocalNavigation implements NodeMain, Runnable{
 	private static boolean RUN_SONAR_GUI = false;
 	public SonarGUI gui;
 
-	public static int STOP_ON_BUMP  = 0;
-	public static int ALIGN_ON_BUMP = 1;
-	public static int ALIGNING      = 2;
-	public static int ALIGNED       = 3;
-	private int state = STOP_ON_BUMP;
+	public static int STOP_ON_BUMP    = 0;
+	public static int ALIGN_ON_BUMP   = 1;
+	public static int ALIGNING        = 2;
+	public static int ALIGNED         = 3;
+	public static int SPIN_ONCE_START = 4;
+	public static int SPIN_ONCE       = 5;
+	public static int SPIN_ONCE_STOP  = 6;
+	private int state = SPIN_ONCE_START;
 
 	protected boolean firstUpdate = true;
 
@@ -39,6 +42,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 
 	private static double transSlow = 0.05;
 	private static double rotSlow = 0.05;
+	private static double rotFast = 0.2;
 
 	/* Frames of reference:
 	 *
@@ -214,6 +218,24 @@ public class LocalNavigation implements NodeMain, Runnable{
 					commandMotors.translationalVelocity = transSlow;
 				}
 			}
+		} else if (state == SPIN_ONCE_START) {
+			if (!firstUpdate) {
+				state = SPIN_ONCE;
+			}
+		} else if (state == SPIN_ONCE) {
+			commandMotors.rotationalVelocity = rotFast;
+			commandMotors.translationalVelocity = 0;
+			if (theta > 4 * Math.PI / 3) {
+				state = SPIN_ONCE_STOP;
+			}
+		} else if (state == SPIN_ONCE_STOP) {
+			if (theta > 2 * Math.PI / 3) {
+				commandMotors.rotationalVelocity = rotFast;
+				commandMotors.translationalVelocity = 0;
+			} else {
+				commandMotors.rotationalVelocity = 0;
+				commandMotors.translationalVelocity = 0;
+			}
 		}
 
 		// publish velocity messages to move the robot
@@ -319,6 +341,12 @@ public class LocalNavigation implements NodeMain, Runnable{
 			stateMsg.data = "ALIGNING";
 		} else if (state == ALIGNED) {
 			stateMsg.data = "ALIGNED";
+		} else if (state == SPIN_ONCE_START) {
+			stateMsg.data = "SPIN_ONCE_START";
+		} else if (state == SPIN_ONCE) {
+			stateMsg.data = "SPIN_ONCE";
+		} else if (state == SPIN_ONCE_STOP) {
+			stateMsg.data = "SPIN_ONCE_STOP";
 		} else {
 			stateMsg.data = "ERROR: unknown state";
 		}

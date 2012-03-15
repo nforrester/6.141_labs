@@ -150,8 +150,19 @@ public class Mat {
 		double x     = pose.data[0][0];
 		double y     = pose.data[1][0];
 		double theta = pose.data[2][0];
+		theta = rerangeAngle(theta);
 		double[] ret = {x, y, theta};
 		return ret;
+	}
+
+	private static double rerangeAngle(double a) {
+		while (a >= 2 * Math.PI) {
+			a -= 2 * Math.PI;
+		}
+		while (a < 0) {
+			a += 2 * Math.PI;
+		}
+		return a;
 	}
 	
 	/**
