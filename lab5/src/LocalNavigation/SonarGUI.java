@@ -92,7 +92,7 @@ public class SonarGUI extends VisionGUI {
   /**
    * <p>Radius of {@link SonarGUI.GUIPoint}s in meters.</p>
    **/
-  public static final double POINT_RADIUS = 0.005;
+  public static final double POINT_RADIUS = 0.05;
 
   /**
    * <p>Whether to paint the points.</p>
