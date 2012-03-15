@@ -6,6 +6,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import org.ros.message.MessageListener;
 import org.ros.message.rss_msgs.MotionMsg;
 import org.ros.message.lab5_msgs.GUIPointMsg;
+import org.ros.message.lab5_msgs.GUILineMsg;
 import org.ros.message.lab5_msgs.ColorMsg;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
@@ -70,19 +71,23 @@ public class LocalNavigation implements NodeMain, Runnable{
 	private static final Mat sonarFrontToRobot = Mat.mul(Mat.translation( 0.1016, 0.2286), sonarToRobotRot);
 	private static final Mat sonarBackToRobot  = Mat.mul(Mat.translation(-0.2540, 0.2286), sonarToRobotRot);
 
-	private LeastSquaresLine lsq;
+	private LeastSquareLine lsq;
 
 	private Subscriber<org.ros.message.rss_msgs.SonarMsg> sonarFrontSub;
 	private Subscriber<org.ros.message.rss_msgs.SonarMsg> sonarBackSub;
 	private Subscriber<org.ros.message.rss_msgs.BumpMsg> bumpSub;
 	private Subscriber<org.ros.message.rss_msgs.OdometryMsg> odoSub;
 
+
 	private Publisher<MotionMsg> motorPub;
-	private Publisher<GUIPointMsg> pointPub;
 	private MotionMsg commandMotors;
+
+	private Publisher<GUIPointMsg> pointPub;
 	private GUIPointMsg pointPlot;
 	private ColorMsg pointPlotColor;
-	private GUIPointMsg linePlot;
+
+	private Publisher<GUILineMsg> linePub;
+	private GUILineMsg linePlot;
 	private ColorMsg linePlotColor;
 
 	private Publisher<org.ros.message.std_msgs.String> statePub;
@@ -95,7 +100,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 
 		setInitialParams();
 
-		lsq = new LeastSquaresLine();
+		lsq = new LeastSquareLine();
 
 		if (RUN_SONAR_GUI) {
 			gui = new SonarGUI();
@@ -129,9 +134,9 @@ public class LocalNavigation implements NodeMain, Runnable{
 		}
 
 		if (!firstUpdate) {
-			Mat echoSonar = encodePose(message.range, 0, 0);
+			Mat echoSonar = Mat.encodePose(message.range, 0, 0);
 
-			Mat echoWorld = Mat.mul(robotToWorld, SonarToRobot, echoSonar);
+			Mat echoWorld = Mat.mul(robotToWorld, sonarToRobot, echoSonar);
 			Mat echoOdo = Mat.mul(worldToOdo, echoWorld);
 
 			double[] echoWorldL = Mat.decodePose(echoWorld);
@@ -337,7 +342,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 
 		// initialize the ROS publication to graph points
 		linePub = node.newPublisher("/gui/Line","lab5_msgs/GUILineMsg");
-		linePlot = new GUIPointMsg();
+		linePlot = new GUILineMsg();
 		linePlotColor = new ColorMsg();
 
 		// initialize the ROS publication to rss/state

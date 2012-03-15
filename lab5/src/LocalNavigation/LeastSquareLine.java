@@ -32,7 +32,7 @@ public class LeastSquareLine {
 
 		nPoints = 0;
 		line_dirty = true;
-		line = {};
+		line = new double[] {};
 	}
 
 	public synchronized void addPoint(double x, double y) {
@@ -54,7 +54,7 @@ public class LeastSquareLine {
 				if (d != 0) {
 					double a = (sumX * sumYY - sumY * sumXY) / d;
 					double b = (sumY * sumXX - sumX * sumXY) / d;
-					line = {a, b, -1};
+					line = new double[] {a, b, -1};
 					line_dirty = false;
 				}
 			}
