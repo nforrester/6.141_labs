@@ -1,7 +1,5 @@
 #!/usr/bin/perl
 
-print $ENV{ROS_PACKAGE_PATH}."\n";
 $ENV{ROS_PACKAGE_PATH} =~ /:/;
 $ENV{ROS_PACKAGE_PATH} = '/home/rss-student/gitrss:' . $';
-print $ENV{ROS_PACKAGE_PATH}."\n";
 system('roslaunch ' . join(' ',@ARGV));
