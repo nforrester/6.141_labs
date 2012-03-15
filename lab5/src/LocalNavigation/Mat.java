@@ -281,7 +281,6 @@ public class Mat {
 			matrix  = multiply(eliminator, matrix);
 			inverse = multiply(eliminator, inverse);
 		}
-		print(matrix);
 		return inverse;
 	}
 }
