@@ -1,5 +1,5 @@
 #!/usr/bin/perl
 
 $ENV{ROS_PACKAGE_PATH} =~ /:/;
-$ENV{ROS_PACKAGE_PATH} =~ '/home/rss-student/gitrss:' . $';
+$ENV{ROS_PACKAGE_PATH} = '/home/rss-student/gitrss:' . $';
 system('rosmake ' . join(' ',@ARGV));
