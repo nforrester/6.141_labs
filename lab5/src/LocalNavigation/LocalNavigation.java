@@ -126,6 +126,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 			pointPlotColor.g = 0;
 			pointPlotColor.b = 0;
 		}
+		pointPlot.color = pointPlotColor;
 
 		double[] echoOdo = Mat.decodePose(Mat.multiply(worldToOdo, robotToWorld, sonarToRobot, Mat.encodePose(message.range, 0, 0)));
 		pointPlot.x = echoOdo[0];
