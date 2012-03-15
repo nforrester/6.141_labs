@@ -229,7 +229,7 @@ public class Mat {
 	 * <p>Multiply many matricies</p>
 	 */
 	public static Mat multiply(Mat... matrices) {
-		Mat product = matricies[0];
+		Mat product = matrices[0];
 
 		for (int matrix = 1; matrix < matrices.length; matrix++) {
 			product = multiply(product, matrices[matrix]);
