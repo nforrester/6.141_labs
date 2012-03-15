@@ -8,10 +8,10 @@
  *
  *      trans = translation(x, y);
  *      rot = rotation(theta);
- *      coordinateTransformation = multiply(rot, trans);
+ *      coordinateTransformation = mul(rot, trans);
  *
  *      poseOdo = encodePose(xOdo, yOdo, thetaOdo);
- *      poseRobot = multiply(coordinateTransformation, poseOdo);
+ *      poseRobot = mul(coordinateTransformation, poseOdo);
  *      p = decodePose(poseRobot);
  *      x = p[0];
  *      y = p[1];
@@ -213,7 +213,7 @@ public class Mat {
 	/**
 	 * <p>Multiply two matricies</p>
 	 */
-	public static Mat multiply(Mat mA, Mat mB) {
+	public static Mat mul(Mat mA, Mat mB) {
 		assert mA.columns == mB.rows;
 
 		Mat mC = new Mat(mA.rows, mB.columns);
@@ -239,11 +239,11 @@ public class Mat {
 	/**
 	 * <p>Multiply many matricies</p>
 	 */
-	public static Mat multiply(Mat... matrices) {
+	public static Mat mul(Mat... matrices) {
 		Mat product = matrices[0];
 
 		for (int matrix = 1; matrix < matrices.length; matrix++) {
-			product = multiply(product, matrices[matrix]);
+			product = mul(product, matrices[matrix]);
 		}
 
 		return product;
@@ -252,7 +252,7 @@ public class Mat {
 	/**
 	 * <p>Multiply a scalar and a matrix</p>
 	 */
-	public static Mat multiply(double a, Mat mB) {
+	public static Mat mul(double a, Mat mB) {
 		Mat mC = new Mat(mB.rows, mB.columns);
 
 		int row;
@@ -289,8 +289,8 @@ public class Mat {
 				eliminator.data[row][row] = 1;
 			}
 			eliminator.data[pivot][pivot] = 1 / pivotValue;
-			matrix  = multiply(eliminator, matrix);
-			inverse = multiply(eliminator, inverse);
+			matrix  = mul(eliminator, matrix);
+			inverse = mul(eliminator, inverse);
 		}
 		return inverse;
 	}
