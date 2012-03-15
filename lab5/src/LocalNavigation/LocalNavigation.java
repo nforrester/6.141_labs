@@ -273,10 +273,14 @@ public class LocalNavigation implements NodeMain, Runnable{
 		}
 
 		// publish velocity messages to move the robot
-		logNode.getLog().info("MOTORs: " + commandMotors.translationalVelocity + " " + commandMotors.rotationalVelocity);
 		if (state != MANUAL_MODE) {
 			motorPub.publish(commandMotors);
+		} else if (state == MANUAL_MODE && (bumpLeft || bumpRight)) {
+			commandMotors.rotationalVelocity = 0;
+			commandMotors.translationalVelocity = 0;
+			motorPub.publish(commandMotors);
 		}
+		logNode.getLog().info("MOTORs: " + commandMotors.translationalVelocity + " " + commandMotors.rotationalVelocity);
 	}
 	
 	@Override
