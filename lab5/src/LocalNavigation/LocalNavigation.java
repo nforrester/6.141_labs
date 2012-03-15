@@ -73,6 +73,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 	private Publisher<GUIPointMsg> pointPub;
 	private MotionMsg commandMotors;
 	private GUIPointMsg pointPlot;
+	private ColorMsg pointPlotColor;
 
 	private Publisher<org.ros.message.std_msgs.String> statePub;
 	private org.ros.message.std_msgs.String stateMsg;
@@ -113,6 +114,16 @@ public class LocalNavigation implements NodeMain, Runnable{
 			sensor = "Back";
 			sonarToRobot = sonarBackToRobot;
 			pointPlot.shape = 1;
+		}
+
+		if (message.range > 1.0) {
+			pointPlotColor.r = 0;
+			pointPlotColor.g = 0;
+			pointPlotColor.b = 1;
+		} else {
+			pointPlotColor.r = 1;
+			pointPlotColor.g = 0;
+			pointPlotColor.b = 0;
 		}
 
 		double[] echoOdo = Mat.decodePose(Mat.multiply(worldToOdo, robotToWorld, sonarToRobot, Mat.encodePose(message.range, 0, 0)));
