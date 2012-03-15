@@ -120,9 +120,9 @@ public class LocalNavigation implements NodeMain, Runnable{
 		if (message.range > 1.0) {
 			pointPlotColor.r = 0;
 			pointPlotColor.g = 0;
-			pointPlotColor.b = 1;
+			pointPlotColor.b = 255;
 		} else {
-			pointPlotColor.r = 1;
+			pointPlotColor.r = 255;
 			pointPlotColor.g = 0;
 			pointPlotColor.b = 0;
 		}
