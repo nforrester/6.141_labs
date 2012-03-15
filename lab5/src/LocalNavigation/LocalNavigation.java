@@ -115,7 +115,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 			pointPlot.shape = 1;
 		}
 
-		Mat sonarToOdo = Mat.multiply(worldToOdo, Mat.multiply(robotToWorld, sonarToRobot));
+		Mat sonarToOdo = Mat.multiply(worldToOdo, robotToWorld, sonarToRobot);
 
 		double[] echoOdo = Mat.decodePose(Mat.multiply(sonarToOdo, Mat.encodePose(message.range, 0, 0)));
 		pointPlot.x = echoOdo[0];

@@ -226,6 +226,19 @@ public class Mat {
 	}
 
 	/**
+	 * <p>Multiply many matricies</p>
+	 */
+	public static Mat multiply(Mat... matrices) {
+		Mat product = matricies[0];
+
+		for (int matrix = 1; matrix < matrices.length; matrix++) {
+			product = multiply(product, matrices[matrix]);
+		}
+
+		return product;
+	}
+
+	/**
 	 * <p>Multiply a scalar and a matrix</p>
 	 */
 	public static Mat multiply(double a, Mat mB) {
