@@ -30,7 +30,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 	public static int ALIGN_ON_BUMP = 1;
 	public static int ALIGNING      = 2;
 	public static int ALIGNED       = 3;
-	private int state = ALIGNED;
+	private int state = STOP_ON_BUMP;
 
 	protected boolean firstUpdate = true;
 
