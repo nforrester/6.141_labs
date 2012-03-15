@@ -267,7 +267,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 		
 		// initialize the ROS publication to graph points
 		pointPub = node.newPublisher("/gui/Point","lab5_msgs/GUIPointMsg");
-		pointPlot=new GUIPointMsg();
+		pointPlot = new GUIPointMsg();
 
 		// initialize the ROS publication to rss/state
 		statePub = node.newPublisher("/rss/state","std_msgs/String");
