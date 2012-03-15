@@ -64,6 +64,25 @@ public class Mat {
 	}
 
 	/**
+	 * <p>Copy a matrix</p>
+	 */
+	public static Mat copy(Mat matrix) {
+		Mat copy = new Mat(matrix.rows, matrix.columns);
+
+		int row;
+		int column;
+
+		for (row = 0; row < matrix.rows; row++) {
+			for (column = 0; column < matrix.columns; column++) {
+				copy.data[row][column] = matrix.data[row][column];
+			}
+		}
+
+		return copy;
+	}
+
+
+	/**
 	 * <p>The zero matrix</p>
 	 */
 	public static Mat zero(int size) {
@@ -205,6 +224,7 @@ public class Mat {
 
 		return mC;
 	}
+
 	/**
 	 * <p>Multiply a scalar and a matrix</p>
 	 */
@@ -221,5 +241,34 @@ public class Mat {
 		}
 
 		return mC;
+	}
+
+	/**
+	 * <p>Inverse of a matrix, with Gauss-Jordan elimination</p>
+	 */
+	public static Mat inverse(Mat matrix) {
+		assert matrix.rows == matrix.columns;
+		Mat inverse = eye(matrix.rows);
+
+		int pivot;
+		int row;
+		double pivotValue;
+		Mat eliminator;
+
+		for (pivot = 0; pivot < matrix.rows; pivot++) {
+			eliminator = zero(matrix.rows);
+			pivotValue = matrix.data[pivot][pivot];
+			for (row = 0; row < matrix.rows; row++) {
+				eliminator.data[row][pivot] = -1 * matrix.data[row][pivot] / pivotValue;
+			}
+			for (row = 0; row < matrix.rows; row++) {
+				eliminator.data[row][row] = 1;
+			}
+			eliminator.data[pivot][pivot] = 1 / pivotValue;
+			matrix  = multiply(eliminator, matrix);
+			inverse = multiply(eliminator, inverse);
+		}
+		print(matrix);
+		return inverse;
 	}
 }

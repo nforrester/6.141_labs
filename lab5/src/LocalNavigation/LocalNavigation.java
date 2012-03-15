@@ -44,7 +44,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 	 * World frame: Relative to the robot's starting position, x front, y left, theta up
 	 * Robot frame: Relative to the robot right now, x front, y left, theta up
 	 * Sonar frame: Relative to the sonar, x points along the sonar axis, y left, theta up
-	 * Odometry frame: Whatever stupid frame of reference the odometry module uses
+	 * Odometry frame: Whatever stupid frame of reference the odometry module uses, which the SonarGUI also uses
 	 */
 
 	// x, y, and theta record the robot's current position in the world frame
@@ -114,11 +114,11 @@ public class LocalNavigation implements NodeMain, Runnable{
 			pointPlot.shape = 1;
 		}
 
-		double[] echoWorld = Mat.decodePose(Mat.multiply(sonarToWorld, Mat.encodePose(message.range, 0, 0)));
+		double[] echoWorld = Mat.decodePose(Mat.multiply(Mat.inverse(odoToWorld), Mat.multiply(sonarToWorld, Mat.encodePose(message.range, 0, 0))));
 		pointPlot.x = echoWorld[0];
 		pointPlot.y = echoWorld[1];
 		pointPub.publish(pointPlot);
-//		logNode.getLog().info("SONAR: Sensor: " + sensor + " Range: " + message.range);
+		logNode.getLog().info("SONAR: Sensor: " + sensor + " Range: " + message.range);
 		motorUpdate();
 	}
 	
@@ -130,7 +130,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 	public void handleBump(org.ros.message.rss_msgs.BumpMsg message) {
 		bumpLeft = message.left;
 		bumpRight = message.right;
-//		logNode.getLog().info("BUMP: Left: " + message.left + " Right: " + message.right);
+		logNode.getLog().info("BUMP: Left: " + message.left + " Right: " + message.right);
 		motorUpdate();
 	}
 	
@@ -162,7 +162,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 		if (RUN_SONAR_GUI) {
 			gui.setRobotPose(x, y, theta);
 		}
-		logNode.getLog().info("ODOM raw:       " + message.x + " " + message.y + " " + message.theta +
+		logNode.getLog().info("ODOM raw: " + message.x + " " + message.y + " " + message.theta +
 		                    "\nODOM processed: " +         x + " " +         y + " " +         theta);
 	}
 
