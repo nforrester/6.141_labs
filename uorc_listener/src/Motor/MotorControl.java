@@ -82,9 +82,7 @@ public class MotorControl implements NodeMain {
 			robot.enableMotors(true);
 
 			subscriber = node.newSubscriber("command/Motors", "rss_msgs/MotionMsg");
-			MotorListener ml = new MotorListener(robotVelocityController);
-			ml.log_node = node;
-			subscriber.addMessageListener(ml);
+			subscriber.addMessageListener(new MotorListener(robotVelocityController));
 			System.out.println("new Subscriber");
 		} catch (Exception e) {
 			e.printStackTrace();
