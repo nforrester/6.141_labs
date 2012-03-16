@@ -24,27 +24,27 @@ import VisualServo.VisionGUI;
 public class LocalNavigation implements NodeMain, Runnable{
 	private Node logNode;
 
-	private static boolean RUN_SONAR_GUI = false;
+	private static final boolean RUN_SONAR_GUI = false;
 	public SonarGUI gui;
 
-	public static int STOP_ON_BUMP    = 0;
-	public static int ALIGN_ON_BUMP   = 1;
-	public static int ALIGNING        = 2;
-	public static int ALIGNED         = 3;
-	public static int SPIN_ONCE_START = 4;
-	public static int SPIN_ONCE       = 5;
-	public static int SPIN_ONCE_STOP  = 6;
-	public static int MANUAL_MODE     = 7;
-	private int state = MANUAL_MODE;
+	public static final int STOP_ON_BUMP         =  0;
+	public static final int ALIGN_ON_BUMP        =  1;
+	public static final int ALIGNING             =  2;
+	public static final int ALIGNED              =  3;
+	public static final int SPIN_ONCE_START      =  6;
+	public static final int SPIN_ONCE            =  7;
+	public static final int SPIN_ONCE_STOP       =  8;
+	public static final int MANUAL_MODE          =  9;
+	private int state = ALIGN_ON_BUMP;
 
 	protected boolean firstUpdate = true;
 
 	private boolean bumpLeft = false;
 	private boolean bumpRight = false;
 
-	private static double transSlow = 0.05;
-	private static double rotSlow = 0.05;
-	private static double rotFast = 0.2;
+	private static final double transSlow = 0.05;
+	private static final double rotSlow = 0.05;
+	private static final double rotFast = 0.2;
 
 	/* Frames of reference:
 	 *
