@@ -31,10 +31,14 @@ public class LocalNavigation implements NodeMain, Runnable{
 	public static final int ALIGN_ON_BUMP        =  1;
 	public static final int ALIGNING             =  2;
 	public static final int ALIGNED              =  3;
+	public static final int ALIGNED_AND_ROTATING =  4;
+	public static final int ALIGNED_AND_ROTATED  =  5;
 	public static final int SPIN_ONCE_START      =  6;
 	public static final int SPIN_ONCE            =  7;
 	public static final int SPIN_ONCE_STOP       =  8;
 	public static final int MANUAL_MODE          =  9;
+	public static final int BACKING_UP           = 10;
+	public static final int FINDING_WALL         = 11;
 	private int state = ALIGN_ON_BUMP;
 
 	protected boolean firstUpdate = true;
@@ -52,6 +56,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 	 * Robot frame: Relative to the robot right now, x front, y left, theta up
 	 * Sonar frame: Relative to the sonar, x points along the sonar axis, y left, theta up
 	 * Odometry frame: Whatever stupid frame of reference the odometry module uses, which the SonarGUI also uses
+	 * Aligned frame: Relative to the robot when it most recently entered the ALIGNED state.
 	 */
 
 	// x, y, and theta record the robot's current position in the world frame
@@ -71,8 +76,18 @@ public class LocalNavigation implements NodeMain, Runnable{
 	private static final Mat sonarFrontToRobot = Mat.mul(Mat.translation( 0.1016, 0.2286), sonarToRobotRot);
 	private static final Mat sonarBackToRobot  = Mat.mul(Mat.translation(-0.2540, 0.2286), sonarToRobotRot);
 
+	// transforms between aligned and world frames
+	private Mat alignedToWorld; // updated when entering the ALIGNED state
+	private Mat worldToAligned; // updated when entering the ALIGNED state
+
+	private static final double wallStandoffDistance = 0.5;
+	private static final double distanceToFrontOfRobot = 0.1;
+
 	private LeastSquareLine lsqWorld;
 	private LeastSquareLine lsqOdo;
+
+	private boolean obstacleVisibleFront = false;
+	private boolean obstacleVisibleBack  = false;
 
 	private Subscriber<org.ros.message.rss_msgs.SonarMsg> sonarFrontSub;
 	private Subscriber<org.ros.message.rss_msgs.SonarMsg> sonarBackSub;
@@ -145,10 +160,22 @@ public class LocalNavigation implements NodeMain, Runnable{
 			double[] echoOdoL = Mat.decodePose(echoOdo);
 
 			if (message.range > 1.0) {
+				if (message.isFront) {
+					obstacleVisibleFront = false;
+				} else {
+					obstacleVisibleBack  = false;
+				}
+
 				pointPlotColor.r = 0;
 				pointPlotColor.g = 0;
 				pointPlotColor.b = 255;
 			} else {
+				if (message.isFront) {
+					obstacleVisibleFront = true;
+				} else {
+					obstacleVisibleBack  = true;
+				}
+
 				pointPlotColor.r = 255;
 				pointPlotColor.g = 0;
 				pointPlotColor.b = 0;
@@ -252,6 +279,45 @@ public class LocalNavigation implements NodeMain, Runnable{
 					commandMotors.translationalVelocity = transSlow;
 				}
 			}
+		} else if (state == ALIGNED) {
+			double[] poseAligned = Mat.decodePose(Mat.mul(worldToAligned, Mat.encodePose(x, y, theta)));
+			if (poseAligned[0] > -1 * (wallStandoffDistance - distanceToFrontOfRobot)) {
+				commandMotors.rotationalVelocity = 0;
+				commandMotors.translationalVelocity = -1 * transSlow;
+			} else {
+				commandMotors.rotationalVelocity = 0;
+				commandMotors.translationalVelocity = 0;
+				changeState(ALIGNED_AND_ROTATING);
+			}
+		} else if (state == ALIGNED_AND_ROTATING) {
+			double[] poseAligned = Mat.decodePose(Mat.mul(worldToAligned, Mat.encodePose(x, y, theta)));
+			if (poseAligned[2] > Math.PI) {
+				poseAligned[2] -= 2 * Math.PI;
+			}
+			if (poseAligned[2] > -0.5 * Math.PI) {
+				commandMotors.rotationalVelocity = -1 * rotSlow;
+				commandMotors.translationalVelocity = 0;
+			} else {
+				commandMotors.rotationalVelocity = 0;
+				commandMotors.translationalVelocity = 0;
+				changeState(ALIGNED_AND_ROTATED);
+			}
+		} else if (state == ALIGNED_AND_ROTATED) {
+			commandMotors.rotationalVelocity = 0;
+			commandMotors.translationalVelocity = 0;
+			changeState(BACKING_UP);
+		} else if (state == BACKING_UP) {
+			if (obstacleVisibleFront || obstacleVisibleBack) {
+				commandMotors.rotationalVelocity = 0;
+				commandMotors.translationalVelocity = -1 * transSlow;
+			} else {
+				commandMotors.rotationalVelocity = 0;
+				commandMotors.translationalVelocity = 0;
+				changeState(FINDING_WALL);
+			}
+		} else if (state == FINDING_WALL) {
+			commandMotors.rotationalVelocity = 0;
+			commandMotors.translationalVelocity = 0;
 		} else if (state == SPIN_ONCE_START) {
 			if (!firstUpdate) {
 				state = SPIN_ONCE;
@@ -385,13 +451,25 @@ public class LocalNavigation implements NodeMain, Runnable{
 		} else if (state == ALIGNING) {
 			stateMsg.data = "ALIGNING";
 		} else if (state == ALIGNED) {
+			worldToAligned = Mat.mul(Mat.rotation(-theta), Mat.translation(-x, -y));
+			alignedToWorld = Mat.inverse(worldToAligned);
 			stateMsg.data = "ALIGNED";
+		} else if (state == ALIGNED_AND_ROTATING) {
+			stateMsg.data = "ALIGNED_AND_ROTATING";
+		} else if (state == ALIGNED_AND_ROTATED) {
+			stateMsg.data = "ALIGNED_AND_ROTATED";
 		} else if (state == SPIN_ONCE_START) {
 			stateMsg.data = "SPIN_ONCE_START";
 		} else if (state == SPIN_ONCE) {
 			stateMsg.data = "SPIN_ONCE";
 		} else if (state == SPIN_ONCE_STOP) {
 			stateMsg.data = "SPIN_ONCE_STOP";
+		} else if (state == BACKING_UP) {
+			lsqWorld.reset();
+			lsqOdo.reset();
+			stateMsg.data = "BACKING_UP";
+		} else if (state == FINDING_WALL) {
+			stateMsg.data = "FINDING_WALL";
 		} else {
 			stateMsg.data = "ERROR: unknown state";
 		}
