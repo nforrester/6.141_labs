@@ -39,7 +39,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 	public static final int MANUAL_MODE          =  9;
 	public static final int BACKING_UP           = 10;
 	public static final int FINDING_WALL         = 11;
-	private int state = ALIGN_ON_BUMP;
+	private int state = ALIGNING;
 
 	protected boolean firstUpdate = true;
 
@@ -199,7 +199,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 			pointPlot.y = echoOdoL[1];
 			pointPub.publish(pointPlot);
 		}
-		logNode.getLog().info("SONAR: Sensor: " + sensor + " Range: " + message.range);
+		//logNode.getLog().info("SONAR: Sensor: " + sensor + " Range: " + message.range);
 		motorUpdate();
 	}
 	
@@ -211,7 +211,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 	public void handleBump(org.ros.message.rss_msgs.BumpMsg message) {
 		bumpLeft = message.left;
 		bumpRight = message.right;
-		logNode.getLog().info("BUMP: Left: " + message.left + " Right: " + message.right);
+		//logNode.getLog().info("BUMP: Left: " + message.left + " Right: " + message.right);
 		motorUpdate();
 	}
 	
@@ -242,8 +242,8 @@ public class LocalNavigation implements NodeMain, Runnable{
 		if (RUN_SONAR_GUI) {
 			gui.setRobotPose(x, y, theta);
 		}
-		logNode.getLog().info("ODOM raw: " + message.x + " " + message.y + " " + message.theta +
-		                    "\nODOM processed: " +         x + " " +         y + " " +         theta);
+		//logNode.getLog().info("ODOM raw: " + message.x + " " + message.y + " " + message.theta +
+		//                    "\nODOM processed: " +         x + " " +         y + " " +         theta);
 		motorUpdate();
 	}
 
@@ -308,8 +308,21 @@ public class LocalNavigation implements NodeMain, Runnable{
 			changeState(BACKING_UP);
 		} else if (state == BACKING_UP) {
 			if (obstacleVisibleFront || obstacleVisibleBack) {
-				commandMotors.rotationalVelocity = 0;
-				commandMotors.translationalVelocity = -1 * transSlow;
+				if (lsqWorld.getNPoints() > 50 && lsqWorld.getLine().length > 0){
+					double distError = wallStandoffDistance - lsqWorld.getDistance(x, y);
+					double desiredAngle = 3 * Math.PI / 2 - distError * 0.5;
+					double actualAngle = Mat.decodePose(Mat.mul(worldToAligned, Mat.encodePose(x, y, theta)))[2];
+					double angleError = desiredAngle - actualAngle;
+					if(angleError > Math.PI) {
+						angleError -= 2 * Math.PI;
+					}
+					logNode.getLog().info("STEERING: " + distError +" "+ desiredAngle +" "+ actualAngle +" "+ angleError);
+					commandMotors.rotationalVelocity = 0.4 * angleError;
+					commandMotors.translationalVelocity = -1 * transSlow;
+				} else {
+					commandMotors.rotationalVelocity = 0;
+					commandMotors.translationalVelocity = 0;
+				}
 			} else {
 				commandMotors.rotationalVelocity = 0;
 				commandMotors.translationalVelocity = 0;
@@ -346,7 +359,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 			commandMotors.translationalVelocity = 0;
 			motorPub.publish(commandMotors);
 		}
-		logNode.getLog().info("MOTORs: " + commandMotors.translationalVelocity + " " + commandMotors.rotationalVelocity);
+		//logNode.getLog().info("MOTORs: " + commandMotors.translationalVelocity + " " + commandMotors.rotationalVelocity);
 	}
 	
 	@Override

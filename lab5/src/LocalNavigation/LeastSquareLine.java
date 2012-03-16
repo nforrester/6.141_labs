@@ -16,14 +16,14 @@ public class LeastSquareLine {
 	private double sumXY;
 
 	private long nPoints;
-	private boolean line_dirty;
+	private boolean lineDirty;
 	private double[] line; // {a, b, c}
 
 	public LeastSquareLine() {
 		reset();
 	}
 
-	public synchronized void reset() {
+	public void reset() {
 		sumX = 0;
 		sumY = 0;
 		sumXX = 0;
@@ -31,11 +31,11 @@ public class LeastSquareLine {
 		sumXY = 0;
 
 		nPoints = 0;
-		line_dirty = true;
+		lineDirty = true;
 		line = new double[] {};
 	}
 
-	public synchronized void addPoint(double x, double y) {
+	public void addPoint(double x, double y) {
 		sumX += x;
 		sumY += y;
 		sumXX += x * x;
@@ -43,22 +43,35 @@ public class LeastSquareLine {
 		sumXY += x * y;
 
 		nPoints++;
-		line_dirty = true;
+		lineDirty = true;
 	}
 
-	public synchronized double[] getLine() {
+	public double[] getLine() {
 		double[] line = {};
-		if (line_dirty) {
+		if (lineDirty) {
 			if (nPoints >= 2) {
 				double d = sumXX * sumYY - sumXY * sumXY;
 				if (d != 0) {
 					double a = (sumX * sumYY - sumY * sumXY) / d;
 					double b = (sumY * sumXX - sumX * sumXY) / d;
 					line = new double[] {a, b, -1};
-					line_dirty = false;
+					lineDirty = false;
 				}
 			}
 		}
 		return line;
+	}
+
+	public double getNPoints() {
+		return nPoints;
+	}
+
+	public double getDistance(double x, double y) {
+		double[] line = getLine();
+		if (line.length > 0) {
+			return Math.abs(line[0] * x + line[1] * y + line[2]);
+		} else {
+			return -1;
+		}
 	}
 }
