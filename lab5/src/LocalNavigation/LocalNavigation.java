@@ -55,7 +55,8 @@ public class LocalNavigation implements NodeMain, Runnable{
 	public static final int WALL_ENDED           = 13;
 	public static final int TURN_PREP            = 14;
 	public static final int FIND_NEXT_WALL       = 15;
-	
+        public static final int DONE                 = 16;
+
 	private int state = ALIGNING;
 
 	protected boolean firstUpdate = true;
@@ -392,7 +393,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 			} else {
 				commandMotors.rotationalVelocity = 0;
 				commandMotors.translationalVelocity = 0;
-				changeState(WALL_ENDED);
+				changeState(TURN_PREP);
 			}
 		} else if (state == WALL_ENDED) {
 			commandMotors.rotationalVelocity = 0;
@@ -412,8 +413,8 @@ public class LocalNavigation implements NodeMain, Runnable{
 				commandMotors.translationalVelocity = 0;
 				changeState(ALIGNING);				
 			}else{
-				commandMotors.rotationalVelocity = 1*rotSlow;
-				commandMotors.translationalVelocity = 1*transSlow;
+				commandMotors.rotationalVelocity = 1*rotFast;
+				commandMotors.translationalVelocity = 3.5*transSlow;
 			}
 		}
 		//------------------------------------Debug States
@@ -435,6 +436,9 @@ public class LocalNavigation implements NodeMain, Runnable{
 				commandMotors.rotationalVelocity = 0;
 				commandMotors.translationalVelocity = 0;
 			}
+		} else if (state == DONE) {
+		    commandMotors.rotationalVelocity = 0;
+		    commandMotors.translationalVelocity = 0;
 		}
 
 		// publish velocity messages to move the robot
@@ -611,8 +615,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 			stateMsg.data = "ALIGNED_AND_ROTATING";
 		} else if (state == ALIGNED_AND_ROTATED) {
 			stateMsg.data = "ALIGNED_AND_ROTATED";
-		} else if (state == SPIN_ONCE_START) {
-			stateMsg.data = "SPIN_ONCE_START";
+		} else if (state == SPIN_ONCE_START) {			stateMsg.data = "SPIN_ONCE_START";
 		} else if (state == SPIN_ONCE) {
 			stateMsg.data = "SPIN_ONCE";
 		} else if (state == SPIN_ONCE_STOP) {
@@ -665,11 +668,11 @@ public class LocalNavigation implements NodeMain, Runnable{
 			segmentPlot.endX = xyEnd[0];
 			segmentPlot.endY = xyEnd[1];
 
-			segmentPlotColor.r = 0;
-			segmentPlotColor.g = 0;
-			segmentPlotColor.b = 0;
+			//segmentPlotColor.r = 0;
+			//segmentPlotColor.g = 0;
+			//segmentPlotColor.b = 0;
 
-			segmentPlot.color = segmentPlotColor;
+			segmentPlot.colorMsg = gui.makeRandomColor();
 
 			publishTheLine = false;
 			segmentPub.publish(segmentPlot);
