@@ -22,7 +22,7 @@ public class SegmentMessageListener implements MessageListener<GUISegmentMsg> {
 			gui.addSegment(msg.startX, msg.startY, msg.endX, msg.endY);
 		} else{
 			Color c = new Color(r, g, b);
-			gui.addSegment(msg.startX, msg.startY, msg.endX, msg.endY);
+			gui.addSegment(msg.startX, msg.startY, msg.endX, msg.endY, c);
 		}
 	}
 
