@@ -53,7 +53,10 @@ public class LocalNavigation implements NodeMain, Runnable{
 	public static final int FINDING_WALL         = 11;
 	public static final int TRACKING_WALL        = 12;
 	public static final int WALL_ENDED           = 13;
-        private int state = ALIGNING;
+	public static final int TURN_PREP            = 14;
+	public static final int FIND_NEXT_WALL       = 15;
+	
+	private int state = ALIGNING;
 
 	protected boolean firstUpdate = true;
 
@@ -174,11 +177,13 @@ public class LocalNavigation implements NodeMain, Runnable{
 			sensor = "Front";
 			sonarToRobot = sonarFrontToRobot;
 			pointPlot.shape = 0;
+			//pointPlot.color=0;
 			
 		} else {
 			sensor = "Back";
 			sonarToRobot = sonarBackToRobot;
 			pointPlot.shape = 1;
+			//pointPlot.color=0;
 		}
 
 		if (!firstUpdate) {
@@ -392,7 +397,27 @@ public class LocalNavigation implements NodeMain, Runnable{
 		} else if (state == WALL_ENDED) {
 			commandMotors.rotationalVelocity = 0;
 			commandMotors.translationalVelocity = 0;
-		} else if (state == SPIN_ONCE_START) {
+			
+		} else if (state==TURN_PREP){
+			if(obstacleVisibleBack){
+				changeState(FIND_NEXT_WALL);
+			}else{
+				commandMotors.rotationalVelocity =0;
+				commandMotors.translationalVelocity = -1*transFast;
+			}
+			
+		} else if (state == FIND_NEXT_WALL){
+			if (bumpLeft || bumpRight) {
+				commandMotors.rotationalVelocity = 0;
+				commandMotors.translationalVelocity = 0;
+				changeState(ALIGNING);				
+			}else{
+				commandMotors.rotationalVelocity = 1*rotSlow;
+				commandMotors.translationalVelocity = 1*transSlow;
+			}
+		}
+		//------------------------------------Debug States
+		else if (state == SPIN_ONCE_START) {
 			if (!firstUpdate) {
 				state = SPIN_ONCE;
 			}
@@ -650,6 +675,10 @@ public class LocalNavigation implements NodeMain, Runnable{
 			segmentPub.publish(segmentPlot);
 
 			stateMsg.data = "WALL_ENDED";
+		} else if (state == TURN_PREP) {
+			stateMsg.data = "TURN_PREP";
+		} else if (state == FIND_NEXT_WALL) {
+			stateMsg.data = "FIND_NEXT_WALL";
 		} else {
 			stateMsg.data = "ERROR: unknown state";
 		}
