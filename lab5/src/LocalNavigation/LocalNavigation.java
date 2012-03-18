@@ -8,6 +8,7 @@ import org.ros.message.MessageListener;
 import org.ros.message.rss_msgs.MotionMsg;
 import org.ros.message.lab5_msgs.GUIPointMsg;
 import org.ros.message.lab5_msgs.GUILineMsg;
+import org.ros.message.lab5_msgs.GUISegmentMsg;
 import org.ros.message.lab5_msgs.ColorMsg;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
@@ -40,6 +41,8 @@ public class LocalNavigation implements NodeMain, Runnable{
 	public static final int MANUAL_MODE          =  9;
 	public static final int BACKING_UP           = 10;
 	public static final int FINDING_WALL         = 11;
+	public static final int TRACKING_WALL        = 12;
+	public static final int WALL_ENDED           = 13;
 	private int state = ALIGNING;
 
 	protected boolean firstUpdate = true;
@@ -66,6 +69,9 @@ public class LocalNavigation implements NodeMain, Runnable{
 	private double y;     // continuously updated in handleOdometry
 	private double theta; // continuously updated in handleOdometry
 
+	private Mat wallStartRobotToWorld;
+	private Mat wallEndRobotToWorld;
+
 	// transforms between odometry and world frames
 	private Mat odoToWorld; // initialized in handleOdometry
 	private Mat worldToOdo; // initialized in handleOdometry
@@ -91,6 +97,10 @@ public class LocalNavigation implements NodeMain, Runnable{
 	private boolean obstacleVisibleFront = false;
 	private boolean obstacleVisibleBack  = false;
 
+	private int obstacleVisibleFrontDebounce = 0;
+	private int obstacleVisibleBackDebounce  = 0;
+	private final int debounceThreshold = 20;
+
 	private Subscriber<org.ros.message.rss_msgs.SonarMsg> sonarFrontSub;
 	private Subscriber<org.ros.message.rss_msgs.SonarMsg> sonarBackSub;
 	private Subscriber<org.ros.message.rss_msgs.BumpMsg> bumpSub;
@@ -107,6 +117,10 @@ public class LocalNavigation implements NodeMain, Runnable{
 	private Publisher<GUILineMsg> linePub;
 	private GUILineMsg linePlot;
 	private ColorMsg linePlotColor;
+
+	private Publisher<GUISegmentMsg> segmentPub;
+	private GUISegmentMsg segmentPlot;
+	private ColorMsg segmentPlotColor;
 
 	private Publisher<org.ros.message.std_msgs.String> statePub;
 	private org.ros.message.std_msgs.String stateMsg;
@@ -161,11 +175,21 @@ public class LocalNavigation implements NodeMain, Runnable{
 			double[] echoWorldL = Mat.decodePose(echoWorld);
 			double[] echoOdoL = Mat.decodePose(echoOdo);
 
-			if (message.range > 1.0) {
+			if (message.range > wallStandoffDistance + 0.2) {
 				if (message.isFront) {
-					obstacleVisibleFront = false;
+					if (obstacleVisibleFrontDebounce > debounceThreshold && obstacleVisibleFront) {
+						obstacleVisibleFront = false;
+						obstacleVisibleFrontDebounce = 0;
+					} else {
+						obstacleVisibleFrontDebounce++;
+					}
 				} else {
-					obstacleVisibleBack  = false;
+					if (obstacleVisibleBackDebounce > debounceThreshold && obstacleVisibleBack) {
+						obstacleVisibleBack = false;
+						obstacleVisibleBackDebounce = 0;
+					} else {
+						obstacleVisibleBackDebounce++;
+					}
 				}
 
 				pointPlotColor.r = 0;
@@ -173,9 +197,19 @@ public class LocalNavigation implements NodeMain, Runnable{
 				pointPlotColor.b = 255;
 			} else {
 				if (message.isFront) {
-					obstacleVisibleFront = true;
+					if (obstacleVisibleFrontDebounce > debounceThreshold && !obstacleVisibleFront) {
+						obstacleVisibleFront = true;
+						obstacleVisibleFrontDebounce = 0;
+					} else {
+						obstacleVisibleFrontDebounce++;
+					}
 				} else {
-					obstacleVisibleBack  = true;
+					if (obstacleVisibleBackDebounce > debounceThreshold && !obstacleVisibleBack) {
+						obstacleVisibleBack = true;
+						obstacleVisibleBackDebounce = 0;
+					} else {
+						obstacleVisibleBackDebounce++;
+					}
 				}
 
 				pointPlotColor.r = 255;
@@ -311,26 +345,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 		} else if (state == BACKING_UP) {
 			if (obstacleVisibleFront || obstacleVisibleBack) {
 				if (lsqWorld.getNPoints() > 50 && lsqWorld.getLine().length > 0){
-					double angleError;
-					try {
-						double distError = wallStandoffDistance - lsqWorld.getDistance(x, y);
-						double desiredAngle = 3 * Math.PI / 2 + distError * 10.5;
-						double actualAngle = Mat.decodePose(Mat.mul(worldToAligned, Mat.encodePose(x, y, theta)))[2];
-						angleError = desiredAngle - actualAngle;
-						if (angleError > Math.PI / 6) {
-							angleError = Math.PI / 6;
-						} else if (angleError < -1 * Math.PI / 6) {
-							angleError = -1 * Math.PI / 6;
-						}
-						if (angleError > Math.PI) {
-							angleError -= 2 * Math.PI;
-						}
-						logNode.getLog().info("STEERING: " + distError +" "+ desiredAngle +" "+ actualAngle +" "+ angleError);
-					} catch (Exception e) {
-						logNode.getLog().info("getDistance threw an exception.\n");
-						angleError = 0;
-					}
-					commandMotors.rotationalVelocity = 0.4 * angleError;
+					commandMotors.rotationalVelocity = lineTracker(lsqWorld, false);
 					commandMotors.translationalVelocity = -1 * transFast;
 				} else {
 					commandMotors.rotationalVelocity = 0;
@@ -342,6 +357,22 @@ public class LocalNavigation implements NodeMain, Runnable{
 				changeState(FINDING_WALL);
 			}
 		} else if (state == FINDING_WALL) {
+			if (obstacleVisibleFront || obstacleVisibleBack) {
+				changeState(TRACKING_WALL);
+			} else {
+				commandMotors.rotationalVelocity = 0;
+				commandMotors.translationalVelocity = transFast;
+			}
+		} else if (state == TRACKING_WALL) {
+			if (obstacleVisibleFront || obstacleVisibleBack) {
+				commandMotors.rotationalVelocity = lineTracker(lsqWorld, true);
+				commandMotors.translationalVelocity = transFast;
+			} else {
+				commandMotors.rotationalVelocity = 0;
+				commandMotors.translationalVelocity = 0;
+				changeState(WALL_ENDED);
+			}
+		} else if (state == WALL_ENDED) {
 			commandMotors.rotationalVelocity = 0;
 			commandMotors.translationalVelocity = 0;
 		} else if (state == SPIN_ONCE_START) {
@@ -373,6 +404,30 @@ public class LocalNavigation implements NodeMain, Runnable{
 			motorPub.publish(commandMotors);
 		}
 		//logNode.getLog().info("MOTORs: " + commandMotors.translationalVelocity + " " + commandMotors.rotationalVelocity);
+	}
+
+	private double lineTracker(LeastSquareLine lsq, boolean forwards) {
+		double angleError;
+		try {
+			double distError = wallStandoffDistance - lsq.getDistance(x, y);
+			double gain = 3;
+			double desiredAngle = 3 * Math.PI / 2 + (forwards ? (-1 * gain * distError) : (gain * distError));
+			double actualAngle = Mat.decodePose(Mat.mul(worldToAligned, Mat.encodePose(x, y, theta)))[2];
+			angleError = desiredAngle - actualAngle;
+			if (angleError > Math.PI / 6) {
+				angleError = Math.PI / 6;
+			} else if (angleError < -1 * Math.PI / 6) {
+				angleError = -1 * Math.PI / 6;
+			}
+			if (angleError > Math.PI) {
+				angleError -= 2 * Math.PI;
+			}
+			logNode.getLog().info("STEERING: " + distError +" "+ desiredAngle +" "+ actualAngle +" "+ angleError);
+		} catch (Exception e) {
+			logNode.getLog().info("getDistance threw an exception.\n");
+			angleError = 0;
+		}
+		return 0.4 * angleError;
 	}
 	
 	@Override
@@ -439,10 +494,15 @@ public class LocalNavigation implements NodeMain, Runnable{
 		pointPlot = new GUIPointMsg();
 		pointPlotColor = new ColorMsg();
 
-		// initialize the ROS publication to graph points
+		// initialize the ROS publication to graph lines
 		linePub = node.newPublisher("/gui/Line","lab5_msgs/GUILineMsg");
 		linePlot = new GUILineMsg();
 		linePlotColor = new ColorMsg();
+
+		// initialize the ROS publication to graph line segments
+		segmentPub = node.newPublisher("/gui/Segment","lab5_msgs/GUISegmentMsg");
+		segmentPlot = new GUISegmentMsg();
+		segmentPlotColor = new ColorMsg();
 
 		// initialize the ROS publication to rss/state
 		statePub = node.newPublisher("/rss/state","std_msgs/String");
@@ -496,9 +556,64 @@ public class LocalNavigation implements NodeMain, Runnable{
 			stateMsg.data = "BACKING_UP";
 		} else if (state == FINDING_WALL) {
 			stateMsg.data = "FINDING_WALL";
+		} else if (state == TRACKING_WALL) {
+			wallStartRobotToWorld = robotToWorld;
+			lsqWorld.reset();
+			lsqOdo.reset();
+			stateMsg.data = "TRACKING_WALL";
+		} else if (state == WALL_ENDED) {
+			wallEndRobotToWorld = robotToWorld;
+			double line[] = lsqWorld.getLine();
+
+			double[] sonarWorldStartxyL   = Mat.decodePose(Mat.mul(wallStartRobotToWorld, sonarFrontToRobot, Mat.encodePose(0, 0, 0)));
+			double[] sonarWorldStartdxdyL = Mat.decodePose(Mat.mul(wallStartRobotToWorld, sonarFrontToRobot, Mat.encodePose(0.5, 0, 0)));
+
+			// refers to sonar vectors
+			double xStart = sonarWorldStartxyL[0];
+			double yStart = sonarWorldStartxyL[1];
+			double dxStart = sonarWorldStartdxdyL[0];
+			double dyStart = sonarWorldStartdxdyL[1];
+
+			// refers to wall location
+			double xyStart[] = lineVectorIntersection(line, xStart, yStart, dxStart, dyStart);
+
+			double[] sonarWorldEndxyL   = Mat.decodePose(Mat.mul(wallEndRobotToWorld, sonarBackToRobot, Mat.encodePose(0, 0, 0)));
+			double[] sonarWorldEnddxdyL = Mat.decodePose(Mat.mul(wallEndRobotToWorld, sonarBackToRobot, Mat.encodePose(0.5, 0, 0)));
+
+			// refers to sonar vectors
+			double xEnd = sonarWorldEndxyL[0];
+			double yEnd = sonarWorldEndxyL[1];
+			double dxEnd = sonarWorldEnddxdyL[0];
+			double dyEnd = sonarWorldEnddxdyL[1];
+
+			// refers to wall location
+			double xyEnd[] = lineVectorIntersection(line, xEnd, yEnd, dxEnd, dyEnd);
+
+			segmentPlot.startX = xyStart[0];
+			segmentPlot.startY = xyStart[1];
+			segmentPlot.endX = xyEnd[0];
+			segmentPlot.endY = xyEnd[1];
+
+			segmentPlotColor.r = 0;
+			segmentPlotColor.g = 0;
+			segmentPlotColor.b = 0;
+
+			segmentPlot.color = segmentPlotColor;
+
+			segmentPub.publish(segmentPlot);
+
+			stateMsg.data = "WALL_ENDED";
 		} else {
 			stateMsg.data = "ERROR: unknown state";
 		}
 		statePub.publish(stateMsg);
+	}
+
+	public static double[] lineVectorIntersection(double[] line, double x, double y, double dx, double dy) {
+		double a = line[0];
+		double b = line[1];
+		double c = line[2];
+		double p = (-a * x - b * y - c) / (a * dx + b * dy);
+		return new double[] {x + p * dx, y + p * dy};
 	}
 }
