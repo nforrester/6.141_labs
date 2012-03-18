@@ -1,16 +1,8 @@
 package LocalNavigation;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import com.sun.jmx.snmp.Timestamp;
+
 
 import org.ros.message.MessageListener;
 import org.ros.message.rss_msgs.MotionMsg;
@@ -24,8 +16,6 @@ import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
-import com.sun.jmx.snmp.Timestamp;
-
 import VisualServo.VisionGUI;
 
 /**
@@ -33,7 +23,7 @@ import VisualServo.VisionGUI;
  * @author previous TA's, prentice, vona, nforrest, raga, wyken, dgonz
  *
  */
-public class LocalNavigation implements NodeMain, Runnable{
+public class ManualNav implements NodeMain, Runnable{
 	private Node logNode;
 
 	private static final boolean RUN_SONAR_GUI = false;
@@ -53,7 +43,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 	public static final int FINDING_WALL         = 11;
 	public static final int TRACKING_WALL        = 12;
 	public static final int WALL_ENDED           = 13;
-        private int state = ALIGNING;
+        private int state = MANUAL_MODE;
 
 	protected boolean firstUpdate = true;
 
@@ -110,8 +100,6 @@ public class LocalNavigation implements NodeMain, Runnable{
 	private int obstacleVisibleFrontDebounce = 0;
 	private int obstacleVisibleBackDebounce  = 0;
 	private final int debounceThreshold = 20;
-	
-	private final boolean saveErrors = false;
 
 	private Subscriber<org.ros.message.rss_msgs.SonarMsg> sonarFrontSub;
 	private Subscriber<org.ros.message.rss_msgs.SonarMsg> sonarBackSub;
@@ -142,7 +130,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 	/**
 	 * <p>Create a new LocalNavigation object.</p>
 	 */
-	public LocalNavigation() {
+	public ManualNav() {
 
 		setInitialParams();
 
@@ -430,34 +418,6 @@ public class LocalNavigation implements NodeMain, Runnable{
 			double desiredAngle = 3 * Math.PI / 2 + (forwards ? (-1 * gain * distError) : (gain * distError));
 			double actualAngle = Mat.decodePose(Mat.mul(worldToAligned, Mat.encodePose(x, y, theta)))[2];
 			angleError = desiredAngle - actualAngle;
-			
-			//saving errors for 4.3
-			
-			if(saveErrors) {
-	            File file = new File("Errors.txt");
-	            FileWriter writer = null;
-	            try {
-	                writer = new FileWriter(file,true);
-	                BufferedWriter out = new BufferedWriter(writer);
-	                String toBeWritten = new Timestamp(System.currentTimeMillis()) + " " +
-	                                distError + " " + angleError;
-	                out.append(toBeWritten);
-	                out.newLine();
-	            } catch (IOException e) {
-	                System.out.println("complexity Sources/Levels file not found" + e);
-	            }
-	            finally {
-	                try {
-	                    out.close();
-	                    writer.close();
-	                } catch (IOException e) {
-	                    e.printStackTrace();
-	                }
-	            
-	        }
-	    }
-			
-			
 			if (angleError > Math.PI / 6) {
 				angleError = Math.PI / 6;
 			} else if (angleError < -1 * Math.PI / 6) {
