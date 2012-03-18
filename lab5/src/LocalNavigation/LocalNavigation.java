@@ -10,7 +10,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import com.sun.jmx.snmp.Timestamp;
+
 
 import org.ros.message.MessageListener;
 import org.ros.message.rss_msgs.MotionMsg;
@@ -24,7 +24,7 @@ import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
-import com.sun.jmx.snmp.Timestamp;
+
 
 import VisualServo.VisionGUI;
 
@@ -100,6 +100,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 
 	private static final double wallStandoffDistance = 0.5;
 	private static final double distanceToFrontOfRobot = 0.1;
+	private static final double sonarRobotCenterXDifference = 0.2286;
 
 	private LeastSquareLine lsqWorld;
 	private LeastSquareLine lsqOdo;
@@ -111,7 +112,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 	private int obstacleVisibleBackDebounce  = 0;
 	private final int debounceThreshold = 20;
 	
-	private final boolean saveErrors = false;
+	private final boolean saveErrors = true;
 
 	private Subscriber<org.ros.message.rss_msgs.SonarMsg> sonarFrontSub;
 	private Subscriber<org.ros.message.rss_msgs.SonarMsg> sonarBackSub;
@@ -189,7 +190,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 			double[] echoWorldL = Mat.decodePose(echoWorld);
 			double[] echoOdoL = Mat.decodePose(echoOdo);
 
-			if (message.range > wallStandoffDistance + 0.2) {
+			if (message.range > wallStandoffDistance - sonarRobotCenterXDifference + 0.2) {
 				if (message.isFront) {
 					if (obstacleVisibleFrontDebounce > debounceThreshold && obstacleVisibleFront) {
 						obstacleVisibleFront = false;
@@ -434,28 +435,25 @@ public class LocalNavigation implements NodeMain, Runnable{
 			//saving errors for 4.3
 			
 			if(saveErrors) {
-	            File file = new File("Errors.txt");
-	            FileWriter writer = null;
-	            try {
-	                writer = new FileWriter(file,true);
-	                BufferedWriter out = new BufferedWriter(writer);
-	                String toBeWritten = new Timestamp(System.currentTimeMillis()) + " " +
-	                                distError + " " + angleError;
-	                out.append(toBeWritten);
-	                out.newLine();
-	            } catch (IOException e) {
-	                System.out.println("complexity Sources/Levels file not found" + e);
-	            }
-	            finally {
-	                try {
-	                    out.close();
-	                    writer.close();
-	                } catch (IOException e) {
-	                    e.printStackTrace();
-	                }
-	            
-	        }
-	    }
+			    File file = new File("/home/rss-student/RSS-I-group/lab5/src/LocalNavigation/Errors.txt");
+			    if (!file.exists()){
+				file.createNewFile();
+			    }
+			    FileWriter writer = null;
+			    BufferedWriter out = null;
+				writer = new FileWriter(file,true);
+				out = new BufferedWriter(writer);
+				String toBeWritten = System.currentTimeMillis() + " " +
+				    distError + " " + angleError;
+				out.append(toBeWritten);
+				out.newLine();
+
+				    out.close();
+				    writer.close();
+
+
+
+			}
 			
 			
 			if (angleError > Math.PI / 6) {
@@ -466,9 +464,9 @@ public class LocalNavigation implements NodeMain, Runnable{
 			if (angleError > Math.PI) {
 				angleError -= 2 * Math.PI;
 			}
-			logNode.getLog().info("STEERING: " + distError +" "+ desiredAngle +" "+ actualAngle +" "+ angleError);
+			//			logNode.getLog().info("STEERING: " + distError +" "+ desiredAngle +" "+ actualAngle +" "+ angleError);
 		} catch (Exception e) {
-			logNode.getLog().info("getDistance threw an exception.\n");
+		    logNode.getLog().info("getDistance threw an exception.\n"+ e.toString());
 			angleError = 0;
 		}
 		return 0.4 * angleError;
