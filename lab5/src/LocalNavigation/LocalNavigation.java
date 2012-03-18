@@ -1,5 +1,6 @@
 package LocalNavigation;
 
+import java.awt.Color;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -668,11 +669,12 @@ public class LocalNavigation implements NodeMain, Runnable{
 			segmentPlot.endX = xyEnd[0];
 			segmentPlot.endY = xyEnd[1];
 
-			//segmentPlotColor.r = 0;
-			//segmentPlotColor.g = 0;
-			//segmentPlotColor.b = 0;
-
-			segmentPlot.colorMsg = gui.makeRandomColor();
+			Color randomColor = gui.makeRandomColor();
+			segmentPlotColor.r = randomColor.getRed();
+			segmentPlotColor.g = randomColor.getGreen();
+			segmentPlotColor.b = randomColor.getBlue();
+			
+			segmentPlot.colorMsg = segmentPlotColor; 
 
 			publishTheLine = false;
 			segmentPub.publish(segmentPlot);
