@@ -3,6 +3,7 @@ package LocalNavigation;
 import java.util.concurrent.ArrayBlockingQueue;
 
 
+
 import org.ros.message.MessageListener;
 import org.ros.message.rss_msgs.MotionMsg;
 import org.ros.message.lab5_msgs.GUIPointMsg;
@@ -48,7 +49,8 @@ public class LocalNavigation implements NodeMain, Runnable{
 
 	private static final double transSlow = 0.05;
 	private static final double rotSlow = 0.05;
-	private static final double rotFast = 0.2;
+	private static final double transFast = 0.2;
+	private static final double rotFast = 0.1;
 
 	/* Frames of reference:
 	 *
@@ -283,7 +285,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 			double[] poseAligned = Mat.decodePose(Mat.mul(worldToAligned, Mat.encodePose(x, y, theta)));
 			if (poseAligned[0] > -1 * (wallStandoffDistance - distanceToFrontOfRobot)) {
 				commandMotors.rotationalVelocity = 0;
-				commandMotors.translationalVelocity = -1 * transSlow;
+				commandMotors.translationalVelocity = -1 * transFast;
 			} else {
 				commandMotors.rotationalVelocity = 0;
 				commandMotors.translationalVelocity = 0;
@@ -295,7 +297,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 				poseAligned[2] -= 2 * Math.PI;
 			}
 			if (poseAligned[2] > -0.5 * Math.PI) {
-				commandMotors.rotationalVelocity = -1 * rotSlow;
+				commandMotors.rotationalVelocity = -1 * rotFast;
 				commandMotors.translationalVelocity = 0;
 			} else {
 				commandMotors.rotationalVelocity = 0;
@@ -309,16 +311,27 @@ public class LocalNavigation implements NodeMain, Runnable{
 		} else if (state == BACKING_UP) {
 			if (obstacleVisibleFront || obstacleVisibleBack) {
 				if (lsqWorld.getNPoints() > 50 && lsqWorld.getLine().length > 0){
-					double distError = wallStandoffDistance - lsqWorld.getDistance(x, y);
-					double desiredAngle = 3 * Math.PI / 2 - distError * 0.5;
-					double actualAngle = Mat.decodePose(Mat.mul(worldToAligned, Mat.encodePose(x, y, theta)))[2];
-					double angleError = desiredAngle - actualAngle;
-					if(angleError > Math.PI) {
-						angleError -= 2 * Math.PI;
+					double angleError;
+					try {
+						double distError = wallStandoffDistance - lsqWorld.getDistance(x, y);
+						double desiredAngle = 3 * Math.PI / 2 + distError * 10.5;
+						double actualAngle = Mat.decodePose(Mat.mul(worldToAligned, Mat.encodePose(x, y, theta)))[2];
+						angleError = desiredAngle - actualAngle;
+						if (angleError > Math.PI / 6) {
+							angleError = Math.PI / 6;
+						} else if (angleError < -1 * Math.PI / 6) {
+							angleError = -1 * Math.PI / 6;
+						}
+						if (angleError > Math.PI) {
+							angleError -= 2 * Math.PI;
+						}
+						logNode.getLog().info("STEERING: " + distError +" "+ desiredAngle +" "+ actualAngle +" "+ angleError);
+					} catch (Exception e) {
+						logNode.getLog().info("getDistance threw an exception.\n");
+						angleError = 0;
 					}
-					logNode.getLog().info("STEERING: " + distError +" "+ desiredAngle +" "+ actualAngle +" "+ angleError);
 					commandMotors.rotationalVelocity = 0.4 * angleError;
-					commandMotors.translationalVelocity = -1 * transSlow;
+					commandMotors.translationalVelocity = -1 * transFast;
 				} else {
 					commandMotors.rotationalVelocity = 0;
 					commandMotors.translationalVelocity = 0;

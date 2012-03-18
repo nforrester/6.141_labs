@@ -8,6 +8,8 @@
 
 package LocalNavigation;
 
+import java.lang.Exception;
+
 public class LeastSquareLine {
 	private double sumX;
 	private double sumY;
@@ -47,14 +49,14 @@ public class LeastSquareLine {
 	}
 
 	public double[] getLine() {
-		double[] line = {};
 		if (lineDirty) {
 			if (nPoints >= 2) {
 				double d = sumXX * sumYY - sumXY * sumXY;
 				if (d != 0) {
 					double a = (sumX * sumYY - sumY * sumXY) / d;
 					double b = (sumY * sumXX - sumX * sumXY) / d;
-					line = new double[] {a, b, -1};
+					double ln = Math.pow(a * a + b * b, 0.5);
+					line = new double[] {a / ln, b / ln, -1 / ln};
 					lineDirty = false;
 				}
 			}
@@ -66,12 +68,12 @@ public class LeastSquareLine {
 		return nPoints;
 	}
 
-	public double getDistance(double x, double y) {
+	public double getDistance(double x, double y) throws Exception {
 		double[] line = getLine();
 		if (line.length > 0) {
 			return Math.abs(line[0] * x + line[1] * y + line[2]);
 		} else {
-			return -1;
+			throw new Exception("Bad line in getDistance\n");
 		}
 	}
 }
