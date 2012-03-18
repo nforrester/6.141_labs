@@ -125,6 +125,8 @@ public class LocalNavigation implements NodeMain, Runnable{
 	private Publisher<org.ros.message.std_msgs.String> statePub;
 	private org.ros.message.std_msgs.String stateMsg;
 
+	private boolean publishTheLine = true;
+
 	/**
 	 * <p>Create a new LocalNavigation object.</p>
 	 */
@@ -227,7 +229,9 @@ public class LocalNavigation implements NodeMain, Runnable{
 					linePlotColor.g = 130;
 					linePlotColor.b = 0;
 					linePlot.color = linePlotColor;
-					linePub.publish(linePlot);
+					if (publishTheLine) {
+						linePub.publish(linePlot);
+					}
 				}
 			}
 			pointPlot.color = pointPlotColor;
@@ -563,28 +567,32 @@ public class LocalNavigation implements NodeMain, Runnable{
 			stateMsg.data = "TRACKING_WALL";
 		} else if (state == WALL_ENDED) {
 			wallEndRobotToWorld = robotToWorld;
-			double line[] = lsqWorld.getLine();
+			double line[] = lsqOdo.getLine();
 
-			double[] sonarWorldStartxyL   = Mat.decodePose(Mat.mul(wallStartRobotToWorld, sonarFrontToRobot, Mat.encodePose(0, 0, 0)));
-			double[] sonarWorldStartdxdyL = Mat.decodePose(Mat.mul(wallStartRobotToWorld, sonarFrontToRobot, Mat.encodePose(0.5, 0, 0)));
+			double[] sonarOdoStartxyL   = Mat.decodePose(Mat.mul(worldToOdo, wallStartRobotToWorld, sonarFrontToRobot, Mat.encodePose(0, 0, 0)));
+			double[] sonarOdoStartdxdyL = Mat.decodePose(Mat.mul(worldToOdo, wallStartRobotToWorld, sonarFrontToRobot, Mat.encodePose(0.5, 0, 0)));
 
 			// refers to sonar vectors
-			double xStart = sonarWorldStartxyL[0];
-			double yStart = sonarWorldStartxyL[1];
-			double dxStart = sonarWorldStartdxdyL[0];
-			double dyStart = sonarWorldStartdxdyL[1];
+			double xStart = sonarOdoStartxyL[0];
+			double yStart = sonarOdoStartxyL[1];
+			double dxStart = sonarOdoStartdxdyL[0];
+			double dyStart = sonarOdoStartdxdyL[1];
+			dxStart -= xStart;
+			dyStart -= yStart;
 
 			// refers to wall location
 			double xyStart[] = lineVectorIntersection(line, xStart, yStart, dxStart, dyStart);
 
-			double[] sonarWorldEndxyL   = Mat.decodePose(Mat.mul(wallEndRobotToWorld, sonarBackToRobot, Mat.encodePose(0, 0, 0)));
-			double[] sonarWorldEnddxdyL = Mat.decodePose(Mat.mul(wallEndRobotToWorld, sonarBackToRobot, Mat.encodePose(0.5, 0, 0)));
+			double[] sonarOdoEndxyL   = Mat.decodePose(Mat.mul(worldToOdo, wallEndRobotToWorld, sonarBackToRobot, Mat.encodePose(0, 0, 0)));
+			double[] sonarOdoEnddxdyL = Mat.decodePose(Mat.mul(worldToOdo, wallEndRobotToWorld, sonarBackToRobot, Mat.encodePose(0.5, 0, 0)));
 
 			// refers to sonar vectors
-			double xEnd = sonarWorldEndxyL[0];
-			double yEnd = sonarWorldEndxyL[1];
-			double dxEnd = sonarWorldEnddxdyL[0];
-			double dyEnd = sonarWorldEnddxdyL[1];
+			double xEnd = sonarOdoEndxyL[0];
+			double yEnd = sonarOdoEndxyL[1];
+			double dxEnd = sonarOdoEnddxdyL[0];
+			double dyEnd = sonarOdoEnddxdyL[1];
+			dxEnd -= xEnd;
+			dyEnd -= yEnd;
 
 			// refers to wall location
 			double xyEnd[] = lineVectorIntersection(line, xEnd, yEnd, dxEnd, dyEnd);
@@ -600,6 +608,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 
 			segmentPlot.color = segmentPlotColor;
 
+			publishTheLine = false;
 			segmentPub.publish(segmentPlot);
 
 			stateMsg.data = "WALL_ENDED";
