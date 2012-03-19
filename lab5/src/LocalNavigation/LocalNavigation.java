@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import java.io.BufferedWriter;
@@ -56,7 +57,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 	public static final int WALL_ENDED           = 13;
 	public static final int TURN_PREP            = 14;
 	public static final int FIND_NEXT_WALL       = 15;
-        public static final int DONE                 = 16;
+	public static final int DONE			     = 16;
 
 	private int state = ALIGNING;
 
@@ -69,6 +70,8 @@ public class LocalNavigation implements NodeMain, Runnable{
 	private static final double rotSlow = 0.05;
 	private static final double transFast = 0.2;
 	private static final double rotFast = 0.1;
+	
+	private ArrayList<double[]> polySegments= new ArrayList<double[]>();
 
 	/* Frames of reference:
 	 *
@@ -163,6 +166,15 @@ public class LocalNavigation implements NodeMain, Runnable{
 	
 	protected void setInitialParams() {
 
+	}
+	
+	public boolean comparePoints(double	x1, double y1,double x2,double y2, double tolerance) {
+		return ((Math.abs(x2-x1)<tolerance)&&(Math.abs(y2-y1)<tolerance));
+	}
+	
+	public boolean polygonIsComplete(){
+		return (comparePoints( polySegments.get(0)[0] , polySegments.get(0)[1] , 
+								polySegments.get(polySegments.size()-1)[0] , polySegments.get(polySegments.size()-1)[1] ,.1));
 	}
 
 	/**
@@ -399,7 +411,11 @@ public class LocalNavigation implements NodeMain, Runnable{
 		} else if (state == WALL_ENDED) {
 			commandMotors.rotationalVelocity = 0;
 			commandMotors.translationalVelocity = 0;
-			
+			if (polygonIsComplete()) {
+				changeState(DONE);
+			} else {
+				changeState(TURN_PREP);
+			}
 		} else if (state==TURN_PREP){
 			if(obstacleVisibleBack){
 				changeState(FIND_NEXT_WALL);
@@ -417,6 +433,9 @@ public class LocalNavigation implements NodeMain, Runnable{
 				commandMotors.rotationalVelocity = 1*rotFast;
 				commandMotors.translationalVelocity = 3.5*transSlow;
 			}
+		} else if (state==DONE){
+			commandMotors.rotationalVelocity = 0;
+			commandMotors.translationalVelocity = 0;
 		}
 		//------------------------------------Debug States
 		else if (state == SPIN_ONCE_START) {
@@ -663,7 +682,9 @@ public class LocalNavigation implements NodeMain, Runnable{
 
 			// refers to wall location
 			double xyEnd[] = lineVectorIntersection(line, xEnd, yEnd, dxEnd, dyEnd);
-
+			
+			polySegments.add(new double[] {xStart,yStart,xEnd,yEnd});
+			
 			segmentPlot.startX = xyStart[0];
 			segmentPlot.startY = xyStart[1];
 			segmentPlot.endX = xyEnd[0];
@@ -679,12 +700,14 @@ public class LocalNavigation implements NodeMain, Runnable{
 
 			publishTheLine = false;
 			segmentPub.publish(segmentPlot);
-
+			
 			stateMsg.data = "WALL_ENDED";
 		} else if (state == TURN_PREP) {
 			stateMsg.data = "TURN_PREP";
 		} else if (state == FIND_NEXT_WALL) {
 			stateMsg.data = "FIND_NEXT_WALL";
+		} else if (state == DONE) {
+			stateMsg.data = "DONE";
 		} else {
 			stateMsg.data = "ERROR: unknown state";
 		}
