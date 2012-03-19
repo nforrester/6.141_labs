@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.Scanner;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -488,7 +489,14 @@ public class LocalNavigation implements NodeMain, Runnable{
 			//saving errors for 4.3
 			
 			if(saveErrors) {
-			    File file = new File("/home/rss-student/RSS-I-group/lab5/src/LocalNavigation/Errors.txt");
+			    File numberFile = new File("/home/rss-student/RSS-I-group/lab5/src/LocalNavigation/currentTest.txt");
+			    Scanner fileReader = new Scanner(numberFile);
+			    int k = Integer.parseInt(fileReader.nextLine().trim());
+			    FileWriter numberUpdater = new FileWriter(numberFile);
+			    BufferedWriter numberBuffer = new BufferedWriter(numberUpdater);
+			    numberBuffer.write(k+1);
+			    String fileName  ="/home/rss-student/RSS-I-group/lab5/src/LocalNavigation/Errors" + k + ".txt";
+			    File file = new File(fileName);
 			    if (!file.exists()){
 				file.createNewFile();
 			    }
