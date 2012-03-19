@@ -1,0 +1,13 @@
+
+<launch>
+  <include file="$(find lab4)/launch/config.launch" />
+
+  <node name="nav" pkg="rosjava_bootstrap" type="run.py" args="lab6 GlobalNavigation.GlobalNavigation" machine="workstation">
+<!--
+  	<param name="mapFileName" value="/home/jbrooksh/my_sandbox/6.141/spring2012/priv/labs_ros/lab6/src/global-nav-maze-2011-med.map" /> 
+-->
+  	<param name="mapFileName" value="/home/jbrooksh/my_sandbox/6.141/spring2012/priv/labs_ros/lab6/src/practice-maze-02.map" /> 
+
+  </node>
+
+</launch>
