@@ -169,14 +169,14 @@ public class LocalNavigation implements NodeMain, Runnable{
 
 	}
 	
-	public boolean comparePoints(double	x1, double y1,double x2,double y2, double tolerance) {
-		return ((Math.abs(x2-x1)<tolerance)&&(Math.abs(y2-y1)<tolerance));
+	public boolean comparePoints(double x1, double y1, double x2, double y2, double tolerance) {
+		return Math.pow(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2), 0.5) < tolerance;
 	}
 	
 	public boolean polygonIsComplete(){
 		if (polySegments.size() > 1) {
 			return (comparePoints(polySegments.get(0)[0],                     polySegments.get(0)[1],
-					      polySegments.get(polySegments.size()-1)[0], polySegments.get(polySegments.size()-1)[1], .1));
+					      polySegments.get(polySegments.size()-1)[2], polySegments.get(polySegments.size()-1)[3], .3));
 		} else {
 			return false;
 		}
