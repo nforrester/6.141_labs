@@ -675,7 +675,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 			segmentPlotColor.g = randomColor.getGreen();
 			segmentPlotColor.b = randomColor.getBlue();
 			
-			segmentPlot.colorMsg = segmentPlotColor; 
+			segmentPlot.color = segmentPlotColor; 
 
 			publishTheLine = false;
 			segmentPub.publish(segmentPlot);
