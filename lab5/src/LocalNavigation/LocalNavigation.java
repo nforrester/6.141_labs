@@ -57,9 +57,9 @@ public class LocalNavigation implements NodeMain, Runnable{
 	public static final int WALL_ENDED           = 13;
 	public static final int TURN_PREP            = 14;
 	public static final int FIND_NEXT_WALL       = 15;
-	public static final int DONE			     = 16;
+	public static final int DONE		     = 16;
 
-	private int state = ALIGNING;
+	private int state = ALIGN_ON_BUMP;
 
 	protected boolean firstUpdate = true;
 
@@ -406,7 +406,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 			} else {
 				commandMotors.rotationalVelocity = 0;
 				commandMotors.translationalVelocity = 0;
-				changeState(TURN_PREP);
+				changeState(WALL_ENDED);
 			}
 		} else if (state == WALL_ENDED) {
 			commandMotors.rotationalVelocity = 0;
@@ -431,7 +431,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 				changeState(ALIGNING);				
 			}else{
 				commandMotors.rotationalVelocity = 1*rotFast;
-				commandMotors.translationalVelocity = 3.5*transSlow;
+				commandMotors.translationalVelocity = 4*transSlow;
 			}
 		} else if (state==DONE){
 			commandMotors.rotationalVelocity = 0;
