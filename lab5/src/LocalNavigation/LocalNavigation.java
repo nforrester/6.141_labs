@@ -634,36 +634,50 @@ public class LocalNavigation implements NodeMain, Runnable{
 	private void changeState(int newState) {
 		state = newState;
 		if (state == STOP_ON_BUMP) {
+			publishTheLine = false;
 			stateMsg.data = "STOP_ON_BUMP";
 		} else if (state == ALIGN_ON_BUMP) {
+			publishTheLine = false;
 			stateMsg.data = "ALIGN_ON_BUMP";
 		} else if (state == ALIGNING) {
+			publishTheLine = false;
 			stateMsg.data = "ALIGNING";
 		} else if (state == ALIGNED) {
+			publishTheLine = false;
 			worldToAligned = Mat.mul(Mat.rotation(-theta), Mat.translation(-x, -y));
 			alignedToWorld = Mat.inverse(worldToAligned);
 			stateMsg.data = "ALIGNED";
 		} else if (state == ALIGNED_AND_ROTATING) {
+			publishTheLine = false;
 			stateMsg.data = "ALIGNED_AND_ROTATING";
 		} else if (state == ALIGNED_AND_ROTATED) {
+			publishTheLine = false;
 			stateMsg.data = "ALIGNED_AND_ROTATED";
-		} else if (state == SPIN_ONCE_START) {			stateMsg.data = "SPIN_ONCE_START";
+		} else if (state == SPIN_ONCE_START) {
+			publishTheLine = false;
+			stateMsg.data = "SPIN_ONCE_START";
 		} else if (state == SPIN_ONCE) {
+			publishTheLine = false;
 			stateMsg.data = "SPIN_ONCE";
 		} else if (state == SPIN_ONCE_STOP) {
+			publishTheLine = false;
 			stateMsg.data = "SPIN_ONCE_STOP";
 		} else if (state == BACKING_UP) {
+			publishTheLine = true;
 			lsqWorld.reset();
 			lsqOdo.reset();
 			stateMsg.data = "BACKING_UP";
 		} else if (state == FINDING_WALL) {
+			publishTheLine = false;
 			stateMsg.data = "FINDING_WALL";
 		} else if (state == TRACKING_WALL) {
+			publishTheLine = true;
 			wallStartRobotToWorld = robotToWorld;
 			lsqWorld.reset();
 			lsqOdo.reset();
 			stateMsg.data = "TRACKING_WALL";
 		} else if (state == WALL_ENDED) {
+			publishTheLine = false;
 			wallEndRobotToWorld = robotToWorld;
 			double line[] = lsqOdo.getLine();
 
@@ -709,16 +723,17 @@ public class LocalNavigation implements NodeMain, Runnable{
 			segmentPlotColor.b = randomColor.getBlue();
 			
 			segmentPlot.color = segmentPlotColor; 
-
-			publishTheLine = false;
 			segmentPub.publish(segmentPlot);
 			
 			stateMsg.data = "WALL_ENDED";
 		} else if (state == TURN_PREP) {
+			publishTheLine = false;
 			stateMsg.data = "TURN_PREP";
 		} else if (state == FIND_NEXT_WALL) {
+			publishTheLine = false;
 			stateMsg.data = "FIND_NEXT_WALL";
 		} else if (state == DONE) {
+			publishTheLine = false;
 			stateMsg.data = "DONE";
 		} else {
 			stateMsg.data = "ERROR: unknown state";
