@@ -71,7 +71,7 @@ public class LocalNavigation implements NodeMain, Runnable{
 	private static final double transFast = 0.2;
 	private static final double rotFast = 0.1;
 	
-	private ArrayList<double[]> polySegments= new ArrayList<double[]>();
+	private ArrayList<double[]> polySegments = new ArrayList<double[]>();
 
 	/* Frames of reference:
 	 *
@@ -173,8 +173,12 @@ public class LocalNavigation implements NodeMain, Runnable{
 	}
 	
 	public boolean polygonIsComplete(){
-		return (comparePoints( polySegments.get(0)[0] , polySegments.get(0)[1] , 
-								polySegments.get(polySegments.size()-1)[0] , polySegments.get(polySegments.size()-1)[1] ,.1));
+		if (polySegments.size() > 1) {
+			return (comparePoints(polySegments.get(0)[0],                     polySegments.get(0)[1],
+					      polySegments.get(polySegments.size()-1)[0], polySegments.get(polySegments.size()-1)[1], .1));
+		} else {
+			return false;
+		}
 	}
 
 	/**
@@ -416,12 +420,12 @@ public class LocalNavigation implements NodeMain, Runnable{
 			} else {
 				changeState(TURN_PREP);
 			}
-		} else if (state==TURN_PREP){
+		} else if (state == TURN_PREP){
 			if(obstacleVisibleBack){
 				changeState(FIND_NEXT_WALL);
 			}else{
-				commandMotors.rotationalVelocity =0;
-				commandMotors.translationalVelocity = -1*transFast;
+				commandMotors.rotationalVelocity = 0;
+				commandMotors.translationalVelocity = -1 * transFast;
 			}
 			
 		} else if (state == FIND_NEXT_WALL){
@@ -430,10 +434,10 @@ public class LocalNavigation implements NodeMain, Runnable{
 				commandMotors.translationalVelocity = 0;
 				changeState(ALIGNING);				
 			}else{
-				commandMotors.rotationalVelocity = 1*rotFast;
-				commandMotors.translationalVelocity = 4*transSlow;
+				commandMotors.rotationalVelocity = 1 * rotFast;
+				commandMotors.translationalVelocity = 4 * transSlow;
 			}
-		} else if (state==DONE){
+		} else if (state == DONE){
 			commandMotors.rotationalVelocity = 0;
 			commandMotors.translationalVelocity = 0;
 		}
