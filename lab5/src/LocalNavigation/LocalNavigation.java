@@ -668,7 +668,8 @@ public class LocalNavigation implements NodeMain, Runnable{
 			segmentPlot.startY = xyStart[1];
 			segmentPlot.endX = xyEnd[0];
 			segmentPlot.endY = xyEnd[1];
-
+			
+			//random color from SonarGUI
 			Color randomColor = gui.makeRandomColor();
 			segmentPlotColor.r = randomColor.getRed();
 			segmentPlotColor.g = randomColor.getGreen();
