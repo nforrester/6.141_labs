@@ -217,6 +217,16 @@ public class RobotController implements NodeMain, Runnable  {
 		
 		Thread runningStuff = new Thread(this);
 		runningStuff.start();
+		
+		addWaypoint(new Waypoint(.5, 0, (short) 1));
+		addWaypoint(new Waypoint(.75, .75, (short) 1));
+		addWaypoint(new Waypoint(0, 0, (short) -1));
+		addWaypoint(new Waypoint(0, 1, (short) 1));
+		addWaypoint(new Waypoint(1, 1, (short) 1));
+		addWaypoint(new Waypoint(1, 0, (short) 1));
+		addWaypoint(new Waypoint(0, 0, (short) 1));
+		addWaypoint(new Waypoint(1, 0, (short) -1));
+		addWaypoint(new Waypoint(1, 1, (short) -1));
 		}
 	
 	@Override
