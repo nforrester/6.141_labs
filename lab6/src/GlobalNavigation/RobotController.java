@@ -229,7 +229,11 @@ public class RobotController implements NodeMain, Runnable  {
 	@Override
 	public void onShutdownComplete(Node node) {
 	}
-	
+
+        public GraphName getDefaultNodeName() {
+	    return new GraphName("rss/RobotController");
+	}
+
 	private void changeState(int newState){
 		state=newState;
 		if(state==IDLE){
