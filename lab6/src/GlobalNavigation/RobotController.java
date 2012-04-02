@@ -45,14 +45,14 @@ public class RobotController implements NodeMain, Runnable  {
 	//PI Parameters
     private double distanceError=0;
     private double distanceErrorIntegral=0;
-    private double distanceKp=.2;
-    private double distanceKi=0.01;
+    private double distanceKp=.15;
+    private double distanceKi=0.002;
     private double distanceOutput=0;
     private double headingDesired=0;    
     private double headingError=0;
     private double headingErrorIntegral=0;
-    private double headingKp=.2;
-    private double headingKi=0.01;
+    private double headingKp=.15;
+    private double headingKi=0.005;
     private double headingOutput=0;
 	
 	// x, y, and theta record the robot's current position in the world frame
@@ -91,6 +91,24 @@ public class RobotController implements NodeMain, Runnable  {
 		myWaypoints.add(p);
 	}
 	
+	public double fixAngle(double theta){
+		while (theta>=2*Math.PI){
+			theta-=2*Math.PI;
+                }
+		while (theta<0){
+			theta+=2*Math.PI;
+                }
+		return theta;
+	}
+	public double fixAngle2(double theta){
+		while (theta>=Math.PI){
+			theta-=2*Math.PI;
+                }
+		while (theta<-Math.PI){
+			theta+=2*Math.PI;
+                }
+		return theta;
+	}
 	/**
 	 * <p>Handle an OdometryMsg.</p>
 	 * 
@@ -110,6 +128,8 @@ public class RobotController implements NodeMain, Runnable  {
 		y     = robotPose[1];
 		theta = robotPose[2];
 
+		theta=fixAngle(theta);
+
 		robotToWorld = Mat.mul(Mat.translation(x, y), Mat.rotation(theta));
 
 		//logNode.getLog().info("ODOM raw: " + message.x + " " + message.y + " " + message.theta +
@@ -124,7 +144,7 @@ public class RobotController implements NodeMain, Runnable  {
 	}
 	
 	public double getAngle(double x1, double y1, double x2, double y2) {
-		return Math.atan2(y2-y1, x2-x1);
+		return fixAngle(Math.atan2(y2-y1, x2-x1));
 	}
 	
 	public boolean compareAngles(double thetaOne, double thetaTwo, double tolerance) {
@@ -145,24 +165,24 @@ public class RobotController implements NodeMain, Runnable  {
 				
 				//Set the desired heading, taking into account the direction we wish to face
 				if(myWaypoints.get(0).getDir()==1){
-					headingDesired=getAngle(x,y,myWaypoints.get(0).getX(),myWaypoints.get(0).getY());
+					headingDesired=fixAngle(getAngle(x,y,myWaypoints.get(0).getX(),myWaypoints.get(0).getY()));
 				}else{
-					headingDesired=getAngle(x,y,myWaypoints.get(0).getX(),myWaypoints.get(0).getY())+Math.PI;
+					headingDesired=fixAngle(getAngle(myWaypoints.get(0).getX(),myWaypoints.get(0).getY(),x,y));
 				}
-				
+				//logNode.getLog().info("Turning Towards "+myWaypoints.get(0).getX()+" , "+myWaypoints.get(0).getY());
 				changeState(ROTATING);
 			}
 		}else if(state==ROTATING){
-			
-			headingError=(headingDesired-theta);
+			headingError = fixAngle2(headingDesired - theta);
 			
 			commandMotors.translationalVelocity = 0;
 			commandMotors.rotationalVelocity = headingKp * headingError + headingKi * headingErrorIntegral;
 			headingErrorIntegral+=headingError;
 			
-			if(compareAngles(theta,headingDesired, .2)){
+			if(compareAngles(theta,headingDesired, .15)){
 				commandMotors.rotationalVelocity = 0;
 				headingErrorIntegral=0;
+				//logNode.getLog().info("Moving to "+myWaypoints.get(0).getX()+" , "+myWaypoints.get(0).getY());
 				changeState(TRANSLATING);
 			}
 
@@ -198,7 +218,7 @@ public class RobotController implements NodeMain, Runnable  {
 	@Override
 	public void onStart(Node node) {
 		logNode = node;
-		logNode.getLog().info("I'M WORKING!");
+		logNode.getLog().info("RobotController Online");
 		// initialize the ROS subscription to rss/odometry
 		odoSub = node.newSubscriber("/rss/odometry", "rss_msgs/OdometryMsg");
 		odoSub.addMessageListener(new MessageListener<org.ros.message.rss_msgs.OdometryMsg>() {
@@ -219,15 +239,15 @@ public class RobotController implements NodeMain, Runnable  {
 		Thread runningStuff = new Thread(this);
 		runningStuff.start();
 		
-		addWaypoint(new Waypoint(.5, 0, (short) 1));
-		addWaypoint(new Waypoint(.75, .75, (short) 1));
-		addWaypoint(new Waypoint(0, 0, (short) -1));
-		addWaypoint(new Waypoint(0, 1, (short) 1));
+/*		addWaypoint(new Waypoint(.5, 0, (short) 1));
 		addWaypoint(new Waypoint(1, 1, (short) 1));
+		addWaypoint(new Waypoint(0, 0, (short) -1));
 		addWaypoint(new Waypoint(1, 0, (short) 1));
+		addWaypoint(new Waypoint(1, 1, (short) 1));
+		addWaypoint(new Waypoint(0, 1, (short) 1));
 		addWaypoint(new Waypoint(0, 0, (short) 1));
-		addWaypoint(new Waypoint(1, 0, (short) -1));
-		addWaypoint(new Waypoint(1, 1, (short) -1));
+		addWaypoint(new Waypoint(0, 1, (short) -1));
+		addWaypoint(new Waypoint(1, 1, (short) -1));*/
 		}
 	
 	@Override

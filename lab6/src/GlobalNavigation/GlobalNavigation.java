@@ -20,7 +20,7 @@ import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 import org.ros.node.parameter.ParameterTree;
 
-public class GlobalNavigation implements NodeMain, Runnable {
+public class GlobalNavigation implements NodeMain {
 
     private String mapFileName;
     private PolygonMap map;
@@ -34,14 +34,16 @@ public class GlobalNavigation implements NodeMain, Runnable {
     private Publisher <GUIPointMsg> pointPub;
     private GUIPointMsg pointPlot;
     
+    public MapGUI gui;
+
     public GlobalNavigation() {
+	 gui = new MapGUI();
     }
 
 
     public void onStart(Node node) {
 	ParameterTree paramTree = node.newParameterTree();
 	mapFileName = paramTree.getString(node.resolveName("~/mapFileName"));
-	
 	try {
 	    map = new PolygonMap(mapFileName);
 	} catch(IOException e) {
@@ -63,18 +65,17 @@ public class GlobalNavigation implements NodeMain, Runnable {
 	pointPub = node.newPublisher("/gui/Point","lab5_msgs/GUIPointMsg");
 	pointPlot = new GUIPointMsg();
 
-	Thread t = new Thread(this);
-	t.start();
+	try {
+	    this.wait(2000);
+	} catch(InterruptedException e) {}
+
+	displayMap();
     }
+
     
-    @Override
-    public void run() {
-    }
-     
     public void instanceMain(java.lang.String[] arg) {
 	//TODO: Implement
-	//Displays map, computes cspace and grid, displays grid and path, and initiates path following.
-	displayMap();
+	//Displays map, computes cspace and grid, displays grid and path, and initiates path following
     }
 
     @Override
@@ -197,7 +198,7 @@ public class GlobalNavigation implements NodeMain, Runnable {
     }
 
     public void displayPath() {
-	//TODO: Implemet
+	//TODO: Implement
     }
 
     public void testConvexHull() {
