@@ -180,6 +180,7 @@ public class RobotController implements NodeMain, Runnable  {
 				changeState(IDLE);
 			}
 		}
+	motorPub.publish(commandMotors);
 	}
 	
 	@Override
@@ -197,7 +198,7 @@ public class RobotController implements NodeMain, Runnable  {
 	@Override
 	public void onStart(Node node) {
 		logNode = node;
-		
+		logNode.getLog().info("I'M WORKING!");
 		// initialize the ROS subscription to rss/odometry
 		odoSub = node.newSubscriber("/rss/odometry", "rss_msgs/OdometryMsg");
 		odoSub.addMessageListener(new MessageListener<org.ros.message.rss_msgs.OdometryMsg>() {

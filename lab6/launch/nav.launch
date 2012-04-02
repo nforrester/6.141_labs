@@ -2,6 +2,11 @@
 <launch>
   <include file="$(find lab4)/launch/config.launch" />
 
+  <node name="lis" pkg="rosjava_bootstrap" type="run.py" args="uorc_listener Listener" machine="netbook" />
+  <node name="pub" pkg="rosjava_bootstrap" type="run.py" args="uorc_publisher Publisher" machine="netbook" />
+  <node name="odo" pkg="rosjava_bootstrap" type="run.py" args="odometry odometry.Odometry" machine="netbook" />
+  <node name="gui" pkg="rosjava_bootstrap" type="run.py" args="lab6 GlobalNavigation.MapGUI" machine="workstation" />
+
   <node name="nav" pkg="rosjava_bootstrap" type="run.py" args="lab6 GlobalNavigation.GlobalNavigation" machine="workstation">
 <!--
   	<param name="mapFileName" value="/home/jbrooksh/my_sandbox/6.141/spring2012/priv/labs_ros/lab6/src/global-nav-maze-2011-med.map" /> 

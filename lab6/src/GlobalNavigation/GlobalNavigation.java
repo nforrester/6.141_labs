@@ -2,6 +2,8 @@ package GlobalNavigation;
 
 import java.awt.geom.*;
 import java.awt.Color;
+import java.io.IOException;
+import java.text.ParseException;
 
 import org.ros.message.MessageListener;
 import org.ros.message.rss_msgs.*;
@@ -18,22 +20,19 @@ import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 import org.ros.node.parameter.ParameterTree;
 
-public class GlobalNavigation implements NodeMain {
+public class GlobalNavigation implements NodeMain, Runnable {
 
     private String mapFileName;
     private PolygonMap map;
 
     private Publisher<GUIRectMsg> rectPub;
     private GUIRectMsg rectPlot;
-    private ColorMsg rectPlotColor;
 
     private Publisher<GUIPolyMsg> polyPub;
     private GUIPolyMsg polyPlot;
-    private ColorMsg polyPlotColor;
 
     private Publisher <GUIPointMsg> pointPub;
     private GUIPointMsg pointPlot;
-    private ColorMsg pointPlotColor;
     
     public GlobalNavigation() {
     }
@@ -42,29 +41,40 @@ public class GlobalNavigation implements NodeMain {
     public void onStart(Node node) {
 	ParameterTree paramTree = node.newParameterTree();
 	mapFileName = paramTree.getString(node.resolveName("~/mapFileName"));
-	map = new PolygonMap();
-
+	
+	try {
+	    map = new PolygonMap(mapFileName);
+	} catch(IOException e) {
+	    System.out.println("IOException in PolygonMap");
+	    System.exit(0);
+	} catch(ParseException e) {
+	    System.out.println("ParseException in PolygonMap");
+	    System.exit(0);
+	}
 	//initializes the rectangle publisher
 	rectPub = node.newPublisher("/gui/Rect","lab6_msgs/GUIRectMsg");
 	rectPlot = new GUIRectMsg();
-	rectPlotColor = new ColorMsg();
 
 	//initializes the polygon publisher
 	polyPub = node.newPublisher("/gui/Poly","lab6_msgs/GUIPolyMsg");
 	polyPlot = new GUIPolyMsg();
-	polyPlotColor = new ColorMsg();
 
 	//initializes the point publisher
 	pointPub = node.newPublisher("/gui/Point","lab5_msgs/GUIPointMsg");
 	pointPlot = new GUIPointMsg();
-	pointPlotColor = new ColorMsg();
 
-	displayMap();
+	Thread t = new Thread(this);
+	t.start();
     }
-
+    
+    @Override
+    public void run() {
+    }
+     
     public void instanceMain(java.lang.String[] arg) {
 	//TODO: Implement
 	//Displays map, computes cspace and grid, displays grid and path, and initiates path following.
+	displayMap();
     }
 
     @Override
@@ -97,6 +107,13 @@ public class GlobalNavigation implements NodeMain {
 	    polyPub.publish(polyPlot);
 	}
 
+	//display start and end points
+	Color startC = new Color(1,0,0);
+	Color endC = new Color(0,1,0);
+	fillPointMsg(pointPlot, map.getRobotStart(), startC, 0);
+	pointPub.publish(pointPlot);
+	fillPointMsg(pointPlot, map.getRobotGoal(), endC, 0);
+	pointPub.publish(pointPlot);
     }
 
     public void fillPointMsg(GUIPointMsg msg, java.awt.geom.Point2D.Double point, java.awt.Color color, long shape) {

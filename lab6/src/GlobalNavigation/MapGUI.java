@@ -441,6 +441,7 @@ public class MapGUI extends SonarGUI implements NodeMain{
     private Subscriber<org.ros.message.lab6_msgs.GUIRectMsg> guiRectSub;
     private Subscriber<org.ros.message.lab6_msgs.GUIPolyMsg> guiPolySub;
     private Subscriber<org.ros.message.lab5_msgs.GUIEraseMsg> guiEraseSub;
+    private Subscriber<org.ros.message.lab5_msgs.GUIPointMsg> guiPointSub;
 
     /**
      * Hook called by ROS to start the gui
