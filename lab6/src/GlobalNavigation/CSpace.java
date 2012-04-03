@@ -84,8 +84,7 @@ public class CSpace {
 		obstacles.add(obstacle);
 	}
 
-	public boolean queryPose(double x, double y, double theta, double thetaTolerance) {
-		Mat pose = Mat.encodePose(x, y, theta);
+	public ArrayList<Polygon> getThetaObstacles(double theta, double thetaTolerance) {
 		Maybe<DoubleMap<ArrayList<Polygon>>.Pair> mp = cSpaceObstacles.get(theta, thetaTolerance);
 		ArrayList<Polygon> thetaObstacles;
 		Polygon strokedRobot;
@@ -93,18 +92,13 @@ public class CSpace {
 			thetaObstacles = mp.value.v;
 		} else {
 			strokedRobot = Polygon.strokeRot(theta - thetaTolerance, theta + thetaTolerance, reflectedRobot);
-			thetaObstacles = new ArrayList();
+			thetaObstacles = new ArrayList<Polygon>();
 			for (Polygon obstacle : obstacles) {
 				thetaObstacles.add(Polygon.minkowskiSum(obstacle, strokedRobot));
 			}
 			cSpaceObstacles.put(theta, thetaObstacles, thetaTolerance);
 		}
-		for (Polygon obstacle : thetaObstacles) {
-			if (Polygon.pointInPolygon(obstacle, pose)) {
-				return false;
-			}
-		}
-		return true;
+		return thetaObstacles;
 	}
 
 	// occupancy grid is indexed from (xMin, yMin, 0)

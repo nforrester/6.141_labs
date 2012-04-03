@@ -92,7 +92,26 @@ public class GlobalNavigation implements NodeMain {
 	//TODO: Implement
 	//Displays map, computes cspace and grid, displays grid and path, and initiates path following
 	
+	System.out.println("  map file: " + mapFile);
+
+	// wait for the gui to come online.
+	try {
+	    Thread.sleep(2000);
+	} catch (InterruptedException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+	}
+
 	displayMap();
+
+	try {
+	    Thread.sleep(2000);
+	} catch (InterruptedException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+	}
+
+	cspace.displayCSpace(0);
     }
 
     @Override
@@ -113,14 +132,6 @@ public class GlobalNavigation implements NodeMain {
     }
 
     public void displayMap() {
-	System.out.println("  map file: " + mapFile);
-	try {
-	    Thread.sleep(2000);
-	} catch (InterruptedException e) {
-	    // TODO Auto-generated catch block                                                                                                    
-	    e.printStackTrace();
-	}
-
 	erasePub.publish(new GUIEraseMsg());
 	
 	GUIRectMsg rectMsg = new GUIRectMsg();
@@ -131,7 +142,7 @@ public class GlobalNavigation implements NodeMain {
 	    polyMsg = new GUIPolyMsg();
 	    fillPolyMsg(polyMsg, obstacle, MapGUI.makeRandomColor(), true, true);
 	    polyPub.publish(polyMsg);
-	}	    
+	}
 	GUIPointMsg pointMsg = new GUIPointMsg();
 	fillPointMsg(pointMsg, map.getRobotStart(), new Color(255,0,0), 1);
 	pointPub.publish(pointMsg);
@@ -214,8 +225,18 @@ public class GlobalNavigation implements NodeMain {
 	grid = new Grid(map.getWorldRect(), GRID_RESOLUTION);
     }
 
-    public void displayCSpace() {
-	//TODO: Implement
+    public void displayCSpace(double theta) {
+	GUIPolyMsg polyMsg = new GUIPolyMsg();
+	for (CSpace.Polygon obstacle : cspace.getThetaObstacles(theta, Math.PI / 10)) {
+		polyMsg = new GUIPolyMsg();
+		PolygonObstacle POobstacle;
+		for (Mat vertex : obstacle.vertices) {
+			double[] v = Mat.decodePoint(vertex);
+			POobstacle.addVertex(v[0], v[1]);
+		}
+		fillPolyMsg(polyMsg, POobstacle, MapGUI.makeRandomColor(), true, true);
+		polyPub.publish(polyMsg);
+	}
     }
 
     public void displayVisibilityGraph() {
