@@ -155,6 +155,25 @@ public class Mat {
 		return ret;
 	}
 
+	/**
+	 * <p>Encode a point matrix</p>
+	 */
+	public static Mat encodePoint(double[] point) {
+		return encodePoint(point[0], point[1]);
+	}
+	
+	public static Mat encodePoint(double x, double y) {
+		return encodePose(x, y, 0);
+	}
+	
+	/**
+	 * <p>Decode a point matrix</p>
+	 */
+	public static double[] decodePoint(Mat point) {
+		double[] pose = decodePose(point);
+		return new double[] {pose[0], pose[1]};
+	}
+
 	private static double rerangeAngle(double a) {
 		while (a >= 2 * Math.PI) {
 			a -= 2 * Math.PI;
