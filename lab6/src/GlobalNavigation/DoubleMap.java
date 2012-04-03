@@ -1,5 +1,7 @@
 package GlobalNavigation;
 
+import java.util.ArrayList;
+
 /**
  * Maps real values to discrete objects.
  * You specify several objects and where they fall on the real number line.
@@ -32,7 +34,7 @@ public class DoubleMap<V> {
 		int split = high / 2;
 
 		while (low + 1 < high) {
-			if (pairs.get(split) < testKey) {
+			if (pairs.get(split).k < testKey) {
 				low = split;
 			} else {
 				high = split;
@@ -45,7 +47,7 @@ public class DoubleMap<V> {
 		} else if (mode == HIGHER) {
 			return high;
 		} else if (mode == CLOSEST) {
-			if (testKey - pairs.get(low) < pairs.get(high) - testKey) {
+			if (testKey - pairs.get(low).k < pairs.get(high).k - testKey) {
 				return low;
 			} else {
 				return high;
@@ -68,6 +70,6 @@ public class DoubleMap<V> {
 	}
 
 	public void put(double key, V value) {
-		pairs.add(new Pair(key, value), search(key, HIGHER));
+		pairs.add(search(key, HIGHER), new Pair(key, value));
 	}
 }
