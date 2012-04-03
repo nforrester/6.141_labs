@@ -20,37 +20,41 @@ public class CSpace {
 
 	// robot reference point is the origin
 	public CSpace(Polygon robot, Rectangle2D.Double worldRect) {
-		CSpace(robot, worldRect.getMinX(), worldRect.getMinY(), worldRect.getMaxX(), worldRect.getMaxY());
+		constructor(robot, worldRect.getMinX(), worldRect.getMinY(), worldRect.getMaxX(), worldRect.getMaxY());
 	}
 
 	public CSpace(Polygon robot, double boundaryXMin, double boundaryYMin, double boundaryXMax, double boundaryYMax) {
+		constructor(robot, boundaryXMin, boundaryYMin, boundaryXMax, boundaryYMax);
+	}
+
+	private void constructor(Polygon robot, double boundaryXMin, double boundaryYMin, double boundaryXMax, double boundaryYMax) {
 		xMin = boundaryXMin;
 		yMin = boundaryYMin;
 		xMax = boundaryXMax;
 		yMax = boundaryYMax;
 
-		reflectedRobot = Polygon.mul(Mat.mul(-1, Mat.eye()), robot);
+		reflectedRobot = Polygon.mul(Mat.mul(-1, Mat.eye(4)), robot);
 		ArrayList<List<Mat>> boundaries = new ArrayList<List<Mat>>();
 
-		boundaries.add(Arrays.asList(Mat.encodePoint(xMin - 0, yMin - 1)),
-		               Arrays.asList(Mat.encodePoint(xMin - 0, yMax + 1)),
-		               Arrays.asList(Mat.encodePoint(xMin - 1, yMax + 1)),
-		               Arrays.asList(Mat.encodePoint(xMin - 1, yMin - 1)));
+		boundaries.add(Arrays.asList(Mat.encodePoint(xMin - 0, yMin - 1),
+		                             Mat.encodePoint(xMin - 0, yMax + 1),
+		                             Mat.encodePoint(xMin - 1, yMax + 1),
+		                             Mat.encodePoint(xMin - 1, yMin - 1)));
 
-		boundaries.add(Arrays.asList(Mat.encodePoint(xMax + 0, yMin - 1)),
-		               Arrays.asList(Mat.encodePoint(xMax + 0, yMax + 1)),
-		               Arrays.asList(Mat.encodePoint(xMax + 1, yMax + 1)),
-		               Arrays.asList(Mat.encodePoint(xMax + 1, yMin - 1)));
+		boundaries.add(Arrays.asList(Mat.encodePoint(xMax + 0, yMin - 1),
+		                             Mat.encodePoint(xMax + 0, yMax + 1),
+		                             Mat.encodePoint(xMax + 1, yMax + 1),
+		                             Mat.encodePoint(xMax + 1, yMin - 1)));
 
-		boundaries.add(Arrays.asList(Mat.encodePoint(xMin - 1, yMin - 0)),
-		               Arrays.asList(Mat.encodePoint(xMax + 1, yMin - 0)),
-		               Arrays.asList(Mat.encodePoint(xMax + 1, yMin - 1)),
-		               Arrays.asList(Mat.encodePoint(xMin - 1, yMin - 1)));
+		boundaries.add(Arrays.asList(Mat.encodePoint(xMin - 1, yMin - 0),
+		                             Mat.encodePoint(xMax + 1, yMin - 0),
+		                             Mat.encodePoint(xMax + 1, yMin - 1),
+		                             Mat.encodePoint(xMin - 1, yMin - 1)));
 
-		boundaries.add(Arrays.asList(Mat.encodePoint(xMin - 1, yMax + 0)),
-		               Arrays.asList(Mat.encodePoint(xMax + 1, yMax + 0)),
-		               Arrays.asList(Mat.encodePoint(xMax + 1, yMax + 1)),
-		               Arrays.asList(Mat.encodePoint(xMin - 1, yMax + 1)));
+		boundaries.add(Arrays.asList(Mat.encodePoint(xMin - 1, yMax + 0),
+		                             Mat.encodePoint(xMax + 1, yMax + 0),
+		                             Mat.encodePoint(xMax + 1, yMax + 1),
+		                             Mat.encodePoint(xMin - 1, yMax + 1)));
 
 		for (List<Mat> boundary : boundaries) {
 			addObstacle(new Polygon(boundary));
@@ -65,7 +69,7 @@ public class CSpace {
 		cSpaceObstacles.add(Polygon.minkowskiSum(obstacle, reflectedRobot));
 	}
 
-	public class Polygon {
+	public static class Polygon {
 		private static final double DEFAULT_TOLERANCE = 0.0000001;
 		public ArrayList<Mat> vertices;
 
@@ -94,10 +98,10 @@ public class CSpace {
 			Mat prevVertex = poly1.vertices.get(poly1.vertices.size());
 			Polygon sum = poly1;
 			for (Mat vertex : poly1.vertices) {
-				sum = combine(sum, mul(Mat.translation(vertex.data[0], vertex.data[1]), stroke(prevVertex.data[0] - vertex.data[0], prevVertex.data[1] - vertex.data[1], poly2)));
+				sum = combine(sum, mul(Mat.translation(vertex.data[0][0], vertex.data[1][0]), stroke(prevVertex.data[0][0] - vertex.data[0][0], prevVertex.data[1][0] - vertex.data[1][0], poly2)));
 				prevVertex = vertex;
 			}
-			return sum.
+			return sum;
 		}
 
 		// Generates a new polygon by dragging a polygon by a vector and taking all the points it touched.
@@ -113,7 +117,7 @@ public class CSpace {
 
 			// pre-compute some information that will make it easy to find the actual perimeter of the extrusion
 			for (int i = 0; i < 2 * size; i++) {
-				edgesTo.add(new ArrayList<Integer>);
+				edgesTo.add(new ArrayList<Integer>());
 			}
 
 			for (int i = 0; i < size; i++) {
@@ -140,8 +144,8 @@ public class CSpace {
 			boolean done;
 
 			// add all the vertices in both polygons
-			vertices.addAll(poly.vertices);
-			vertices.addAll(polyTrans.vertices);
+			vertices.addAll(poly1.vertices);
+			vertices.addAll(poly2.vertices);
 
 			// add all the edges in both polygons
 			for (int i = 0; i < size; i++) {
@@ -221,7 +225,7 @@ public class CSpace {
 											if (lineSegIntersect(vertices.get(e00), vertices.get(e01), vertices.get(e10), vertices.get(e11))) {
 												vertices.add(lineSegIntersection(vertices.get(e00), vertices.get(e01), vertices.get(e10), vertices.get(e11)));
 
-												edgesTo.add(new ArrayList<ArrayList<Integer>>());
+												edgesTo.add(new ArrayList<Integer>());
 
 												edgesTo.get(size).add(new Integer(e00));
 												edgesTo.get(size).add(new Integer(e01));
@@ -271,10 +275,8 @@ public class CSpace {
 			double dist;
 			double maxDist = -1;
 			int farPoint;
-			Mat vertex;
-			for (int i = 0; i < 2 * size; i++) {
-				vertex = vertices.get(i);
-				dist = Math.pow(Math.pow(vertex.data[0], 2) + Math.pow(vertex.data[1], 2), 0.5);
+			for (int i = 0; i < vertices.size(); i++) {
+				dist = Math.pow(Math.pow(vertices.get(i).data[0][0], 2) + Math.pow(vertices.get(i).data[1][0], 2), 0.5);
 				if (dist > maxDist) {
 					maxDist = dist;
 					farPoint = i;
@@ -285,7 +287,7 @@ public class CSpace {
 			int vertexStart = farPoint;
 			int vertex = vertexStart;
 			int prevVertex = -1;
-			double prevAngle = Math.atan2(vertices.get(vertex).data[0], vertices.get(vertex).data[1]);
+			double prevAngle = Math.atan2(vertices.get(vertex).data[0][0], vertices.get(vertex).data[1][0]);
 			double edgeAngle;
 			double angleDiff;
 			double minAngleDiff;
@@ -299,7 +301,7 @@ public class CSpace {
 				perimeter.add(e0);
 				for (int edgeVertex : edgesTo.get(vertex)) {
 					e1 = vertices.get(edgeVertex);
-					edgeAngle = Math.atan2(e1.data[0] - e0.data[0], e1.data[1] - e0.data[1]);
+					edgeAngle = Math.atan2(e1.data[0][0] - e0.data[0][0], e1.data[1][0] - e0.data[1][0]);
 					angleDiff = edgeAngle - prevAngle;
 					if (angleDiff < 0) {
 						angleDiff += 2 * Math.PI;
@@ -328,7 +330,7 @@ public class CSpace {
 		}
 
 		public static boolean ptsEqual(Mat p0, Mat p1, double tolerance) {
-			return tolerance > Math.pow(Math.pow(p0.data[0] - p1.data[0], 2) + Math.pow(p0.data[1] - p1.data[1], 2), 0.5);
+			return tolerance > Math.pow(Math.pow(p0.data[0][0] - p1.data[0][0], 2) + Math.pow(p0.data[1][0] - p1.data[1][0], 2), 0.5);
 		}
 
 		public static boolean ptSegIntersect(Mat e0, Mat e1, Mat p) {
@@ -336,36 +338,36 @@ public class CSpace {
 		}
 
 		public static boolean ptSegIntersect(Mat e0, Mat e1, Mat p, double tolerance) {
-			return tolerance > Line2D.ptSegDist(e0.data[0], e0.data[1], e1.data[0], e1.data[1], p.data[0], p.data[1]);
+			return tolerance > Line2D.ptSegDist(e0.data[0][0], e0.data[1][0], e1.data[0][0], e1.data[1][0], p.data[0][0], p.data[1][0]);
 		}
 
 		public static boolean lineSegIntersect(Mat e00, Mat e01, Mat e10, Mat e11) {
-			return Line2D.linesIntersect(e00.data[0], e00.data[1], e01.data[0], e01.data[1], e10.data[0], e10.data[1], e11.data[0], e11.data[1]);
+			return Line2D.linesIntersect(e00.data[0][0], e00.data[1][0], e01.data[0][0], e01.data[1][0], e10.data[0][0], e10.data[1][0], e11.data[0][0], e11.data[1][0]);
 		}
 
 		public static Mat lineSegIntersection(Mat e00, Mat e01, Mat e10, Mat e11) {
-			double x0 = e00.data[0];
-			double y0 = e00.data[1];
-			double x1 = e10.data[0];
-			double y1 = e10.data[1];
+			double x0 = e00.data[0][0];
+			double y0 = e00.data[1][0];
+			double x1 = e10.data[0][0];
+			double y1 = e10.data[1][0];
 
 			double x, y;
 			double m0, m1;
-			if (x0 == e01.data[0]) {
-				m1 = (y1 - e11.data[1]) / (x1 - e11.data[0]);
+			if (x0 == e01.data[0][0]) {
+				m1 = (y1 - e11.data[1][0]) / (x1 - e11.data[0][0]);
 
 				x = x0;
 				y = m1 * (x - x1) + y1;
-			} else if (x1 == e11.data[0]) {
-				m0 = (y0 - e01.data[1]) / (x0 - e01.data[0]);
+			} else if (x1 == e11.data[0][0]) {
+				m0 = (y0 - e01.data[1][0]) / (x0 - e01.data[0][0]);
 
 				x = x1;
 				y = m0 * (x - x0) + y0;
 			} else {
-				m0 = (y0 - e01.data[1]) / (x0 - e01.data[0]);
-				m1 = (y1 - e11.data[1]) / (x1 - e11.data[0]);
+				m0 = (y0 - e01.data[1][0]) / (x0 - e01.data[0][0]);
+				m1 = (y1 - e11.data[1][0]) / (x1 - e11.data[0][0]);
 
-				x = (m0 * x0 - m1 * x1 - y1 + y2) / (m0 - m1);
+				x = (m0 * x0 - m1 * x1 - y0 + y1) / (m0 - m1);
 				y = m1 * (x - x1) + y1;
 			}
 			return Mat.encodePoint(x, y);
