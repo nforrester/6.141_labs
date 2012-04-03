@@ -82,7 +82,7 @@ public class PolygonMap implements NodeMain{
 
 	private Publisher<Object> polyPub;
 
-	private String mapFile = "/home/rss-staff/ros/rss/solutions/lab6/src/global-nav-maze-2011-basic.map";
+	private String mapFile = "/home/rss-student/RSS-I-group/lab6/src/global-nav-maze-2011-basic.map";
 
 	/**
 	 * <p>Create a new map, parsing <code>mapFile</code>.</p>

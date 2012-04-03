@@ -11,6 +11,7 @@ import org.ros.message.lab5_msgs.GUIPointMsg;
 import org.ros.message.lab5_msgs.GUILineMsg;
 import org.ros.message.lab5_msgs.GUISegmentMsg;
 import org.ros.message.lab5_msgs.ColorMsg;
+import org.ros.message.lab5_msgs.GUIEraseMsg;
 import org.ros.message.lab6_msgs.GUIRectMsg;
 import org.ros.message.lab6_msgs.GUIPolyMsg;
 import org.ros.namespace.GraphName;
@@ -22,30 +23,37 @@ import org.ros.node.parameter.ParameterTree;
 
 public class GlobalNavigation implements NodeMain {
 
-    private String mapFileName;
-    private PolygonMap map;
+    public static final String APPNAME = "GlobalNavigation";
+
+    public static final double FOLLOW_PATH_MAX_RV = .5;
+    public static final double FOLLOW_PATH_RV_GAIN = .1;
+    public static final double FOLLOW_PATH_TV = .2;
+    public static final double GRID_RESOLUTION = .075;
+    public static final double ROTATE_FIRST_THRESHOLD = .2;
+    public static final double WP_THRESHOLD = .03;
+
+    public static final int STOP = 0;
+    public static final int GO = 1;
+
+    protected Grid grid;
+    private String mapFile;
+    protected PolygonMap map;
 
     private Publisher<GUIRectMsg> rectPub;
-    private GUIRectMsg rectPlot;
-
     private Publisher<GUIPolyMsg> polyPub;
-    private GUIPolyMsg polyPlot;
-
     private Publisher <GUIPointMsg> pointPub;
-    private GUIPointMsg pointPlot;
-    
-    public MapGUI gui;
+    private Publisher<GUIEraseMsg> erasePub;
 
     public GlobalNavigation() {
-	 gui = new MapGUI();
     }
 
 
     public void onStart(Node node) {
 	ParameterTree paramTree = node.newParameterTree();
-	mapFileName = paramTree.getString(node.resolveName("~/mapFileName"));
+	mapFile = paramTree.getString(node.resolveName("~/mapFileName"));
 	try {
-	    map = new PolygonMap(mapFileName);
+	    //	    mapFile = "/home/rss-student/RSS-I-group/lab6/src/global-nav-maze-2011-basic.map";
+	    map = new PolygonMap(mapFile);
 	} catch(IOException e) {
 	    System.out.println("IOException in PolygonMap");
 	    System.exit(0);
@@ -53,29 +61,21 @@ public class GlobalNavigation implements NodeMain {
 	    System.out.println("ParseException in PolygonMap");
 	    System.exit(0);
 	}
-	//initializes the rectangle publisher
-	rectPub = node.newPublisher("/gui/Rect","lab6_msgs/GUIRectMsg");
-	rectPlot = new GUIRectMsg();
 
-	//initializes the polygon publisher
+       	rectPub = node.newPublisher("/gui/Rect","lab6_msgs/GUIRectMsg");
 	polyPub = node.newPublisher("/gui/Poly","lab6_msgs/GUIPolyMsg");
-	polyPlot = new GUIPolyMsg();
-
-	//initializes the point publisher
 	pointPub = node.newPublisher("/gui/Point","lab5_msgs/GUIPointMsg");
-	pointPlot = new GUIPointMsg();
+	erasePub = node.newPublisher("/gui/Erase","lab5_msgs/GUIEraseMsg");
 
-	try {
-	    this.wait(2000);
-	} catch(InterruptedException e) {}
-
-	displayMap();
+	this.instanceMain();
     }
 
     
-    public void instanceMain(java.lang.String[] arg) {
+    public void instanceMain() {
 	//TODO: Implement
 	//Displays map, computes cspace and grid, displays grid and path, and initiates path following
+	
+	displayMap();
     }
 
     @Override
@@ -96,25 +96,30 @@ public class GlobalNavigation implements NodeMain {
     }
 
     public void displayMap() {
-	//display world rectangle
-	Color rectC = new Color(0,0,0);
-	fillRectMsg(rectPlot, map.getWorldRect(), rectC, false);
-	rectPub.publish(rectPlot);
-
-	//display obstacles
-	Color polyC = new Color(0,0,0);
-	for(PolygonObstacle o : map.getObstacles()) {
-	    fillPolyMsg(polyPlot, o, polyC, true, true);
-	    polyPub.publish(polyPlot);
+	System.out.println("  map file: " + mapFile);
+	try {
+	    Thread.sleep(2000);
+	} catch (InterruptedException e) {
+	    // TODO Auto-generated catch block                                                                                                    
+	    e.printStackTrace();
 	}
 
-	//display start and end points
-	Color startC = new Color(1,0,0);
-	Color endC = new Color(0,1,0);
-	fillPointMsg(pointPlot, map.getRobotStart(), startC, 0);
-	pointPub.publish(pointPlot);
-	fillPointMsg(pointPlot, map.getRobotGoal(), endC, 0);
-	pointPub.publish(pointPlot);
+	erasePub.publish(new GUIEraseMsg());
+	
+	GUIRectMsg rectMsg = new GUIRectMsg();
+	fillRectMsg(rectMsg, map.getWorldRect(), new Color(0,0,0), false);
+	rectPub.publish(rectMsg);
+	GUIPolyMsg polyMsg = new GUIPolyMsg();
+	for (PolygonObstacle obstacle : map.getObstacles()){
+	    polyMsg = new GUIPolyMsg();
+	    fillPolyMsg(polyMsg, obstacle, MapGUI.makeRandomColor(), true, true);
+	    polyPub.publish(polyMsg);
+	}	    
+	GUIPointMsg pointMsg = new GUIPointMsg();
+	fillPointMsg(pointMsg, map.getRobotStart(), new Color(255,0,0), 1);
+	pointPub.publish(pointMsg);
+	fillPointMsg(pointMsg, map.getRobotGoal(), new Color(0,255,0), 1);
+	pointPub.publish(pointMsg);
     }
 
     public void fillPointMsg(GUIPointMsg msg, java.awt.geom.Point2D.Double point, java.awt.Color color, long shape) {
@@ -161,6 +166,9 @@ public class GlobalNavigation implements NodeMain {
 	msg.width = (float) r.getWidth();
 	msg.height = (float) r.getHeight();
 	ColorMsg color = new ColorMsg();
+	if(c == null)
+	    c = new Color(0,0,0);
+
 	fillColor(color, c);
         msg.c = color;
 	if (filled)
@@ -186,7 +194,7 @@ public class GlobalNavigation implements NodeMain {
     }
 
     public void displayGrid() {
-	//TODO: Implement
+	grid = new Grid(map.getWorldRect(), GRID_RESOLUTION);
     }
 
     public void displayCSpace() {
