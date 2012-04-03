@@ -20,6 +20,14 @@ public class CSpace {
 	public double xMin, yMin, xMax, yMax;
 
 	// robot reference point is the origin
+	public CSpace(Polygon robot, PolygonMap map) {
+		Rectangle2D.Double worldRect = map.getWorldRect();
+		constructor(robot, worldRect.getMinX(), worldRect.getMinY(), worldRect.getMaxX(), worldRect.getMaxY());
+		for (PolygonObstacle obstacle : map.getObstacles()) {
+			addObstacle(obstacle);
+		}
+	}
+
 	public CSpace(Polygon robot, Rectangle2D.Double worldRect) {
 		constructor(robot, worldRect.getMinX(), worldRect.getMinY(), worldRect.getMaxX(), worldRect.getMaxY());
 	}

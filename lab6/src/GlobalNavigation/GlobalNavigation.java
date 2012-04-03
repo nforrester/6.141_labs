@@ -38,6 +38,7 @@ public class GlobalNavigation implements NodeMain {
     protected Grid grid;
     private String mapFile;
     protected PolygonMap map;
+    private CSpace cspace;
 
     private Publisher<GUIRectMsg> rectPub;
     private Publisher<GUIPolyMsg> polyPub;
@@ -66,6 +67,8 @@ public class GlobalNavigation implements NodeMain {
 	polyPub = node.newPublisher("/gui/Poly","lab6_msgs/GUIPolyMsg");
 	pointPub = node.newPublisher("/gui/Point","lab5_msgs/GUIPointMsg");
 	erasePub = node.newPublisher("/gui/Erase","lab5_msgs/GUIEraseMsg");
+
+	cspace = new CSpace(map);
 
 	this.instanceMain();
     }
