@@ -111,7 +111,7 @@ public class GlobalNavigation implements NodeMain {
 	    e.printStackTrace();
 	}
 
-	cspace.displayCSpace(0);
+	displayCSpace(0);
     }
 
     @Override
@@ -229,7 +229,7 @@ public class GlobalNavigation implements NodeMain {
 	GUIPolyMsg polyMsg = new GUIPolyMsg();
 	for (CSpace.Polygon obstacle : cspace.getThetaObstacles(theta, Math.PI / 10)) {
 		polyMsg = new GUIPolyMsg();
-		PolygonObstacle POobstacle;
+		PolygonObstacle POobstacle = new PolygonObstacle();
 		for (Mat vertex : obstacle.vertices) {
 			double[] v = Mat.decodePoint(vertex);
 			POobstacle.addVertex(v[0], v[1]);
