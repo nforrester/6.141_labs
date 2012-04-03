@@ -271,7 +271,7 @@ public class CSpace {
 				actualDist = ptSegDistance(cornerVert1, cornerVert2, origin);
 				desiredDist = Mat.l2(cornerVert1);
 
-				Mat cornerTransform = Mat.mul(desiredDist / actualDist, Mat.eye())
+				Mat cornerTransform = Mat.mul(desiredDist / actualDist, Mat.eye());
 				cornerVert1b = Mat.mul(cornerTransform, cornerVert1a);
 				cornerVert2b = Mat.mul(cornerTransform, cornerVert2a);
 
