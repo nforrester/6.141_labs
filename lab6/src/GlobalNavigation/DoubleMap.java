@@ -15,20 +15,19 @@ public class DoubleMap<V> {
 		public double k;
 		public V v;
 
-		public Pair(double key, V value) {
+		public double w; // width is measured from the center, like radius, not diameter
+
+		public Pair(double key, V value, double width) {
 			k = key;
 			v = value;
+
+			w = width;
 		}
 	}
 
-	// search modes
-	private final int LOWER   = 0;
-	private final int HIGHER  = 1;
-	private final int CLOSEST = 2;
-
 	private ArrayList<Pair> pairs = new ArrayList<Pair>();
 
-	private int search(double testKey, int mode) {
+	private int searchHigh(double testKey) {
 		int low = 0;
 		int high = pairs.size() - 1;
 		int split = high / 2;
@@ -42,34 +41,61 @@ public class DoubleMap<V> {
 			split = (high - low) / 2 + low;
 		}
 
-		if (mode == LOWER) {
-			return low;
-		} else if (mode == HIGHER) {
-			return high;
-		} else if (mode == CLOSEST) {
-			if (testKey - pairs.get(low).k < pairs.get(high).k - testKey) {
-				return low;
+		return high;
+	}
+
+	private int search(double testKey, double tolerance) {
+		int low = 0;
+		int high = pairs.size() - 1;
+		int split = high / 2;
+
+		while (low + 1 < high) {
+			if (pairs.get(split).k < testKey) {
+				low = split;
 			} else {
-				return high;
+				high = split;
 			}
-		} else {
-			return -1;
+			split = (high - low) / 2 + low;
 		}
+
+		boolean lowFailure = false;
+		boolean highFailure = false;
+		while (!lowFailure || !highFailure) {
+			if (!lowFailure) {
+				if (pairs.get(low).w > testKey - pairs.get(low).k && pairs.get(low).w < tolerance) {
+					return low;
+				}
+				low--;
+				if (low < 0 || testKey - pairs.get(low).k > tolerance) {
+					lowFailure = true;
+				}
+			}
+			if (!highFailure) {
+				if (pairs.get(high).w > pairs.get(high).k - testKey && pairs.get(high).w < tolerance) {
+					return high;
+				}
+				high++;
+				if (high > pairs.size() || pairs.get(high).k - testKey > tolerance) {
+					highFailure = true;
+				}
+			}
+		}
+		return -1;
 	}
 
-	public Pair getP(double key) {
-		return pairs.get(search(key, CLOSEST));
+	public Pair getP(double key, double tolerance) {
+		return pairs.get(search(key, tolerance));
 	}
 
-	public double getK(double key) {
-		return getP(key).k;
+	public double getK(double key, double tolerance) {
+		return getP(key, tolerance).k;
 	}
 
-	public V getV(double key) {
-		return getP(key).v;
+	public V getV(double key, double tolerance) {
+		return getP(key, tolerance).v;
 	}
 
-	public void put(double key, V value) {
-		pairs.add(search(key, HIGHER), new Pair(key, value));
+	public void put(double key, V value, double width) {
+		pairs.add(searchHigh(key), new Pair(key, value, width));
 	}
 }
