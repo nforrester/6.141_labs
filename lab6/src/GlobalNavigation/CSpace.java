@@ -65,7 +65,11 @@ public class CSpace {
 	}
 
 	public void addObstacle(PolygonObstacle obstacle) {
-		addObstacle(new Polygon(obstacle.getVertices()));
+		ArrayList<Mat> vertices = new ArrayList<Mat>();
+		for (Point2D.Double vert : obstacle.getVertices()) {
+			vertices.add(Mat.encodePoint(vert.x, vert.y));
+		}
+		addObstacle(new Polygon(vertices));
 	}
 
 	public void addObstacle(Polygon obstacle) {
@@ -81,6 +85,7 @@ public class CSpace {
 			thetaObstacles = mp.value.v;
 		} else {
 			strokedRobot = Polygon.strokeRot(theta - thetaTolerance, theta + thetaTolerance, reflectedRobot);
+			thetaObstacles = new ArrayList();
 			for (Polygon obstacle : obstacles) {
 				thetaObstacles.add(Polygon.minkowskiSum(obstacle, strokedRobot));
 			}
@@ -114,7 +119,6 @@ public class CSpace {
 				for (k = 0; k < nCellsAngular; k++) {
 					thetaLow = resolutionAngular * k;
 					thetaHigh = thetaLow + resolutionAngular;
-					// TODO polygon intersection between bounding box and each cspace obstacle
 
 					resolutionCellSpace = new Polygon(Arrays.asList(Mat.encodePoint(xLow, yLow),
 					                                                Mat.encodePoint(xLow, yHigh),
@@ -140,13 +144,6 @@ public class CSpace {
 	public static class Polygon {
 		private static final double DEFAULT_TOLERANCE = 0.0000001;
 		public ArrayList<Mat> vertices;
-
-		public Polygon(List<Point2D.Double> verts) {
-			vertices = new ArrayList<Mat>();
-			for (Point2D.Double vert : verts) {
-				vertices.add(Mat.encodePoint(vert.x, vert.y));
-			}
-		}
 
 		public Polygon(List<Mat> verts) {
 			vertices = new ArrayList<Mat>(verts);
@@ -189,7 +186,7 @@ public class CSpace {
 		}
 
 		public static boolean pointInPolygon(Polygon poly, Mat point) {
-			Mat farPoint;
+			Mat farPoint = Mat.encodePoint(0, 0);
 			double maxDist = -1;
 			double dist;
 
@@ -468,7 +465,7 @@ public class CSpace {
 			// Find a point guaranteed to be on the perimeter of the polygon, so we can start tracing it out
 			double dist;
 			double maxDist = -1;
-			int farPoint;
+			int farPoint = -1;
 			for (int i = 0; i < vertices.size(); i++) {
 				dist = Math.pow(Math.pow(vertices.get(i).data[0][0], 2) + Math.pow(vertices.get(i).data[1][0], 2), 0.5);
 				if (dist > maxDist) {
@@ -485,8 +482,8 @@ public class CSpace {
 			double edgeAngle;
 			double angleDiff;
 			double minAngleDiff;
-			int nextVertex;
-			double nextAngle;
+			int nextVertex = -1;
+			double nextAngle = -1;
 			Mat e0, e1;
 			ArrayList<Mat> perimeter = new ArrayList<Mat>();
 			while (vertex != vertexStart || prevVertex == -1) {

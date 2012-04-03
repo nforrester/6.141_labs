@@ -51,6 +51,7 @@ public class DoubleMap<V> {
 				x -= wrapHigh - wrapLow;
 			}
 		}
+		return x;
 	}
 
 	private double rerangePos(double x) {
@@ -62,6 +63,7 @@ public class DoubleMap<V> {
 				x -= wrapHigh - wrapLow;
 			}
 		}
+		return x;
 	}
 
 	private int searchHigh(double testKey) {
