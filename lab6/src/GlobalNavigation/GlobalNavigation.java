@@ -21,6 +21,8 @@ import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 import org.ros.node.parameter.ParameterTree;
 
+import LocalNavigation.Mat;
+
 public class GlobalNavigation implements NodeMain {
 
     public static final String APPNAME = "GlobalNavigation";
@@ -68,7 +70,18 @@ public class GlobalNavigation implements NodeMain {
 	pointPub = node.newPublisher("/gui/Point","lab5_msgs/GUIPointMsg");
 	erasePub = node.newPublisher("/gui/Erase","lab5_msgs/GUIEraseMsg");
 
-	cspace = new CSpace(map);
+	double halfWidth = 0.235;
+	double fwd = 0.190;
+	double bkwd = 0.290;
+
+	ArrayList<Mat> robotVerts = new ArrayList<Mat>();
+	robotVerts.add(Mat.encodePoint(-1 * halfWidth, fwd));
+	robotVerts.add(Mat.encodePoint(-1 * halfWidth, bkwd));
+	robotVerts.add(Mat.encodePoint(     halfWidth, bkwd));
+	robotVerts.add(Mat.encodePoint(     halfWidth, fwd));
+	CSpace.Polygon robot = new CSpace.Polygon(robotVerts);
+
+	cspace = new CSpace(robot, map);
 
 	this.instanceMain();
     }
