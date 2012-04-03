@@ -15,8 +15,9 @@ public class CSpace {
 	public Polygon reflectedRobot;
 
 	public ArrayList<Polygon> obstacles = new ArrayList<Polygon>();
+	public DoubleMap<ArrayList<Polygon>> cSpaceObstacles = new DoubleMap<ArrayList<Polygon>>();
 
-	double xMin, yMin, xMax, yMax;
+	public double xMin, yMin, xMax, yMax;
 
 	// robot reference point is the origin
 	public CSpace(Polygon robot, Rectangle2D.Double worldRect) {
@@ -28,6 +29,8 @@ public class CSpace {
 	}
 
 	private void constructor(Polygon robot, double boundaryXMin, double boundaryYMin, double boundaryXMax, double boundaryYMax) {
+		cSpaceObstacles.setWrap(-1 * Math.PI, Math.PI);
+
 		xMin = boundaryXMin;
 		yMin = boundaryYMin;
 		xMax = boundaryXMax;
@@ -69,6 +72,71 @@ public class CSpace {
 		obstacles.add(obstacle);
 	}
 
+	public boolean queryPose(double x, double y, double theta, double thetaTolerance) {
+		Mat pose = Mat.encodePose(x, y, theta);
+		Maybe<DoubleMap.Pair> mp = cSpaceObstacles.get(theta, thetaTolerance);
+		ArrayList<Polygon> thetaObstacles;
+		Polygon strokedRobot;
+		if (mp.just) {
+			thetaObstacles = mp.value.v;
+		} else {
+			strokedRobot = strokeRot(theta - thetaTolerance, theta + thetaTolerance, reflectedRobot);
+			for (Polygon obstacle : obstacles) {
+				thetaObstacles.add(Polygon.minkowskiSum(obstacle, strokedRobot));
+			}
+			cSpaceObstacles.put(theta, thetaObstacles, thetaTolerance);
+		}
+		for (Polygon obstacle : thetaObstacles) {
+			if (Polygon.pointInPolygon(obstacle, pose)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	// occupancy grid is indexed from (xMin, yMin, 0)
+	public boolean[][][] getOccupancyGrid(int nCellsLinear, int nCellsAngular) {
+		int i, j, k;
+		double xLow, xHigh, yLow, yHigh, thetaLow, thetaHigh;
+		double maxDimension = Math.max(xMax - xMin, yMax - yMin);
+		double resolutionLinear = maxDimension / nCellsLinear;
+		double resolutionAngular = 2 * Math.PI / nCellsAngular;
+		Polygon strokedRobot;
+		ArrayList<Polygon> thetaObstacles;
+		Polygon resolutionCellSpace;
+		boolean [][][] occupancyGrid = new boolean[nCellsLinear][nCellsLinear][nCellsAngular];
+		for (i = 0; i < nCellsLinear; i++) {
+			xLow = xMin + resolutionLinear * i;
+			xHigh = xLow + resolutionLinear;
+			for (j = 0; j < nCellsLinear; j++) {
+				yLow = yMin + resolutionLinear * j;
+				yHigh = yLow + resolutionLinear;
+				for (k = 0; k < nCellsAngular; k++) {
+					thetaLow = thetaMin + resolutionAngular * k;
+					thetaHigh = thetaLow + resolutionAngular;
+					// TODO polygon intersection between bounding box and each cspace obstacle
+
+					resolutionCellSpace = new Polygon(Arrays.asList(Mat.encodePoint(xLow, yLow),
+					                                                Mat.encodePoint(xLow, yHigh),
+					                                                Mat.encodePoint(xHigh, yHigh),
+					                                                Mat.encodePoint(xHigh, yLow)));
+
+					strokedRobot = strokeRot(thetaLow, thetaHigh, reflectedRobot);
+					occupancyGrid[i][j][k] = false;
+					for (Polygon obstacle : obstacles) {
+						if (polygonsIntersect(resolutionCellSpace, Polygon.minkowskiSum(obstacle, strokedRobot))) {
+							occupancyGrid[i][j][k] = true;
+							break;
+						}
+					}
+
+				}
+			}
+		}
+
+		return occupancyGrid;
+	}
+
 	public static class Polygon {
 		private static final double DEFAULT_TOLERANCE = 0.0000001;
 		public ArrayList<Mat> vertices;
@@ -82,6 +150,68 @@ public class CSpace {
 
 		public Polygon(List<Mat> verts) {
 			vertices = new ArrayList<Mat>(verts);
+		}
+
+		public static boolean polygonsIntersect(Polygon poly1, Polygon poly2) {
+			// if any vertices from one polygon are inside the other polygon
+			for (Mat vertex : poly1.vertices) {
+				if (pointInPolygon(poly2, vertex)) {
+					return true;
+				}
+			}
+			for (Mat vertex : poly2.vertices) {
+				if (pointInPolygon(poly1, vertex)) {
+					return true;
+				}
+			}
+
+			// if any edges hit eachother
+			ArrayList<Mat> poly1EdgesA = poly1.vertices;
+			ArrayList<Mat> poly1EdgesB = new ArrayList<Mat>(poly1EdgesA);
+			poly1EdgesB.add(poly1EdgesB.get(0));
+			poly1EdgesB.remove(0);
+
+			ArrayList<Mat> poly2EdgesA = poly2.vertices;
+			ArrayList<Mat> poly2EdgesB = new ArrayList<Mat>(poly2EdgesA);
+			poly2EdgesB.add(poly2EdgesB.get(0));
+			poly2EdgesB.remove(0);
+
+			for (int e1 = 0; e1 < poly1EdgesA.size(); e1++) {
+				for (int e2 = 0; e2 < poly2EdgesA.size(); e2++) {
+					if (lineSegIntersect(poly1EdgesA.get(e1), poly1EdgesB.get(e1), poly2EdgesA.get(e2), poly2EdgesB.get(e2))) {
+						return true;
+					}
+				}
+			}
+
+			// No? ok, cool.
+			return false;
+		}
+
+		public static boolean pointInPolygon(Polygon poly, Mat point) {
+			Mat farPoint;
+			double maxDist = -1;
+			double dist;
+
+			for (Mat vertex : poly.vertices) {
+				dist = Mat.l2(Mat.add(point, Mat.mul(-1, vertex)));
+				if (maxDist < dist) {
+					maxDist = dist;
+					farPoint = vertex;
+				}
+			}
+
+			farPoint = Mat.add(point, Mat.mul(2, Mat.add(farPoint, Mat.mul(-1, point))));
+
+			int size = poly.vertices.size();
+			int intersections = 0;
+			for (int i = 0; i < size; i++) {
+				if (lineSegIntersect(point, farPoint, poly.vertices.get(i), poly.vertices.get((i + 1) % size))) {
+					intersections++;
+				}
+			}
+
+			return ((intersections % 2) == 1);
 		}
 
 		// Transform a polygon by a matrix
@@ -104,11 +234,65 @@ public class CSpace {
 			return sum;
 		}
 
+		// Generates a new polygon by dragging a polygon through an angle, and taking all the points it touched (and a few extras for overestimation)
+		// Only valid for convex polygons, and small rotations (20 degrees or less)
+		// stroke from theta1 to theta2
+		public static Polygon strokeRot(double theta1, double theta2, Polygon poly) {
+			Polygon poly1 = mul(Mat.rotation(theta1), poly);
+			Polygon poly2 = mul(Mat.rotation(theta2), poly);
+			Polygon stroked = combine(poly1, poly2);
+			ArrayList<Mat> cornerVerts;
+			Polygon corner;
+			int thisVertex, prevVertex, nextVertex;
+			Mat origin = Mat.encodePoint(0, 0);
+			Mat cornerVert1a, cornerVert1b;
+			Mat cornerVert2a, cornerVert2b;
+			for (thisVertex = 0; thisVertex < poly.vertices.size(); thisVertex++) {
+				if (thisVertex == 0) {
+					prevVertex = poly.vertices.size() - 1;
+				} else {
+					prevVertex = thisVertex - 1;
+				}
+
+				if (thisVertex == poly.vertices.size() - 1) {
+					nextVertex = 0;
+				} else {
+					nextVertex = thisVertex + 1;
+				}
+
+				cornerVerts = new ArrayList<Mat>();
+				cornerVerts.add(poly2.vertices.get(nextVertex));
+				cornerVerts.add(origin);
+				cornerVerts.add(poly1.vertices.get(prevVertex));
+
+				cornerVert1a = poly1.vertices.get(thisVertex);
+				cornerVert2a = poly2.vertices.get(thisVertex);
+
+				actualDist = ptSegDistance(cornerVert1, cornerVert2, origin);
+				desiredDist = Mat.l2(cornerVert1);
+
+				Mat cornerTransform = Mat.mul(desiredDist / actualDist, Mat.eye())
+				cornerVert1b = Mat.mul(cornerTransform, cornerVert1a);
+				cornerVert2b = Mat.mul(cornerTransform, cornerVert2a);
+
+				cornerVert1b = lineSegIntersection(cornerVert1b, cornerVert2b, poly1.vertices.get(prevVertex), cornerVert1a);
+				cornerVert2b = lineSegIntersection(cornerVert1b, cornerVert2b, poly2.vertices.get(nextVertex), cornerVert2a);
+
+				cornerVerts.add(cornerVert1b);
+				cornerVerts.add(cornerVert2b);
+
+				corner = new Polygon(cornerVerts);
+				stroked = combine(stroked, corner);
+			}
+
+			return stroked;
+		}
+
 		// Generates a new polygon by dragging a polygon by a vector and taking all the points it touched.
 		public static Polygon stroke(double x, double y, Polygon poly) {
 			Polygon polyTrans = mul(Mat.translation(x, y), poly);
 			ArrayList<Mat> vertices = new ArrayList<Mat>();
-			ArrayList<ArrayList<Integer>> edgesTo = new ArrayList<ArrayList<Integer>>();
+			ArrayList<TreeSet<Integer>> edgesTo = new ArrayList<TreeSet<Integer>>();
 			int size = poly.vertices.size();
 
 			// The list of possible vertices of the extrusion
@@ -117,7 +301,7 @@ public class CSpace {
 
 			// pre-compute some information that will make it easy to find the actual perimeter of the extrusion
 			for (int i = 0; i < 2 * size; i++) {
-				edgesTo.add(new ArrayList<Integer>());
+				edgesTo.add(new TreeSet<Integer>());
 			}
 
 			for (int i = 0; i < size; i++) {
@@ -137,7 +321,7 @@ public class CSpace {
 		// take the union of two polygons, assuming no enclosed empty spaces, and that the result will be contiguous.
 		public static Polygon combine(Polygon poly1, Polygon poly2) {
 			ArrayList<Mat> vertices = new ArrayList<Mat>();
-			ArrayList<ArrayList<Integer>> edgesTo = new ArrayList<ArrayList<Integer>>();
+			ArrayList<TreeSet<Integer>> edgesTo = new ArrayList<TreeSet<Integer>>();
 			int sizePoly1 = poly1.vertices.size();
 			int sizePoly2 = poly2.vertices.size();
 			int size = sizePoly1 + sizePoly2;
@@ -164,18 +348,25 @@ public class CSpace {
 					for (int p1 = 0; p1 < size; p1++){
 						if (p0 != p1) {
 							if (ptsEqual(vertices.get(p0), vertices.get(p1))) {
+								edgesTo.get(p0).addAll(edgesTo.get(p1));
 								vertices.remove(p1);
 								edgesTo.remove(p1);
 								size--;
 
 								for (int e0 = 0; e0 < size; e0++) {
-									for (int i = 0; i < edgesTo.get(e0).size(); i++) {
-										if (edgesTo.get(e0).get(i) == p1) {
-											edgesTo.get(e0).set(i, p0);
-										} else if (edgesTo.get(e0).get(i) > p1) {
-											edgesTo.get(e0).set(i, edgesTo.get(e0).get(i) - 1);
-										}
+									if (edgesTo.get(e0).contains(new Integer(p1))) {
+										edgesTo.get(e0).remove(new Integer(p1));
+										edgesTo.get(e0).add(new Integer(p0));
 									}
+									TreeSet<Integer> head = edgesTo.get(e0).headSet(new Integer(p1));
+									TreeSet<Integer> tail = edgesTo.get(e0).tailSet(new Integer(p1));
+									TreeSet<Integer> newTail = new TreeSet<Integer>();
+									for (Integer e1 : tail) {
+										newTail.add(e1 - 1);
+									}
+									edgesTo.get(e1).clear();
+									edgesTo.get(e1).addAll(head);
+									edgesTo.get(e1).addAll(newTail);
 								}
 
 								done = false;
@@ -203,6 +394,7 @@ public class CSpace {
 									edgesTo.get(e1).remove(new Integer(e0));
 									edgesTo.get(e1).add(new Integer(p));
 
+									size++;
 									done = false;
 								}
 							}
@@ -265,12 +457,12 @@ public class CSpace {
 		 *
 		 * ArrayList<Mat> vertices = the list of vertices
 		 *
-		 * ArrayList<ArrayList<Integer>> edgesTo = To find the edges connecting to a point indexed i in vertices,
-		 *                                     look in edgesTo.get(i). There you will find a list of indicies
-		 *                                     into vertices, which are the endpoints of the edges. This data
-		 *                                     structure is slow to write, but fast to read.
+		 * ArrayList<TreeSet<Integer>> edgesTo = To find the edges connecting to a point indexed i in vertices,
+		 *                                       look in edgesTo.get(i). There you will find a list of indicies
+		 *                                       into vertices, which are the endpoints of the edges. This data
+		 *                                       structure is slow to write, but fast to read.
 		 */
-		public static Polygon perimeter(ArrayList<Mat> vertices, ArrayList<ArrayList<Integer>> edgesTo) {
+		public static Polygon perimeter(ArrayList<Mat> vertices, ArrayList<TreeSet<Integer>> edgesTo) {
 			// Find a point guaranteed to be on the perimeter of the polygon, so we can start tracing it out
 			double dist;
 			double maxDist = -1;
@@ -338,7 +530,11 @@ public class CSpace {
 		}
 
 		public static boolean ptSegIntersect(Mat e0, Mat e1, Mat p, double tolerance) {
-			return tolerance > Line2D.ptSegDist(e0.data[0][0], e0.data[1][0], e1.data[0][0], e1.data[1][0], p.data[0][0], p.data[1][0]);
+			return tolerance > ptSegDistance(e0, e1, p);
+		}
+
+		public static boolean ptSegDistance(Mat e0, Mat e1, Mat p) {
+			return Line2D.ptSegDist(e0.data[0][0], e0.data[1][0], e1.data[0][0], e1.data[1][0], p.data[0][0], p.data[1][0]);
 		}
 
 		public static boolean lineSegIntersect(Mat e00, Mat e01, Mat e10, Mat e11) {

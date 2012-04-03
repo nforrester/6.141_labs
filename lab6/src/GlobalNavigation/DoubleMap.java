@@ -149,17 +149,14 @@ public class DoubleMap<V> {
 		return -1;
 	}
 
-	public Pair getP(double key, double tolerance) {
+	public Maybe<Pair> get(double key, double tolerance) {
 		key = rerange(key);
-		return pairs.get(search(key, tolerance));
-	}
-
-	public double getK(double key, double tolerance) {
-		return getP(key, tolerance).k;
-	}
-
-	public V getV(double key, double tolerance) {
-		return getP(key, tolerance).v;
+		int index = search(key, tolerance);
+		if (index != -1) {
+			return Maybe.just(pairs.get(index));
+		} else {
+			return Maybe.none();
+		}
 	}
 
 	public void put(double key, V value, double width) {

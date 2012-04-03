@@ -287,6 +287,22 @@ public class Mat {
 	}
 
 	/**
+	 * <p>Find the L2 norm</p>
+	 */
+	public static Mat l2(Mat m) {
+		double sumSquares = 0;
+		int row;
+		int column;
+		for (row = 0; row < m.rows; row++) {
+			for (column = 0; column < m.columns; column++) {
+				sumSquares += Math.pow(m.data[row][column], 2);
+			}
+		}
+
+		return Math.pow(sumSquares, 0.5);
+	}
+
+	/**
 	 * <p>Inverse of a matrix, with Gauss-Jordan elimination</p>
 	 */
 	public static Mat inverse(Mat matrix) {
