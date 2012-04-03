@@ -14,7 +14,7 @@ import LocalNavigation.Mat;
 public class CSpace {
 	public Polygon reflectedRobot;
 
-	public ArrayList<Polygon> cSpaceObstacles = new ArrayList<Polygon>();
+	public ArrayList<Polygon> obstacles = new ArrayList<Polygon>();
 
 	double xMin, yMin, xMax, yMax;
 
@@ -66,7 +66,7 @@ public class CSpace {
 	}
 
 	public void addObstacle(Polygon obstacle) {
-		cSpaceObstacles.add(Polygon.minkowskiSum(obstacle, reflectedRobot));
+		obstacles.add(obstacle);
 	}
 
 	public static class Polygon {
