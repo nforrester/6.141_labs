@@ -10,14 +10,14 @@ public class Maybe<T> {
 	boolean just;
 	T value;
 
-	public static just(T v) {
+	public Maybe<T> just(T v) {
 		Maybe<T> m = new Maybe<T>();
 		m.just = true;
 		m.value = v;
 		return m;
 	}
 
-	public static none() {
+	public Maybe<T> none() {
 		Maybe<T> m = new Maybe<T>();
 		m.just = false;
 		return m;

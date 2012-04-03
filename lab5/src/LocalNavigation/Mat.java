@@ -289,7 +289,7 @@ public class Mat {
 	/**
 	 * <p>Find the L2 norm</p>
 	 */
-	public static Mat l2(Mat m) {
+	public static double l2(Mat m) {
 		double sumSquares = 0;
 		int row;
 		int column;

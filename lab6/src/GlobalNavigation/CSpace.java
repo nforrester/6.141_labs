@@ -74,13 +74,13 @@ public class CSpace {
 
 	public boolean queryPose(double x, double y, double theta, double thetaTolerance) {
 		Mat pose = Mat.encodePose(x, y, theta);
-		Maybe<DoubleMap.Pair> mp = cSpaceObstacles.get(theta, thetaTolerance);
+		Maybe<DoubleMap<ArrayList<Polygon>>.Pair> mp = cSpaceObstacles.get(theta, thetaTolerance);
 		ArrayList<Polygon> thetaObstacles;
 		Polygon strokedRobot;
 		if (mp.just) {
 			thetaObstacles = mp.value.v;
 		} else {
-			strokedRobot = strokeRot(theta - thetaTolerance, theta + thetaTolerance, reflectedRobot);
+			strokedRobot = Polygon.strokeRot(theta - thetaTolerance, theta + thetaTolerance, reflectedRobot);
 			for (Polygon obstacle : obstacles) {
 				thetaObstacles.add(Polygon.minkowskiSum(obstacle, strokedRobot));
 			}
@@ -112,7 +112,7 @@ public class CSpace {
 				yLow = yMin + resolutionLinear * j;
 				yHigh = yLow + resolutionLinear;
 				for (k = 0; k < nCellsAngular; k++) {
-					thetaLow = thetaMin + resolutionAngular * k;
+					thetaLow = resolutionAngular * k;
 					thetaHigh = thetaLow + resolutionAngular;
 					// TODO polygon intersection between bounding box and each cspace obstacle
 
@@ -121,10 +121,10 @@ public class CSpace {
 					                                                Mat.encodePoint(xHigh, yHigh),
 					                                                Mat.encodePoint(xHigh, yLow)));
 
-					strokedRobot = strokeRot(thetaLow, thetaHigh, reflectedRobot);
+					strokedRobot = Polygon.strokeRot(thetaLow, thetaHigh, reflectedRobot);
 					occupancyGrid[i][j][k] = false;
 					for (Polygon obstacle : obstacles) {
-						if (polygonsIntersect(resolutionCellSpace, Polygon.minkowskiSum(obstacle, strokedRobot))) {
+						if (Polygon.polygonsIntersect(resolutionCellSpace, Polygon.minkowskiSum(obstacle, strokedRobot))) {
 							occupancyGrid[i][j][k] = true;
 							break;
 						}
@@ -247,6 +247,8 @@ public class CSpace {
 			Mat origin = Mat.encodePoint(0, 0);
 			Mat cornerVert1a, cornerVert1b;
 			Mat cornerVert2a, cornerVert2b;
+			double actualDist, desiredDist;
+			Mat cornerTransform;
 			for (thisVertex = 0; thisVertex < poly.vertices.size(); thisVertex++) {
 				if (thisVertex == 0) {
 					prevVertex = poly.vertices.size() - 1;
@@ -268,10 +270,10 @@ public class CSpace {
 				cornerVert1a = poly1.vertices.get(thisVertex);
 				cornerVert2a = poly2.vertices.get(thisVertex);
 
-				actualDist = ptSegDistance(cornerVert1, cornerVert2, origin);
-				desiredDist = Mat.l2(cornerVert1);
+				actualDist = ptSegDistance(cornerVert1a, cornerVert2a, origin);
+				desiredDist = Mat.l2(cornerVert1a);
 
-				Mat cornerTransform = Mat.mul(desiredDist / actualDist, Mat.eye());
+				cornerTransform = Mat.mul(desiredDist / actualDist, Mat.eye(4));
 				cornerVert1b = Mat.mul(cornerTransform, cornerVert1a);
 				cornerVert2b = Mat.mul(cornerTransform, cornerVert2a);
 
@@ -358,15 +360,15 @@ public class CSpace {
 										edgesTo.get(e0).remove(new Integer(p1));
 										edgesTo.get(e0).add(new Integer(p0));
 									}
-									TreeSet<Integer> head = edgesTo.get(e0).headSet(new Integer(p1));
-									TreeSet<Integer> tail = edgesTo.get(e0).tailSet(new Integer(p1));
-									TreeSet<Integer> newTail = new TreeSet<Integer>();
+									SortedSet<Integer> head = edgesTo.get(e0).headSet(new Integer(p1));
+									SortedSet<Integer> tail = edgesTo.get(e0).tailSet(new Integer(p1));
+									SortedSet<Integer> newTail = new TreeSet<Integer>();
 									for (Integer e1 : tail) {
 										newTail.add(e1 - 1);
 									}
-									edgesTo.get(e1).clear();
-									edgesTo.get(e1).addAll(head);
-									edgesTo.get(e1).addAll(newTail);
+									edgesTo.get(e0).clear();
+									edgesTo.get(e0).addAll(head);
+									edgesTo.get(e0).addAll(newTail);
 								}
 
 								done = false;
@@ -417,7 +419,7 @@ public class CSpace {
 											if (lineSegIntersect(vertices.get(e00), vertices.get(e01), vertices.get(e10), vertices.get(e11))) {
 												vertices.add(lineSegIntersection(vertices.get(e00), vertices.get(e01), vertices.get(e10), vertices.get(e11)));
 
-												edgesTo.add(new ArrayList<Integer>());
+												edgesTo.add(new TreeSet<Integer>());
 
 												edgesTo.get(size).add(new Integer(e00));
 												edgesTo.get(size).add(new Integer(e01));
@@ -533,7 +535,7 @@ public class CSpace {
 			return tolerance > ptSegDistance(e0, e1, p);
 		}
 
-		public static boolean ptSegDistance(Mat e0, Mat e1, Mat p) {
+		public static double ptSegDistance(Mat e0, Mat e1, Mat p) {
 			return Line2D.ptSegDist(e0.data[0][0], e0.data[1][0], e1.data[0][0], e1.data[1][0], p.data[0][0], p.data[1][0]);
 		}
 

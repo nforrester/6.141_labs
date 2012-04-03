@@ -153,9 +153,9 @@ public class DoubleMap<V> {
 		key = rerange(key);
 		int index = search(key, tolerance);
 		if (index != -1) {
-			return Maybe.just(pairs.get(index));
+			return new Maybe().just(pairs.get(index));
 		} else {
-			return Maybe.none();
+			return new Maybe().none();
 		}
 	}
 
