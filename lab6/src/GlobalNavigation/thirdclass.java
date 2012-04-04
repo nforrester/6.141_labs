@@ -151,7 +151,7 @@ public class thirdclass{
            // printing where the robot is headed!!
            int[] addArray = new int[] {currentPosition[0],currentPosition[1],currentPosition[2],potentialField[currentPosition[0]][currentPosition[1]][currentPosition[2]].getFieldValue()};
            wayPoints.add(addArray);
-           System.out.println("moving to " + currentPosition[0] + "," + currentPosition[1] + "," + currentPosition[2]+ " -> " +  potentialField[currentPosition[0]][currentPosition[1]][currentPosition[2]].getFieldValue());
+           System.err.println("moving to " + currentPosition[0] + "," + currentPosition[1] + "," + currentPosition[2]+ " -> " +  potentialField[currentPosition[0]][currentPosition[1]][currentPosition[2]].getFieldValue());
        }
        return wayPoints;
     }
@@ -276,9 +276,13 @@ public class thirdclass{
         int height = cspace[0][0].length;
         int[][][] array = new int[length][breadth][height];
         for(int i=0;i<length;i++) {
+	System.err.println("hi1");
             for(int j=0;j<breadth;j++) {
-                for(int k=0;k<height;k++)
-                array[i][j][k] = -100;
+	System.err.println("hi2");
+                for(int k=0;k<height;k++) {
+		System.err.println("hi3");
+			array[i][j][k] = -100;
+		}
             }
         }
         
@@ -294,6 +298,7 @@ public class thirdclass{
                     for(int k=0;k<array[i][j].length;k++) {
                         if(cspace[i][j][k]) { //if the value is true
                             if(array[i][j][k] >= 0) {
+				System.err.println("hi: " + m + " " + i + " " + j + " " + k + " " + (length*breadth*height + 2));
                                 if(is3DValid(i+1,j,k,length,breadth,height)&& array[i+1][j][k] == -100) array[i+1][j][k] = array[i][j][k]+1; 
                                 if(is3DValid(i-1,j,k,length,breadth,height)&& array[i-1][j][k] == -100 ) array[i-1][j][k] = array[i][j][k]+1; 
                                 if(is3DValid(i,j+1,k,length,breadth,height)&& array[i][j+1][k] == -100) array[i][j+1][k] = array[i][j][k]+ 1; 
@@ -301,10 +306,10 @@ public class thirdclass{
                                 if(is3DValid(i,j,k+1,length,breadth,height)&& array[i][j][k+1] == -100) array[i][j][k+1] = array[i][j][k]+ 1; 
                                 if(is3DValid(i,j,k-1,length,breadth,height)&& array[i][j][k-1] == -100) array[i][j][k-1] = array[i][j][k]+ 1;
 
-                                if(is3DValid(i+1,j+1,k,length,breadth,height)&& array[i+1][j+1][k] == -100) array[i+1][j+1][k] = array[i][j][k]+1; 
-                                if(is3DValid(i+1,j-1,k,length,breadth,height)&& array[i+1][j-1][k] == -100) array[i+1][j-1][k] = array[i][j][k]+1; 
-				if(is3DValid(i-1,j-1,k,length,breadth,height)&& array[i-1][j-1][k] == -100) array[i-1][j-1][k] = array[i][j][k]+1; 
-                                if(is3DValid(i-1,j+1,k,length,breadth,height)&& array[i-1][j+1][k] == -100) array[i-1][j+1][k] = array[i][j][k]+1; 
+                                //if(is3DValid(i+1,j+1,k,length,breadth,height)&& array[i+1][j+1][k] == -100) array[i+1][j+1][k] = array[i][j][k]+1; 
+                                //if(is3DValid(i+1,j-1,k,length,breadth,height)&& array[i+1][j-1][k] == -100) array[i+1][j-1][k] = array[i][j][k]+1; 
+				//if(is3DValid(i-1,j-1,k,length,breadth,height)&& array[i-1][j-1][k] == -100) array[i-1][j-1][k] = array[i][j][k]+1; 
+                                //if(is3DValid(i-1,j+1,k,length,breadth,height)&& array[i-1][j+1][k] == -100) array[i-1][j+1][k] = array[i][j][k]+1; 
                             }
                         }
                         else {

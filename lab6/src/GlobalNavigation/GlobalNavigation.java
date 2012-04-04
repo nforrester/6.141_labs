@@ -101,7 +101,7 @@ public class GlobalNavigation implements NodeMain {
 	cspace = new CSpace(robot, map);
 	cspace.node = node;
 
-	this.instanceMain();
+	this.instanceMain3D();
     }
 
     
@@ -139,7 +139,7 @@ public class GlobalNavigation implements NodeMain {
 		e.printStackTrace();
 	    }
 
-	    int nCells = 60;
+	    int nCells = 150;
 	    boolean[][][] occupancyGrid3D = new boolean[nCells][nCells][8];
 	    for (int t = 0; t < 8; t++) {
 		    double halfWidth = 0.235;
@@ -197,7 +197,9 @@ public class GlobalNavigation implements NodeMain {
 
 	    ArrayList<int[]> intWaypoints = new ArrayList<int[]>();
 	    try {
-		//intWaypoints = thirdclass.pathFind(occupancyGrid3D, new int[] {startXi, startYi}, new int[] {endXi, endYi});
+		    System.err.println("START");
+		intWaypoints = thirdclass.pathFind3D(occupancyGrid3D, new int[] {startXi, startYi, 0}, new int[] {endXi, endYi, 0});
+		    System.err.println("END");
 	    } catch (Exception e) {
 	    	e.printStackTrace();
 		System.exit(1);
@@ -206,6 +208,8 @@ public class GlobalNavigation implements NodeMain {
 	    for (int[] pt : intWaypoints) {
 	    	System.err.println("(" + pt[0] + ", " + pt[1] + ")    ");
 	    }
+
+	    displayPath(intWaypoints);
 
 	    /*intWaypoints = new ArrayList<int[]>();
 	    intWaypoints.add(new int[] {0, 0});

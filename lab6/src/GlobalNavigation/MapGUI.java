@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.geom.*;
 import javax.swing.*;
 import LocalNavigation.PointMessageListener;
+import LocalNavigation.SegmentMessageListener;
 
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
@@ -443,6 +444,7 @@ public class MapGUI extends SonarGUI implements NodeMain{
     private Subscriber<org.ros.message.lab6_msgs.GUIPolyMsg> guiPolySub;
     private Subscriber<org.ros.message.lab5_msgs.GUIEraseMsg> guiEraseSub;
     private Subscriber<org.ros.message.lab5_msgs.GUIPointMsg> guiPointSub;
+    private Subscriber<org.ros.message.lab5_msgs.GUISegmentMsg> guiSegmentSub;
 
     /**
      * Hook called by ROS to start the gui
@@ -456,6 +458,8 @@ public class MapGUI extends SonarGUI implements NodeMain{
 	guiEraseSub.addMessageListener(new EraseMessageListener(this));
 	guiPointSub = node.newSubscriber("gui/Point", "lab5_msgs/GUIPointMsg");
 	guiPointSub.addMessageListener(new PointMessageListener(this));
+	guiSegmentSub = node.newSubscriber("gui/Segment", "lab5_msgs/GUISegmentMsg");
+	guiSegmentSub.addMessageListener(new SegmentMessageListener(this));
 	super.onStart(node);
     }
     
