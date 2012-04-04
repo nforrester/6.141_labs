@@ -101,7 +101,7 @@ public class GlobalNavigation implements NodeMain {
 	cspace = new CSpace(robot, map);
 	cspace.node = node;
 
-	this.instanceMain3D();
+	this.instanceMain();
     }
 
     
