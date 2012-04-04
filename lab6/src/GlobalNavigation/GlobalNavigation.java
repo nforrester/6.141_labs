@@ -26,6 +26,8 @@ import LocalNavigation.Mat;
 
 public class GlobalNavigation implements NodeMain {
 
+    private Node thisNode;
+
     public static final String APPNAME = "GlobalNavigation";
 
     public static final double FOLLOW_PATH_MAX_RV = .5;
@@ -37,6 +39,7 @@ public class GlobalNavigation implements NodeMain {
 
     public static final int STOP = 0;
     public static final int GO = 1;
+    public static boolean TESTCONVEXHULL = false;
 
     protected Grid grid;
     private String mapFile;
@@ -53,6 +56,7 @@ public class GlobalNavigation implements NodeMain {
 
 
     public void onStart(Node node) {
+    	thisNode = node;
 	ParameterTree paramTree = node.newParameterTree();
 	mapFile = paramTree.getString(node.resolveName("~/mapFileName"));
 	try {
@@ -73,16 +77,26 @@ public class GlobalNavigation implements NodeMain {
 
 	double halfWidth = 0.235;
 	double fwd = 0.190;
-	double bkwd = 0.290;
+	double bkwd = -0.290;
+
+	double radius = 0.340;
 
 	ArrayList<Mat> robotVerts = new ArrayList<Mat>();
-	robotVerts.add(Mat.encodePoint(-1 * halfWidth, fwd));
-	robotVerts.add(Mat.encodePoint(-1 * halfWidth, bkwd));
-	robotVerts.add(Mat.encodePoint(     halfWidth, bkwd));
-	robotVerts.add(Mat.encodePoint(     halfWidth, fwd));
+	/*robotVerts.add(Mat.encodePoint(fwd,  -1 * halfWidth));
+	robotVerts.add(Mat.encodePoint(bkwd, -1 * halfWidth));
+	robotVerts.add(Mat.encodePoint(bkwd,      halfWidth));
+	robotVerts.add(Mat.encodePoint(fwd,       halfWidth));*/
+	/*robotVerts.add(Mat.encodePoint(     radius,      radius));
+	robotVerts.add(Mat.encodePoint(-1 * radius,      radius));
+	robotVerts.add(Mat.encodePoint(-1 * radius, -1 * radius));
+	robotVerts.add(Mat.encodePoint(     radius, -1 * radius));*/
+	for (double theta = 0; theta < 2 * Math.PI; theta += 0.05) {
+		robotVerts.add(Mat.encodePoint(radius * Math.sin(theta), radius * Math.cos(theta)));
+	}
 	CSpace.Polygon robot = new CSpace.Polygon(robotVerts);
 
 	cspace = new CSpace(robot, map);
+	cspace.node = node;
 
 	this.instanceMain();
     }
@@ -91,27 +105,187 @@ public class GlobalNavigation implements NodeMain {
     public void instanceMain() {
 	//TODO: Implement
 	//Displays map, computes cspace and grid, displays grid and path, and initiates path following
-	
-	System.out.println("  map file: " + mapFile);
+	if(TESTCONVEXHULL) {
+	    try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block                                                                                                            
+                e.printStackTrace();
+            }
 
-	// wait for the gui to come online.
-	try {
-	    Thread.sleep(2000);
-	} catch (InterruptedException e) {
-	    // TODO Auto-generated catch block
-	    e.printStackTrace();
+	    testConvexHull();
+
+	} else {
+
+	    System.out.println("  map file: " + mapFile);
+
+	    // wait for the gui to come online.
+	    try {
+		Thread.sleep(4000);
+	    } catch (InterruptedException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	    }
+
+	    displayMap();
+
+	    try {
+		Thread.sleep(2000);
+	    } catch (InterruptedException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	    }
+
+	    displayCSpace();
+
+	    try {
+		Thread.sleep(500);
+	    } catch (InterruptedException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	    }
+
+	    int nCells = 60;
+	    boolean[][] occupancyGrid = cspace.getOccupancyGrid(nCells);
+	    displayCSpace();
+
+	    try {
+		Thread.sleep(500);
+	    } catch (InterruptedException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	    }
+
+	    for (int i = nCells - 1; i >= 0; i--) {
+	    	for (int j = 0; j < nCells; j++) {
+			if (occupancyGrid[j][i]) {
+				System.err.print(".");
+			} else {
+				System.err.print("#");
+			}
+		}
+		System.err.println("");
+	    }
+
+	    Rectangle2D.Double worldRect = map.getWorldRect();
+	    float mazeSize = Math.max((float)worldRect.getMaxX() - (float)worldRect.getMinX(), (float)worldRect.getMaxY() - (float)worldRect.getMinY());
+
+	    float startX = (float)map.getRobotStart().getX();
+	    float startY = (float)map.getRobotStart().getY();
+	    float endX = (float)map.getRobotGoal().getX();
+	    float endY = (float)map.getRobotGoal().getY();
+
+	    int startXi = Math.round((startX - (float)worldRect.getMinX()) / mazeSize * nCells);
+	    int startYi = Math.round((startY - (float)worldRect.getMinY()) / mazeSize * nCells);
+	    int endXi = Math.round((endX - (float)worldRect.getMinX()) / mazeSize * nCells);
+	    int endYi = Math.round((endY - (float)worldRect.getMinY()) / mazeSize * nCells);
+
+	    System.err.println(startXi);
+	    System.err.println(startYi);
+	    System.err.println(endXi);
+	    System.err.println(endYi);
+
+	    ArrayList<int[]> intWaypoints = new ArrayList<int[]>();
+	    try {
+		intWaypoints = thirdclass.pathFind(occupancyGrid, new int[] {startXi, startYi}, new int[] {endXi, endYi});
+	    } catch (Exception e) {
+	    	e.printStackTrace();
+		System.exit(1);
+	    }
+
+	    for (int[] pt : intWaypoints) {
+	    	System.err.println("(" + pt[0] + ", " + pt[1] + ")    ");
+	    }
+
+	    /*intWaypoints = new ArrayList<int[]>();
+	    intWaypoints.add(new int[] {0, 0});
+	    intWaypoints.add(new int[] {1, 0});
+	    intWaypoints.add(new int[] {2, 0});
+	    intWaypoints.add(new int[] {2, 1});
+	    intWaypoints.add(new int[] {2, 2});
+	    intWaypoints.add(new int[] {3, 3});
+	    intWaypoints.add(new int[] {4, 4});
+	    intWaypoints.add(new int[] {5, 5});
+	    intWaypoints.add(new int[] {4, 6});
+	    intWaypoints.add(new int[] {3, 7});
+	    intWaypoints.add(new int[] {2, 8});
+	    intWaypoints.add(new int[] {50, 51});
+	    intWaypoints.add(new int[] {50, 52});
+	    intWaypoints.add(new int[] {50, 53});
+	    intWaypoints.add(new int[] {50, 54});
+	    intWaypoints.add(new int[] {50, 55});
+	    intWaypoints.add(new int[] {50, 56});
+	    intWaypoints.add(new int[] {50, 57});
+	    intWaypoints.add(new int[] {50, 58});*/
+
+	    int i = 1;
+	    int dx1, dy1, dx2, dy2;
+	    while (i + 1 < intWaypoints.size()) {
+	    	dx1 = intWaypoints.get(i)[0] - intWaypoints.get(i - 1)[0];
+	    	dy1 = intWaypoints.get(i)[1] - intWaypoints.get(i - 1)[1];
+
+	    	dx2 = intWaypoints.get(i + 1)[0] - intWaypoints.get(i)[0];
+	    	dy2 = intWaypoints.get(i + 1)[1] - intWaypoints.get(i)[1];
+
+		if (Math.abs(dx1) > 5 || Math.abs(dy1) > 5) {
+			i++;
+		} else {
+			while (dx1 > 1) {
+				dx1--;
+			}
+			while (dy1 > 1) {
+				dy1--;
+			}
+			while (dx1 < -1) {
+				dx1++;
+			}
+			while (dy1 < -1) {
+				dy1++;
+			}
+			while (dx2 > 1) {
+				dx2--;
+			}
+			while (dy2 > 1) {
+				dy2--;
+			}
+			while (dx2 < -1) {
+				dx2++;
+			}
+			while (dy2 < -1) {
+				dy2++;
+			}
+
+			if (dx1 == dx2 && dy1 == dy2) {
+				intWaypoints.remove(i);
+			} else {
+				i++;
+			}
+		}
+	    }
+
+	    RobotController navigator = new RobotController();
+	    navigator.onStart(thisNode);
+	    for (int[] pt : intWaypoints) {
+	    	System.err.print("(" + pt[0] + ", " + pt[1] + ")    ");
+		System.err.print((float)pt[0]);
+	    	System.err.print(" ");
+		System.err.print((float)pt[0] * mazeSize);
+	    	System.err.print(" ");
+		System.err.print((float)pt[0] * mazeSize / (float)nCells);
+	    	System.err.print(" ");
+		System.err.print((float)pt[0] * mazeSize / (float)nCells + mazeSize / (float)nCells / 2);
+	    	System.err.print(" ");
+		System.err.print((float)pt[0] * mazeSize / (float)nCells + mazeSize / (float)nCells / 2 + (float)worldRect.getMinX());
+	    	System.err.print(" ");
+		System.err.print((float)pt[0] * mazeSize / (float)nCells + mazeSize / (float)nCells / 2 + (float)worldRect.getMinX() - startX);
+	    	System.err.print(" ");
+		float wpX = (float)pt[0] * mazeSize / (float)nCells + mazeSize / (float)nCells / 2 + (float)worldRect.getMinX() - startX;
+		float wpY = (float)pt[1] * mazeSize / (float)nCells + mazeSize / (float)nCells / 2 + (float)worldRect.getMinY() - startY;
+	    	System.err.println("(" + wpX + ", " + wpY + ")");
+		navigator.addWaypoint(new Waypoint(wpX, wpY, (short) 1));
+	    }
+	navigator.addWaypoint(new Waypoint(wpX, wpY, (short) 1));
 	}
-
-	displayMap();
-
-	try {
-	    Thread.sleep(2000);
-	} catch (InterruptedException e) {
-	    // TODO Auto-generated catch block
-	    e.printStackTrace();
-	}
-
-	displayCSpace(0);
     }
 
     @Override
@@ -225,6 +399,20 @@ public class GlobalNavigation implements NodeMain {
 	grid = new Grid(map.getWorldRect(), GRID_RESOLUTION);
     }
 
+    public void displayCSpace() {
+	GUIPolyMsg polyMsg = new GUIPolyMsg();
+	for (CSpace.Polygon obstacle : cspace.getCSObstacles()) {
+		polyMsg = new GUIPolyMsg();
+		PolygonObstacle POobstacle = new PolygonObstacle();
+		for (Mat vertex : obstacle.vertices) {
+			double[] v = Mat.decodePoint(vertex);
+			POobstacle.addVertex(v[0], v[1]);
+		}
+		fillPolyMsg(polyMsg, POobstacle, MapGUI.makeRandomColor(), true, true);
+		polyPub.publish(polyMsg);
+	}
+    }
+
     public void displayCSpace(double theta) {
 	GUIPolyMsg polyMsg = new GUIPolyMsg();
 	for (CSpace.Polygon obstacle : cspace.getThetaObstacles(theta, Math.PI / 10)) {
@@ -248,7 +436,25 @@ public class GlobalNavigation implements NodeMain {
     }
 
     public void testConvexHull() {
-	//TODO: Implement
+	erasePub.publish(new GUIEraseMsg());
+	GUIPointMsg testPtMsg = new GUIPointMsg();
+	GUIPolyMsg polyMsg = new GUIPolyMsg();
+
+	ArrayList<Point2D.Double> pts = new ArrayList<Point2D.Double>();
+
+	for(int i=0;i<10;i++) {
+	    pts.add(new Point2D.Double(3*Math.random(), 3*Math.random()));
+	    fillPointMsg(testPtMsg,pts.get(i),new Color(255,0,0),1);
+	    pointPub.publish(testPtMsg);
+	    try{
+		Thread.sleep(100);
+	    } catch(InterruptedException e) {};
+	}
+	PolygonObstacle obs = GeomUtils.convexHull(pts);
+	fillPolyMsg(polyMsg, obs, new Color(0,0,0),false, true);
+	polyPub.publish(polyMsg);	
+	
+	
     }
 
     public void handle(OdometryMsg msg) {

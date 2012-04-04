@@ -271,6 +271,7 @@ public class RobotController implements NodeMain, Runnable  {
 			stateMsg.data = "IDLE";
 		}else if (state==ROTATING){
 			stateMsg.data = "ROTATING";
+			System.err.println("Arrived at waypoint.");
 		}else if (state==TRANSLATING){
 			stateMsg.data = "TRANSLATING";
 		}

@@ -5,6 +5,12 @@ import java.util.*;
 
 import LocalNavigation.Mat;
 
+import org.ros.node.Node;
+import org.ros.node.topic.Publisher;
+import org.ros.message.lab5_msgs.GUISegmentMsg;
+import org.ros.message.lab5_msgs.GUIEraseMsg;
+import org.ros.message.lab5_msgs.ColorMsg;
+
 /**
  * <p>Configuration space</p>
  *
@@ -13,6 +19,8 @@ import LocalNavigation.Mat;
  **/
 public class CSpace {
 	public Polygon reflectedRobot;
+
+	public static Node node;
 
 	public ArrayList<Polygon> obstacles = new ArrayList<Polygon>();
 	public DoubleMap<ArrayList<Polygon>> cSpaceObstacles = new DoubleMap<ArrayList<Polygon>>();
@@ -37,6 +45,7 @@ public class CSpace {
 	}
 
 	private void constructor(Polygon robot, double boundaryXMin, double boundaryYMin, double boundaryXMax, double boundaryYMax) {
+		Polygon.tests();
 		cSpaceObstacles.setWrap(-1 * Math.PI, Math.PI);
 
 		xMin = boundaryXMin;
@@ -84,6 +93,14 @@ public class CSpace {
 		obstacles.add(obstacle);
 	}
 
+	public ArrayList<Polygon> getCSObstacles() {
+		ArrayList<Polygon> csObstacles = new ArrayList<Polygon>();
+		for (Polygon obstacle : obstacles) {
+			csObstacles.add(Polygon.minkowskiSumSimple(obstacle, reflectedRobot));
+		}
+		return csObstacles;
+	}
+
 	public ArrayList<Polygon> getThetaObstacles(double theta, double thetaTolerance) {
 		Maybe<DoubleMap<ArrayList<Polygon>>.Pair> mp = cSpaceObstacles.get(theta, thetaTolerance);
 		ArrayList<Polygon> thetaObstacles;
@@ -99,6 +116,48 @@ public class CSpace {
 			cSpaceObstacles.put(theta, thetaObstacles, thetaTolerance);
 		}
 		return thetaObstacles;
+	}
+
+	// occupancy grid is indexed from (xMin, yMin)
+	public boolean[][] getOccupancyGrid(int nCellsLinear) {
+		System.err.println("GOT HERE YO!");
+		int i, j;
+		double xLow, xHigh, yLow, yHigh;
+		double maxDimension = Math.max(xMax - xMin, yMax - yMin);
+		double resolutionLinear = maxDimension / nCellsLinear;
+		Polygon resolutionCellSpace;
+		resolutionCellSpace = new Polygon(Arrays.asList(Mat.encodePoint(-1 * resolutionLinear / 2, -1 * resolutionLinear / 2),
+								Mat.encodePoint(-1 * resolutionLinear / 2,      resolutionLinear / 2),
+								Mat.encodePoint(     resolutionLinear / 2,      resolutionLinear / 2),
+								Mat.encodePoint(     resolutionLinear / 2, -1 * resolutionLinear / 2)));
+		reflectedRobot = Polygon.minkowskiSumSimple(reflectedRobot, resolutionCellSpace);
+		ArrayList<Polygon> csObstacles = getCSObstacles();
+		System.err.println("GOT HERE as well.");
+		boolean [][] occupancyGrid = new boolean[nCellsLinear][nCellsLinear];
+		for (i = 0; i < nCellsLinear; i++) {
+			xLow = xMin + resolutionLinear * i;
+			xHigh = xLow + resolutionLinear;
+			for (j = 0; j < nCellsLinear; j++) {
+				yLow = yMin + resolutionLinear * j;
+				yHigh = yLow + resolutionLinear;
+
+				if (i == 9 && j == 6) {
+					System.err.print("(" + i + ", " + j + ")     ");
+					System.err.println("(" + ((xLow + xHigh) / 2) + ", " + ((yLow + yHigh) / 2) + ")");
+				}
+
+				occupancyGrid[i][j] = true;
+				for (Polygon obstacle : csObstacles) {
+					if (Polygon.pointInPolygon(obstacle, Mat.encodePoint((xLow + xHigh) / 2, (yLow + yHigh) / 2))) {
+						occupancyGrid[i][j] = false;
+						break;
+					}
+				}
+			}
+		}
+
+		System.err.println("GOT HERE TOO!");
+		return occupancyGrid;
 	}
 
 	// occupancy grid is indexed from (xMin, yMin, 0)
@@ -128,10 +187,10 @@ public class CSpace {
 					                                                Mat.encodePoint(xHigh, yLow)));
 
 					strokedRobot = Polygon.strokeRot(thetaLow, thetaHigh, reflectedRobot);
-					occupancyGrid[i][j][k] = false;
+					occupancyGrid[i][j][k] = true;
 					for (Polygon obstacle : obstacles) {
 						if (Polygon.polygonsIntersect(resolutionCellSpace, Polygon.minkowskiSum(obstacle, strokedRobot))) {
-							occupancyGrid[i][j][k] = true;
+							occupancyGrid[i][j][k] = false;
 							break;
 						}
 					}
@@ -144,7 +203,7 @@ public class CSpace {
 	}
 
 	public static class Polygon {
-		private static final double DEFAULT_TOLERANCE = 0.0000001;
+		private static final double DEFAULT_TOLERANCE = 0.0001;
 		public ArrayList<Mat> vertices;
 
 		public Polygon(List<Mat> verts) {
@@ -188,19 +247,25 @@ public class CSpace {
 		}
 
 		public static boolean pointInPolygon(Polygon poly, Mat point) {
-			Mat farPoint = Mat.encodePoint(0, 0);
+			ArrayList<Point2D.Double> points = new ArrayList<Point2D.Double>();
+			for (Mat v : poly.vertices) {
+				points.add(new Point2D.Double(v.data[0][0], v.data[1][0]));
+			}
+			PolygonObstacle po = GeomUtils.convexHull(points);
+			return po.contains(point.data[0][0], point.data[1][0]);
+
+			/*Mat farPoint = Mat.encodePoint(0, 0);
 			double maxDist = -1;
 			double dist;
 
 			for (Mat vertex : poly.vertices) {
-				dist = Mat.l2(Mat.add(point, Mat.mul(-1, vertex)));
+				dist = Mat.dist(point, vertex);
 				if (maxDist < dist) {
 					maxDist = dist;
-					farPoint = vertex;
 				}
 			}
 
-			farPoint = Mat.add(point, Mat.mul(2, Mat.add(farPoint, Mat.mul(-1, point))));
+			farPoint = Mat.add(point, Mat.mul(maxDist + 1, Mat.encodePoint(1, 0)));
 
 			int size = poly.vertices.size();
 			int intersections = 0;
@@ -210,7 +275,7 @@ public class CSpace {
 				}
 			}
 
-			return ((intersections % 2) == 1);
+			return ((intersections % 2) == 1);*/
 		}
 
 		// Transform a polygon by a matrix
@@ -222,9 +287,29 @@ public class CSpace {
 			return new Polygon(newVertices);
 		}
 
+		// assumes that there will be no enclosed empty spaces in the result, and that the result will be contiguous, and that everything is convex
+		public static Polygon minkowskiSumSimple(Polygon poly1, Polygon poly2) {
+			ArrayList<Mat> verts = new ArrayList<Mat>();
+			for (Mat v1 : poly1.vertices) {
+				for (Mat v2 : poly2.vertices) {
+					verts.add(Mat.add(v1, v2));
+				}
+			}
+			ArrayList<Point2D.Double> points = new ArrayList<Point2D.Double>();
+			for (Mat v : verts) {
+				points.add(new Point2D.Double(v.data[0][0], v.data[1][0]));
+			}
+			PolygonObstacle po = GeomUtils.convexHull(points);
+			verts = new ArrayList<Mat>();
+			for (Point2D.Double vert : po.getVertices()) {
+				verts.add(Mat.encodePoint(vert.x, vert.y));
+			}
+			return new Polygon(verts);
+		}
+
 		// assumes that there will be no enclosed empty spaces in the result, and that the result will be contiguous.
 		public static Polygon minkowskiSum(Polygon poly1, Polygon poly2) {
-			Mat prevVertex = poly1.vertices.get(poly1.vertices.size());
+			Mat prevVertex = poly1.vertices.get(poly1.vertices.size() - 1);
 			Polygon sum = poly1;
 			for (Mat vertex : poly1.vertices) {
 				sum = combine(sum, mul(Mat.translation(vertex.data[0][0], vertex.data[1][0]), stroke(prevVertex.data[0][0] - vertex.data[0][0], prevVertex.data[1][0] - vertex.data[1][0], poly2)));
@@ -270,7 +355,7 @@ public class CSpace {
 				cornerVert2a = poly2.vertices.get(thisVertex);
 
 				actualDist = ptSegDistance(cornerVert1a, cornerVert2a, origin);
-				desiredDist = Mat.l2(cornerVert1a);
+				desiredDist = Mat.dist(cornerVert1a, Mat.encodePoint(0, 0));
 
 				cornerTransform = Mat.mul(desiredDist / actualDist, Mat.eye(4));
 				cornerVert1b = Mat.mul(cornerTransform, cornerVert1a);
@@ -328,117 +413,246 @@ public class CSpace {
 			int size = sizePoly1 + sizePoly2;
 			boolean done;
 
+			Publisher<GUISegmentMsg> segmentPub = node.newPublisher("/gui/Segment", "lab5_msgs/GUISegmentMsg");
+			Publisher<GUIEraseMsg> erasePub = node.newPublisher("/gui/Erase", "lab5_msgs/GUIEraseMsg");
+			//erasePub.publish(new GUIEraseMsg());
+			GUISegmentMsg segmentPlot = new GUISegmentMsg();
+			ColorMsg segmentPlotColor = new ColorMsg();
+
 			// add all the vertices in both polygons
 			vertices.addAll(poly1.vertices);
 			vertices.addAll(poly2.vertices);
 
-			// add all the edges in both polygons
 			for (int i = 0; i < size; i++) {
+				edgesTo.add(new TreeSet<Integer>());
+			}
+
+			// add all the edges in both polygons
+			for (int i = 0; i < sizePoly1; i++) {
 				edgesTo.get(i).add(new Integer((i + 1) % sizePoly1));
 				edgesTo.get((i + 1) % sizePoly1).add(new Integer(i));
-
+			}
+			for (int i = 0; i < sizePoly2; i++) {
 				edgesTo.get(i + sizePoly1).add(new Integer(((i + 1) % sizePoly2) + sizePoly1));
 				edgesTo.get(((i + 1) % sizePoly2) + sizePoly1).add(new Integer(i + sizePoly1));
+			}
+
+			System.err.println(vertices);
+			System.err.println(edgesTo);
+
+			segmentPlotColor.r = 255;
+			segmentPlotColor.g = 0;
+			segmentPlotColor.b = 0;
+			segmentPlot.color = segmentPlotColor;
+			for (int e0 = 0; e0 < size; e0++){
+				for (int e1 : edgesTo.get(e0)) {
+					double[] xyStart = Mat.decodePoint(vertices.get(e0));
+					double[] xyEnd   = Mat.decodePoint(vertices.get(e1));
+					segmentPlot.startX = xyStart[0];
+					segmentPlot.startY = xyStart[1];
+					segmentPlot.endX = xyEnd[0];
+					segmentPlot.endY = xyEnd[1];
+					segmentPub.publish(segmentPlot);
+				}
 			}
 
 			// find and merge colocated points
 			done = false;
 			while (!done) {
 				done = true;
-				for (int p0 = 0; p0 < size; p0++){
-					for (int p1 = 0; p1 < size; p1++){
-						if (p0 != p1) {
-							if (ptsEqual(vertices.get(p0), vertices.get(p1))) {
-								edgesTo.get(p0).addAll(edgesTo.get(p1));
-								vertices.remove(p1);
-								edgesTo.remove(p1);
-								size--;
+				checkFMCP: {
+					for (int p0 = 0; p0 < size; p0++){
+						for (int p1 = 0; p1 < size; p1++){
+							if (p0 != p1) {
+								if (ptsEqual(vertices.get(p0), vertices.get(p1))) {
+			//						System.err.println("found two colocated: " + p0 + " " + p1);
+			//System.err.println(edgesTo);
+									edgesTo.get(p0).addAll(edgesTo.get(p1));
+									edgesTo.get(p0).remove(p0);
+									vertices.remove(p1);
+									edgesTo.remove(p1);
+									size--;
 
-								for (int e0 = 0; e0 < size; e0++) {
-									if (edgesTo.get(e0).contains(new Integer(p1))) {
-										edgesTo.get(e0).remove(new Integer(p1));
-										edgesTo.get(e0).add(new Integer(p0));
+									for (int e0 = 0; e0 < size; e0++) {
+										if (edgesTo.get(e0).contains(new Integer(p1))) {
+											edgesTo.get(e0).remove(new Integer(p1));
+											edgesTo.get(e0).add(new Integer(p0));
+										}
+			//System.err.println("e0: " + e0);
+			//System.err.println(edgesTo.get(e0));
+										TreeSet<Integer> head = new TreeSet(edgesTo.get(e0).headSet(new Integer(p1)));
+			//System.err.println(head);
+										for (Integer e1 : edgesTo.get(e0).tailSet(new Integer(p1))) {
+											head.add(e1 - 1);
+										}
+										head.remove(e0);
+			//System.err.println(head);
+										edgesTo.set(e0, head);
+			//System.err.println(edgesTo.get(e0));
 									}
-									SortedSet<Integer> head = edgesTo.get(e0).headSet(new Integer(p1));
-									SortedSet<Integer> tail = edgesTo.get(e0).tailSet(new Integer(p1));
-									SortedSet<Integer> newTail = new TreeSet<Integer>();
-									for (Integer e1 : tail) {
-										newTail.add(e1 - 1);
-									}
-									edgesTo.get(e0).clear();
-									edgesTo.get(e0).addAll(head);
-									edgesTo.get(e0).addAll(newTail);
+
+									done = false;
+			//System.err.println(edgesTo);
+									break checkFMCP;
 								}
-
-								done = false;
 							}
 						}
 					}
 				}
 			}
+			System.err.println("merged points");
+			System.err.println(edgesTo);
+
+			/*segmentPlotColor.r = 0;
+			segmentPlotColor.g = 0;
+			segmentPlotColor.b = 255;
+			segmentPlot.color = segmentPlotColor;
+			for (int e0 = 0; e0 < size; e0++){
+				for (int e1 : edgesTo.get(e0)) {
+					double[] xyStart = Mat.decodePoint(vertices.get(e0));
+					double[] xyEnd   = Mat.decodePoint(vertices.get(e1));
+					segmentPlot.startX = xyStart[0];
+					segmentPlot.startY = xyStart[1];
+					segmentPlot.endX = xyEnd[0];
+					segmentPlot.endY = xyEnd[1];
+					segmentPub.publish(segmentPlot);
+				}
+			}*/
 
 			// find and split edges bisected by points
 			done = false;
 			while (!done) {
 				done = true;
-				for (int e0 = 0; e0 < size; e0++){
-					for (int e1 : edgesTo.get(e0)) {
-						for (int p = 0; p < size; p++){
-							if (e0 != p && e1 != p) {
-								if (ptSegIntersect(vertices.get(e0), vertices.get(e1), vertices.get(p))) {
-									edgesTo.get(p).add(new Integer(e0));
-									edgesTo.get(p).add(new Integer(e1));
+				checkFSEBP: {
+					for (int e0 = 0; e0 < size; e0++){
+						for (int e1 : edgesTo.get(e0)) {
+							for (int p = 0; p < size; p++){
+								if (e0 != p && e1 != p) {
+									if (ptSegIntersect(vertices.get(e0), vertices.get(e1), vertices.get(p))) {
+										edgesTo.get(p).add(new Integer(e0));
+										edgesTo.get(p).add(new Integer(e1));
 
-									edgesTo.get(e0).remove(new Integer(e1));
-									edgesTo.get(e0).add(new Integer(p));
+										edgesTo.get(e0).remove(new Integer(e1));
+										edgesTo.get(e0).add(new Integer(p));
 
-									edgesTo.get(e1).remove(new Integer(e0));
-									edgesTo.get(e1).add(new Integer(p));
+										edgesTo.get(e1).remove(new Integer(e0));
+										edgesTo.get(e1).add(new Integer(p));
 
-									size++;
-									done = false;
+										done = false;
+										break checkFSEBP;
+									}
 								}
 							}
 						}
 					}
 				}
 			}
+			System.err.println("split edges on points");
+			System.err.println(edgesTo);
 
-			// find and split intersecting edges
+			System.err.println("GOT HERE!");
+
+			int iters = 0;
 			done = false;
 			while (!done) {
+				// find and split intersecting edges
+				System.err.println("size: " + size);
 				done = true;
-				for (int e00 = 0; e00 < size; e00++){
-					for (int e10 = 0; e10 < size; e10++){
-						if (e00 != e10) {
-							for (int e01 : edgesTo.get(e00)) {
-								if (e01 != e10) {
-									for (int e11 : edgesTo.get(e10)) {
-										if (e11 != e00 && e11 != e01) {
-											if (lineSegIntersect(vertices.get(e00), vertices.get(e01), vertices.get(e10), vertices.get(e11))) {
-												vertices.add(lineSegIntersection(vertices.get(e00), vertices.get(e01), vertices.get(e10), vertices.get(e11)));
+				checkFSIE: {
+					for (int e00 = 0; e00 < size; e00++){
+						for (int e10 = 0; e10 < size; e10++){
+							if (e00 != e10) {
+								for (int e01 : new TreeSet<Integer>(edgesTo.get(e00))) {
+									if (e01 != e10 && e01 != e00) {
+										for (int e11 : new TreeSet<Integer>(edgesTo.get(e10))) {
+											if (e11 != e00 && e11 != e01 && e11 != e10) {
+												if (lineSegIntersect(vertices.get(e00), vertices.get(e01), vertices.get(e10), vertices.get(e11))) {
+													//System.err.println("intersectors for iter " + iters);
+													//System.err.println(e00);
+													//System.err.println(edgesTo.get(e00));
+													//Mat.print(System.err, vertices.get(e00));
+													//System.err.println(e01);
+													//System.err.println(edgesTo.get(e01));
+													//Mat.print(System.err, vertices.get(e01));
+													//System.err.println(e10);
+													//System.err.println(edgesTo.get(e10));
+													//Mat.print(System.err, vertices.get(e10));
+													//System.err.println(e11);
+													//System.err.println(edgesTo.get(e11));
+													//Mat.print(System.err, vertices.get(e11));
+						if (iters > 10000) {
+							// FUCK!
+							try{
+								throw new Exception();
+							}catch (Exception e){
+								e.printStackTrace();
+								System.err.println("hey there");
+								System.exit(1);
+							}
+						}
+						iters++;
 
-												edgesTo.add(new TreeSet<Integer>());
+													Mat newVertex = lineSegIntersection(vertices.get(e00), vertices.get(e01), vertices.get(e10), vertices.get(e11));
 
-												edgesTo.get(size).add(new Integer(e00));
-												edgesTo.get(size).add(new Integer(e01));
-												edgesTo.get(size).add(new Integer(e10));
-												edgesTo.get(size).add(new Integer(e11));
+													if (ptsEqual(newVertex, vertices.get(e00))) {
+															edgesTo.get(e10).remove(new Integer(e11));
+															edgesTo.get(e10).add(new Integer(e00));
+															edgesTo.get(e00).add(new Integer(e10));
 
-												edgesTo.get(e00).remove(new Integer(e01));
-												edgesTo.get(e00).add(new Integer(size));
+															edgesTo.get(e11).remove(new Integer(e10));
+															edgesTo.get(e11).add(new Integer(e00));
+															edgesTo.get(e00).add(new Integer(e11));
+													} else if (ptsEqual(newVertex, vertices.get(e01))) {
+															edgesTo.get(e10).remove(new Integer(e11));
+															edgesTo.get(e10).add(new Integer(e01));
+															edgesTo.get(e01).add(new Integer(e10));
 
-												edgesTo.get(e01).remove(new Integer(e00));
-												edgesTo.get(e01).add(new Integer(size));
+															edgesTo.get(e11).remove(new Integer(e10));
+															edgesTo.get(e11).add(new Integer(e01));
+															edgesTo.get(e01).add(new Integer(e11));
+													} else if (ptsEqual(newVertex, vertices.get(e10))) {
+															edgesTo.get(e00).remove(new Integer(e01));
+															edgesTo.get(e00).add(new Integer(e10));
+															edgesTo.get(e10).add(new Integer(e00));
 
-												edgesTo.get(e10).remove(new Integer(e11));
-												edgesTo.get(e10).add(new Integer(size));
+															edgesTo.get(e01).remove(new Integer(e00));
+															edgesTo.get(e01).add(new Integer(e10));
+															edgesTo.get(e10).add(new Integer(e01));
+													} else if (ptsEqual(newVertex, vertices.get(e11))) {
+															edgesTo.get(e00).remove(new Integer(e01));
+															edgesTo.get(e00).add(new Integer(e11));
+															edgesTo.get(e11).add(new Integer(e00));
 
-												edgesTo.get(e11).remove(new Integer(e10));
-												edgesTo.get(e11).add(new Integer(size));
+															edgesTo.get(e01).remove(new Integer(e00));
+															edgesTo.get(e01).add(new Integer(e11));
+															edgesTo.get(e11).add(new Integer(e01));
+													} else {
+															vertices.add(newVertex);
 
-												size++;
-												done = false;
+															edgesTo.add(new TreeSet<Integer>());
+
+															edgesTo.get(size).add(new Integer(e00));
+															edgesTo.get(size).add(new Integer(e01));
+															edgesTo.get(size).add(new Integer(e10));
+															edgesTo.get(size).add(new Integer(e11));
+
+															edgesTo.get(e00).remove(new Integer(e01));
+															edgesTo.get(e00).add(new Integer(size));
+
+															edgesTo.get(e01).remove(new Integer(e00));
+															edgesTo.get(e01).add(new Integer(size));
+
+															edgesTo.get(e10).remove(new Integer(e11));
+															edgesTo.get(e10).add(new Integer(size));
+
+															edgesTo.get(e11).remove(new Integer(e10));
+															edgesTo.get(e11).add(new Integer(size));
+
+															size++;
+													}
+													done = false;
+													break checkFSIE;
+												}
 											}
 										}
 									}
@@ -447,7 +661,18 @@ public class CSpace {
 						}
 					}
 				}
+				System.err.println("split edges on edges");
+				System.err.println(edgesTo);
 			}
+
+			System.err.println("GOT HERE TOO!");
+
+			System.err.println("begin vertices");
+			for (Mat vertex : vertices) {
+				Mat.print(System.err, vertex);
+			}
+			System.err.println("end vertices");
+			System.err.println(edgesTo);
 
 			return perimeter(vertices, edgesTo);
 		}
@@ -490,8 +715,23 @@ public class CSpace {
 			ArrayList<Mat> perimeter = new ArrayList<Mat>();
 			while (vertex != vertexStart || prevVertex == -1) {
 				minAngleDiff = 3 * Math.PI;
+				System.err.println("v:"+vertex);
 				e0 = vertices.get(vertex);
+			//	System.err.println(edgesTo.get(vertex));
+			//	Mat.print(System.err, e0);
 				perimeter.add(e0);
+
+				if (perimeter.size() > 100) {
+					// FUCK!
+					try{
+						throw new Exception();
+					}catch (Exception e){
+						e.printStackTrace();
+						System.err.println("hey there");
+						System.exit(1);
+					}
+				}
+
 				for (int edgeVertex : edgesTo.get(vertex)) {
 					e1 = vertices.get(edgeVertex);
 					edgeAngle = Math.atan2(e1.data[0][0] - e0.data[0][0], e1.data[1][0] - e0.data[1][0]);
@@ -499,12 +739,22 @@ public class CSpace {
 					if (angleDiff < 0) {
 						angleDiff += 2 * Math.PI;
 					}
-					if (angleDiff < minAngleDiff) {
+					if (angleDiff > 2 * Math.PI) {
+						angleDiff -= 2 * Math.PI;
+					}
+					if (angleDiff < minAngleDiff && edgeVertex != prevVertex) {
 						minAngleDiff = angleDiff;
 						nextVertex = edgeVertex;
 						nextAngle = edgeAngle;
 					}
 				}
+
+				System.err.println("PERIMETER ITERATION:");
+				System.err.println("vertexStart = " + vertexStart);
+				System.err.println("prevVertex = " + prevVertex);
+				System.err.println("vertex = " + vertex);
+				System.err.println("nextVertex = " + nextVertex);
+				System.err.println("");
 
 				if (nextAngle > 0) {
 					prevAngle = nextAngle - Math.PI;
@@ -523,7 +773,7 @@ public class CSpace {
 		}
 
 		public static boolean ptsEqual(Mat p0, Mat p1, double tolerance) {
-			return tolerance > Math.pow(Math.pow(p0.data[0][0] - p1.data[0][0], 2) + Math.pow(p0.data[1][0] - p1.data[1][0], 2), 0.5);
+			return tolerance > Mat.dist(p0, p1);
 		}
 
 		public static boolean ptSegIntersect(Mat e0, Mat e1, Mat p) {
@@ -535,11 +785,113 @@ public class CSpace {
 		}
 
 		public static double ptSegDistance(Mat e0, Mat e1, Mat p) {
-			return Line2D.ptSegDist(e0.data[0][0], e0.data[1][0], e1.data[0][0], e1.data[1][0], p.data[0][0], p.data[1][0]);
+			double x0 = e0.data[0][0];
+			double y0 = e0.data[1][0];
+			double x1 = e1.data[0][0];
+			double y1 = e1.data[1][0];
+			double xp = p.data[0][0];
+			double yp = p.data[1][0];
+
+			e0 = new Mat(2, 1);
+			e0.data[0][0] = x0;
+			e0.data[1][0] = y0;
+			e1 = new Mat(2, 1);
+			e1.data[0][0] = x1;
+			e1.data[1][0] = y1;
+			p = new Mat(2, 1);
+			p.data[0][0] = xp;
+			p.data[1][0] = yp;
+
+			e1 = Mat.sub(e1, e0);
+			p  = Mat.sub(p,  e0);
+			e0.data[0][0] = 0;
+			e0.data[1][0] = 0;
+
+			Mat e0b = Mat.sub(e0, e1);
+			Mat pb  = Mat.sub(p,  e1);
+			Mat e1b = new Mat(2, 1);
+			e1b.data[0][0] = 0;
+			e1b.data[1][0] = 0;
+
+			if (Mat.dot(e1, p) > 0) {
+				if (Mat.dot(e0b, pb) > 0) {
+					Mat e1u = Mat.mul(1 / Mat.l2(e1), e1);
+					return Mat.dist(p, Mat.mul(Mat.dot(e1u, p), e1u));
+				} else {
+					return Mat.dist(p, e1);
+				}
+			} else {
+				return Mat.dist(p, e0);
+			}
 		}
 
 		public static boolean lineSegIntersect(Mat e00, Mat e01, Mat e10, Mat e11) {
-			return Line2D.linesIntersect(e00.data[0][0], e00.data[1][0], e01.data[0][0], e01.data[1][0], e10.data[0][0], e10.data[1][0], e11.data[0][0], e11.data[1][0]);
+			double x00 = e00.data[0][0];
+			double y00 = e00.data[1][0];
+			double x01 = e01.data[0][0];
+			double y01 = e01.data[1][0];
+			double x10 = e10.data[0][0];
+			double y10 = e10.data[1][0];
+			double x11 = e11.data[0][0];
+			double y11 = e11.data[1][0];
+
+			e00 = new Mat(2, 1);
+			e00.data[0][0] = x00;
+			e00.data[1][0] = y00;
+			e01 = new Mat(2, 1);
+			e01.data[0][0] = x01;
+			e01.data[1][0] = y01;
+			e10 = new Mat(2, 1);
+			e10.data[0][0] = x10;
+			e10.data[1][0] = y10;
+			e11 = new Mat(2, 1);
+			e11.data[0][0] = x11;
+			e11.data[1][0] = y11;
+
+			double x, y;
+			double m0, m1;
+
+			if (x00 == x01) {
+				if (x10 == x11) {
+					return false;
+				}
+				m1 = (y10 - e11.data[1][0]) / (x10 - e11.data[0][0]);
+
+				x = x00;
+				y = m1 * (x - x10) + y10;
+
+				if (((y > y00 && y < y01) || (y < y00 && y > y01)) &&
+				    ((y > y10 && y < y11) || (y < y10 && y > y11) || (y10 == y11))) {
+					return true;
+				} else {
+					return false;
+				}
+			} else if (x10 == x11) {
+				m0 = (y00 - e01.data[1][0]) / (x00 - e01.data[0][0]);
+
+				x = x10;
+				y = m0 * (x - x00) + y00;
+
+				if (((y > y00 && y < y01) || (y < y00 && y > y01) || (y00 == y01)) &&
+				    ((y > y10 && y < y11) || (y < y10 && y > y11))) {
+					return true;
+				} else {
+					return false;
+				}
+			} else {
+				m0 = (y00 - e01.data[1][0]) / (x00 - e01.data[0][0]);
+				m1 = (y10 - e11.data[1][0]) / (x10 - e11.data[0][0]);
+
+				x = (m0 * x00 - m1 * x10 - y00 + y10) / (m0 - m1);
+				y = m1 * (x - x10) + y10;
+
+				if (((x > x00 && x < x01) || (x < x00 && x > x01)) &&
+				    ((x > x10 && x < x11) || (x < x10 && x > x11))) {
+					return true;
+				} else {
+					return false;
+				}
+			}
 		}
 
 		public static Mat lineSegIntersection(Mat e00, Mat e01, Mat e10, Mat e11) {
@@ -564,10 +916,73 @@ public class CSpace {
 				m0 = (y0 - e01.data[1][0]) / (x0 - e01.data[0][0]);
 				m1 = (y1 - e11.data[1][0]) / (x1 - e11.data[0][0]);
 
+				//System.err.println("m0 = " + m0);
+				//System.err.println("m1 = " + m1);
+
 				x = (m0 * x0 - m1 * x1 - y0 + y1) / (m0 - m1);
 				y = m1 * (x - x1) + y1;
+
+				//System.err.println("x = " + x);
+				//System.err.println("y = " + y);
 			}
 			return Mat.encodePoint(x, y);
+		}
+
+		public static void tests() {
+			System.err.println("HEY!");
+			Mat p0 = Mat.encodePoint(0, 0);
+			Mat p1 = Mat.encodePoint(1, .1);
+			Mat p2 = Mat.encodePoint(.1, 1);
+			Mat p3 = Mat.encodePoint(-1, -.1);
+			Mat p4 = Mat.encodePoint(-.1, -1);
+			Mat p5 = Mat.encodePoint(0.0001, 0);
+			Mat p6 = Mat.encodePoint(-0.0001, 0);
+			if (!lineSegIntersect(p1, p3, p2, p4)) {
+					try{
+						throw new Exception();
+					}catch (Exception e){
+						e.printStackTrace();
+						System.err.println("hey there");
+						System.exit(1);
+					}
+			}
+			if (lineSegIntersect(p1, p4, p2, p3)) {
+					try{
+						throw new Exception();
+					}catch (Exception e){
+						e.printStackTrace();
+						System.err.println("hey there");
+						System.exit(1);
+					}
+			}
+			if (lineSegIntersect(p1, p5, p2, p4)) {
+					try{
+						throw new Exception();
+					}catch (Exception e){
+						e.printStackTrace();
+						System.err.println("hey there");
+						System.exit(1);
+					}
+			}
+			if (!lineSegIntersect(p1, p6, p2, p4)) {
+					try{
+						throw new Exception();
+					}catch (Exception e){
+						e.printStackTrace();
+						System.err.println("hey there");
+						System.exit(1);
+					}
+			}
+			Mat inter = lineSegIntersection(p1, p3, p2, p4);
+			if (inter.data[0][0] != 0 || inter.data[1][0] != 0) {
+					try{
+						throw new Exception();
+					}catch (Exception e){
+						e.printStackTrace();
+						System.err.println("hey there");
+						System.exit(1);
+					}
+			}
 		}
 	}
 }

@@ -1,3 +1,4 @@
+package GlobalNavigation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -368,6 +369,11 @@ public class thirdclass{
                             if(isValid(i-1,j,length,breadth)&& array[i-1][j] == -100 ) array[i-1][j] = array[i][j]+1; 
                             if(isValid(i,j+1,length,breadth)&& array[i][j+1] == -100) array[i][j+1] = array[i][j]+ 1; 
                             if(isValid(i,j-1,length,breadth)&& array[i][j-1] == -100) array[i][j-1] = array[i][j]+ 1;
+
+                            if(isValid(i+1,j+1,length,breadth)&& array[i+1][j+1] == -100) array[i+1][j+1] = array[i][j]+1; 
+                            if(isValid(i-1,j+1,length,breadth)&& array[i-1][j+1] == -100) array[i-1][j+1] = array[i][j]+1; 
+                            if(isValid(i-1,j-1,length,breadth)&& array[i-1][j-1] == -100) array[i-1][j-1] = array[i][j]+1; 
+                            if(isValid(i+1,j-1,length,breadth)&& array[i+1][j-1] == -100) array[i+1][j-1] = array[i][j]+1; 
                         }
                     }
                     else {
@@ -379,6 +385,12 @@ public class thirdclass{
 
         
         ///////////////////////////////////Print Out Values///////////////////////////////
+        for (int i = length - 1; i >= 0; i--) {
+            for (int j = 0; j < length; j++) {
+                System.err.print(((array[j][i] >= 0) ? ((array[j][i] > 9)? array[j][i] : (" " + array[j][i])) : " ." ));
+            }
+            System.err.println();
+        }
         /*for(int[] a:array) {
             for(int b: a) {
                 System.out.print(((b >= 0) ? b : " " )+ ",");
@@ -432,7 +444,7 @@ public static ArrayList<int[]> pathFind(boolean[][] cspace,int[] start,int[] goa
        }
        // printing where the robot is headed!!
        wayPoints.add(currentPosition);
-       System.out.println("moving to " + currentPosition[0] + "," + currentPosition[1] + " -> " +  potentialField[currentPosition[0]][currentPosition[1]].getFieldValue());
+       //System.err.println("moving to " + currentPosition[0] + "," + currentPosition[1] + " -> " +  potentialField[currentPosition[0]][currentPosition[1]].getFieldValue());
    }
    return wayPoints;
 }
@@ -529,12 +541,12 @@ public static ArrayList<int[]> pathFind(boolean[][] cspace,int[] start,int[] goa
         ////////////////////////////////////////////////////////////////////////////////
         
         ///////////////////////////////////Print Out Values///////////////////////////////
-        for(PotentialCell[] a:array) {
+        /*for(PotentialCell[] a:array) {
             for(PotentialCell b: a) {
-                System.out.print(((b.getFieldValue() >= 0) ? b.getFieldValue() : " " )+ ",");
+                System.err.print(((b.getFieldValue() >= 0) ? b.getFieldValue() : " " )+ ",");
             }
-            System.out.println();
-        }
+            System.err.println();
+        }*/
         /////////////////////////////////////////////////////////////////////////////////////
         return array;
     }

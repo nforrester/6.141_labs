@@ -67,6 +67,10 @@ public class DoubleMap<V> {
 	}
 
 	private int searchHigh(double testKey) {
+		if (pairs.size() == 0) {
+			return 0;
+		}
+
 		int low = 0;
 		int high = pairs.size() - 1;
 		int split = high / 2;
@@ -92,6 +96,10 @@ public class DoubleMap<V> {
 	}
 
 	private int search(double testKey, double tolerance) {
+		if (pairs.size() == 0) {
+			return -1;
+		}
+
 		int low = 0;
 		int high = pairs.size() - 1;
 		int split = high / 2;

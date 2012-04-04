@@ -3,6 +3,7 @@ package GlobalNavigation;
 import java.awt.*;
 import java.awt.geom.*;
 import javax.swing.*;
+import LocalNavigation.PointMessageListener;
 
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
@@ -358,8 +359,8 @@ public class MapGUI extends SonarGUI implements NodeMain{
       if ( polys.add(new Poly(vertices, closed, filled, polyColor)) ) {
 
 	  System.err.println("added poly with " + vertices.size() + " verts");
-	  for (Point2D.Double vertex : vertices)
-	      System.err.println("  " + vertex);
+	  //for (Point2D.Double vertex : vertices)
+	  //    System.err.println("  " + vertex);
       }
     }
 
@@ -453,6 +454,8 @@ public class MapGUI extends SonarGUI implements NodeMain{
 	guiPolySub.addMessageListener(new PolyMessageListener(this));
 	guiEraseSub = node.newSubscriber("gui/Erase", "lab5_msgs/GUIEraseMsg");
 	guiEraseSub.addMessageListener(new EraseMessageListener(this));
+	guiPointSub = node.newSubscriber("gui/Point", "lab5_msgs/GUIPointMsg");
+	guiPointSub.addMessageListener(new PointMessageListener(this));
 	super.onStart(node);
     }
     
