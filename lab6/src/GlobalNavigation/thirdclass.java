@@ -300,6 +300,11 @@ public class thirdclass{
                                 if(is3DValid(i,j-1,k,length,breadth,height)&& array[i][j-1][k] == -100) array[i][j-1][k] = array[i][j][k]+ 1;
                                 if(is3DValid(i,j,k+1,length,breadth,height)&& array[i][j][k+1] == -100) array[i][j][k+1] = array[i][j][k]+ 1; 
                                 if(is3DValid(i,j,k-1,length,breadth,height)&& array[i][j][k-1] == -100) array[i][j][k-1] = array[i][j][k]+ 1;
+
+                                if(is3DValid(i+1,j+1,k,length,breadth,height)&& array[i+1][j+1][k] == -100) array[i+1][j+1][k] = array[i][j][k]+1; 
+                                if(is3DValid(i+1,j-1,k,length,breadth,height)&& array[i+1][j-1][k] == -100) array[i+1][j-1][k] = array[i][j][k]+1; 
+				if(is3DValid(i-1,j-1,k,length,breadth,height)&& array[i-1][j-1][k] == -100) array[i-1][j-1][k] = array[i][j][k]+1; 
+                                if(is3DValid(i-1,j+1,k,length,breadth,height)&& array[i-1][j+1][k] == -100) array[i-1][j+1][k] = array[i][j][k]+1; 
                             }
                         }
                         else {
