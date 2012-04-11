@@ -77,20 +77,24 @@ To guard against blocks getting stuck in the funnel,
 there will be a break-beam sensor in the throat (not illustrated).
 If a block gets stuck, the robot will back up, turn slightly, and approach the block again.
 
+\newlength{\demowidth}
+\setlength{\demowidth}{2.13in}
+\newlength{\demotextwidth}
+\setlength{\demotextwidth}{\demowidth}
+\addtolength{\demotextwidth}{-0.15in}
 \begin{figure}[h]
  \centering
-  \includegraphics[width=1.25in]{images/Demo01}
-  \includegraphics[width=1.25in]{images/Demo02}
-  \includegraphics[width=1.25in]{images/Demo03} \\
-  1 \hspace{1.1in} 2 \hspace{1.1in} 3 \\
+  \includegraphics[width=\demowidth]{images/Demo01}
+  \includegraphics[width=\demowidth]{images/Demo02}
+  \includegraphics[width=\demowidth]{images/Demo03} \\
+  1 \hspace{\demotextwidth} 2 \hspace{\demotextwidth} 3 \\
   \vspace{12pt}
-  \includegraphics[width=1.25in]{images/Demo04}
-  \includegraphics[width=1.25in]{images/Demo05}
-  \includegraphics[width=1.25in]{images/Demo06} \\
-  4 \hspace{1.1in} 5 \hspace{1.1in} 6 \\
+  \includegraphics[width=\demowidth]{images/Demo04}
+  \includegraphics[width=\demowidth]{images/Demo05}
+  \includegraphics[width=\demowidth]{images/Demo06} \\
+  4 \hspace{\demotextwidth} 5 \hspace{\demotextwidth} 6 \\
 \caption{Collection Process}
 \end{figure}
-
 
 After collecting a sufficient number of blocks in the stack, the robot will back up.
 This will deposit the blocks in a straight line in front of the robot, and aligned with the robot center.
