@@ -48,10 +48,13 @@ The integration of these four different abilities into a single task makes this 
 Before proceeding with the design of a solution to the given problem statement, a series of assumptions must be made.  These assumptions can be divided into three main categories: assumptions about the environment, assumptions about the building blocks, and assumptions about the robot.
 
 \subsection{Assumptions about the environment}
+%TODO: text here
 
 \subsection{Assumptions about the building blocks}
+%TODO: text here
 
 \subsection{Assumptions about the robot}
+%TODO: text here
 
 
 \section{High level approach and mechanical structure}
@@ -71,12 +74,48 @@ This will be precise and efficent, because the robot will not have to turn at al
 and visual feedback can be used to check block placement.
 
 \section{Systems}
-\subsection{most}
-\subsection{of}
-\subsection{the}
-\subsection{robot's}
-\subsection{systems}
+%TODO: do we want any text here?
+
+\subsection{Master Controller}
+The Master Controller is the brain of the system, does high-level planning, and decides when to stop.
+High level operations will be broken down and handed out to other modules for execution.
+%TODO: do we want to say anything more about this?
+
+\subsection{Inventory and Mapping}
+The Inventory and Mapping module provides the other modules with information about the environment.
+This information includes the poses of blocks in the environment,
+the blocks in the stack under the robot,
+the walls of the maze,
+the robot's current location,
+and anything else we decide is useful.
+The I\&M module takes input from the Perception module, and performs data fusion, mapping, and localization.
+%TODO: do we want to say anything more about this?
+
+\subsection{Navigation and Inverse Kinematics}
+The Navigation and Inverse Kinematics module directly controls the robot's actuators.
+Other modules give it commands such as ``travel to $(x, y, \theta)$'',
+or ``Move the robotic arm gripper to $(x, y, z, \theta, \phi)$'',
+and the N\&IK module will move the robot appropriately.
+%TODO: do we want to say anything more about this?
+
+\subsection{Manipulator}
+The Manipulator takes commands from the Master Controller
+and decides what motions need to be performed to manipulate the blocks.
+For example, if the Master Controller commands ``collect block 42'',
+the Manipulator will order the N\&IK module to make movements that will funnel the block into the stack.
+%TODO: do we want to say anything more about this?
+
+\subsection{Perception}
+The Perception module reads data from the sensors and feeds information to the Inventory and Mapping module.
+For example, if the camera image contains a hexagonal red blob,
+the Perception module will interpret this as a block at an angle,
+and report the presence of a block to the I\&M module.
+%TODO: do we want to say anything more about this?
+
 \section{Schedule}
+%TODO: text here
+
 \section{Conclusion}
+%TODO: text here
 
 \end{document}
