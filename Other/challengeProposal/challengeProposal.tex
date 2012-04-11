@@ -77,6 +77,7 @@ To guard against blocks getting stuck in the funnel,
 there will be a break-beam sensor in the throat (not illustrated).
 If a block gets stuck, the robot will back up, turn slightly, and approach the block again.
 
+
 After collecting a sufficient number of blocks in the stack, the robot will back up.
 This will deposit the blocks in a straight line in front of the robot, and aligned with the robot center.
 Now the robot will use the robotic arm to rearrange the blocks into an arbitrary planar structure.
@@ -85,6 +86,11 @@ and visual feedback can be used to check block placement.
 
 \section{Systems}
 %TODO: do we want any text here?
+\begin{figure}[h]
+\centering
+ \includegraphics[width=4in]{images/System_Architecture}
+\caption{System Architecture}
+\end{figure}
 
 \subsection{Master Controller}
 The Master Controller is the brain of the system, does high-level planning, and decides when to stop.
