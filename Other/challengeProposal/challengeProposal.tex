@@ -69,8 +69,7 @@ Before proceeding with the design of a solution to the given problem statement, 
 
 \section{High level approach and mechanical structure}
 The solution we've decided on has two primary modes: collection and assembly.
-In collection mode, the robot uses a funnel in front of the body to collect blocks (see figure ).
-%TODO: figure reference here
+In collection mode, the robot uses a funnel in front of the body to collect blocks (see figure \ref{demoFig}).
 The blocks are stored in a stack under the body.
 The stack is sufficiently narrow so that the blocks will interlock.
 To guard against blocks getting stuck in the funnel,
@@ -83,6 +82,7 @@ If a block gets stuck, the robot will back up, turn slightly, and approach the b
 \setlength{\demotextwidth}{\demowidth}
 \addtolength{\demotextwidth}{-0.15in}
 \begin{figure}[h]
+ \label{demoFig}
  \centering
   \includegraphics[width=\demowidth]{images/Demo01}
   \includegraphics[width=\demowidth]{images/Demo02}
