@@ -1,0 +1,9 @@
+Master Controller - The Master Controller, is the brain of the system and plans a high-level execution plan which qualifies as completion. These High level operations will be broken down into primitive tasks and will be assigned to concrete physical components in the real world and  the resulting fully specified tasks are sent to the manipulation and navigation subsystems. 
+
+Inventory – The goal of the inventory module is to provide the other modules with information about the pose, visibility, bounding box of the existing environment that we are aware about. It also contains the coordinates of the known coloured blocks and Landmarks. 
+
+Navigation and Inverse Kinematics – The goal of Navigation in this module is to provide controlled navigation in the workspace when asked for it. As the name says, Inverse Kinematics, uses inverse kinematics to control the 4-DOF robotic arm that we plan to build. It provides manipulation with control over arm.
+
+Manipulation - This module is the interface between controller and the real world, with feedback from perception and control through navigation.
+
+Perception - This module basically acts as the backbone for manipulation by giving it information about the status of the blocks built and also by detecting and confirming the right parts being used.
