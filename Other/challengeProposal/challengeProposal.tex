@@ -1,4 +1,4 @@
-\documentclass[letterpaper,12pt]{article}
+\documentclass[letterpaper,11pt]{article}
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{subfig}
@@ -48,29 +48,39 @@ The integration of these four different abilities into a single task makes this 
 Before proceeding with the design of a solution to the given problem statement, a series of assumptions must be made.  These assumptions can be divided into three main categories: assumptions about the environment, assumptions about the building blocks, and assumptions about the robot.
 
 \subsection{Assumptions about the environment}
-%TODO: text here
-
-\subsection{Assumptions about the building blocks}
-%TODO: text here
-
+\begin{itemize}
+ \item The maze is flat. While the walls stick up out of the floor, all the blocks will be sitting on the floor, and the robot will never be required to climb up or over anything, or retrieve any blocks from anywhere other than the floor.
+ \item The walls of the maze are fixed, and nothing will move unless it was pushed by the robot. If the robot goes away and comes back, it can reasonably expect to find all the blocks and walls where it left them.
+ \item The maze will be appropriately sized and bounded such the robot is reasonably able to explore at least the majority of the map within the the allotted challenge time. The robot also cant explore for an unlimited distance in one direction, leaving critical building materials behind.
+ \item All areas of the maze will be reasonably accessible by the robot (i.e. no narrow passages, low overhangs, etc.).  All areas of the maze will be properly illuminated such that the robot can rely on vision for navigation and identification without unnecessary recalibration.
+\end{itemize}
+\subsection{Assumptions about the building materials}
+\begin{itemize}
+ \item The blocks will be reasonably sized such that the robot can easily lift it.  The block will also not be shaped such that it is incompatible with all other blocks. Ideally, the longest dimension of any block will not exceed 6 inches and all blocks will be common geometric 3D shapes.
+ \item The blocks will not be unreasonably heavy such that the robot is not able to easily lift them.  The blocks will not be made of a material that is overly difficult to identify with vision (i.e. reflective surfaces, transparent/translucent, etc.).  Ideally, the blocks will be opaque plastic or painted wood.
+ \item The blocks are contrasting colors from the maze walls and floor, making optical identification easier.
+\end{itemize}
 \subsection{Assumptions about the robot}
-%TODO: text here
-
+\begin{itemize}
+ \item The base of the robot will be the same as the one we are currently using for the labs and will build on the framework built during the labs.  
+ \item The battery life of the robot will be longer than the allotted time for the challenge such that is essentially a non-issue.
+ \item The robot must remain within a limited budget and cannot rely on expensive sensors or manipulators to complete the challenge.
+\end{itemize}
 
 \section{High level approach and mechanical structure}
 The solution we've decided on has two primary modes: collection and assembly.
 In collection mode, the robot uses a funnel in front of the body to collect blocks (see figure ).
 %TODO: figure reference here
 The blocks are stored in a stack under the body.
-The stack is sufficently narrow so that the blocks will interlock.
+The stack is sufficiently narrow so that the blocks will interlock.
 To guard against blocks getting stuck in the funnel,
 there will be a break-beam sensor in the throat (not illustrated).
 If a block gets stuck, the robot will back up, turn slightly, and approach the block again.
 
-After collecting a sufficent number of blocks in the stack, the robot will back up.
+After collecting a sufficient number of blocks in the stack, the robot will back up.
 This will deposit the blocks in a straight line in front of the robot, and aligned with the robot center.
 Now the robot will use the robotic arm to rearrange the blocks into an arbitrary planar structure.
-This will be precise and efficent, because the robot will not have to turn at all to place the blocks,
+This will be precise and efficient, because the robot will not have to turn at all to place the blocks,
 and visual feedback can be used to check block placement.
 
 \section{Systems}
