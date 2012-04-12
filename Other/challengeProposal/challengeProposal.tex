@@ -70,12 +70,43 @@ Before proceeding with the design of a solution to the given problem statement, 
 
 \section{High level approach and mechanical structure}
 The solution we've decided on has two primary modes: collection and assembly.
-In collection mode, the robot uses a funnel in front of the body to collect blocks (see figure \ref{demoFig}).
+In collection mode, the robot uses a funnel in front of the body to collect blocks
+(see figures \ref{fig:robotFunnel}, \ref{fig:dimensioned} and \ref{fig:collection}).
 The blocks are stored in a stack under the body.
 The stack is sufficiently narrow so that the blocks will interlock.
 To guard against blocks getting stuck in the funnel,
 there will be a break-beam sensor in the throat (not illustrated).
 If a block gets stuck, the robot will back up, turn slightly, and approach the block again.
+
+After collecting a sufficient number of blocks in the stack, the robot will back up.
+This will deposit the blocks in a straight line in front of the robot, and aligned with the robot center.
+Now the robot will use the robotic arm to rearrange the blocks into an arbitrary planar structure.
+This will be precise and efficient, because the robot will not have to turn at all to place the blocks,
+and visual feedback can be used to check block placement.
+\begin{figure}[h]
+ \centering
+  \includegraphics[width=4.5in]{images/AssemblyIso}
+\caption{The robot with the funnel}
+\label{fig:robotFunnel}
+\end{figure}
+
+\subsection{Mechanical Systems Design}
+Of the mechanical designs considered, a system involving a simple funnel working in tandem with the manipulator built in Lab 7 was chosen because it allows the robot to cut corners during the block collection phase and thereby save time. The principle is simple: upon identifying a block in the environment, the robot will drive straight over it in order to collect it. The amount of time the robot should spend driving forward will be determined by the neck break-beam sensor and the robot's location in the environment. If a block is located in a position that the robot cannot reach with its funnel, the robot will use its manipulator arm instead. The manipulator is also used for further construction.
+\begin{figure}[h]
+ \centering
+  \includegraphics[width=4.5in]{images/Funnel}
+\caption{Dimensioned Drawing of Funnel}
+\label{fig:dimensioned}
+\end{figure}
+\subsubsection{Funnelling System}
+The funnelling system is the robot's primary means of gathering building materials. It consists of a bent sheet metal structure held in place by machined standoffs. The funnel system for block collection can tolerate inaccuracy, and the control system gains during this phase can be optimized for peak time efficiency.
+Key features include:
+\begin{itemize}
+\item Width of funnel is 2.075 Inches to guarantee that the blocks will "snap together" as they enter the funnel. The fillet built into each block allows a .07 Inch tolerance for head-on "snapping".
+\item The funnel will be placed in the center to minimize the robot's footprint and account for errors in visual servoing. 
+\item Gently curved surfaces guide the blocks into the funnel while minimizing jamming. 
+\item Long stack space allows robot to carry a maximum of 8 to 10 block lengths at a time (without taking into account doubled blocks). Increasing the length of the funnel would increase our robot's block storage capacity but inhibit its mobility by increasing its footprint.
+\end{itemize}
 
 \newlength{\demowidth}
 \setlength{\demowidth}{2.13in}
@@ -94,31 +125,9 @@ If a block gets stuck, the robot will back up, turn slightly, and approach the b
   \includegraphics[width=\demowidth]{images/Demo06} \\
   4 \hspace{\demotextwidth} 5 \hspace{\demotextwidth} 6 \\
 \caption{Collection Process}
-\label{demoFig}
+\label{fig:collection}
 \end{figure}
 
-After collecting a sufficient number of blocks in the stack, the robot will back up.
-This will deposit the blocks in a straight line in front of the robot, and aligned with the robot center.
-Now the robot will use the robotic arm to rearrange the blocks into an arbitrary planar structure.
-This will be precise and efficient, because the robot will not have to turn at all to place the blocks,
-and visual feedback can be used to check block placement.
-
-\subsection{Mechanical Systems Design}
-Of the mechanical designs considered, a system involving a simple funnel working in tandem with the manipulator built in Lab 7 was chosen because it allows the robot to cut corners during the block collection phase and thereby save time. The principle is simple: upon identifying a block in the environment, the robot will drive straight over it in order to collect it. The amount of time the robot should spend driving forward will be determined by the neck break-beam sensor and the robot's location in the environment. If a block is located in a position that the robot cannot reach with its funnel, the robot will use its manipulator arm as a countermeasure. The manipulator is also used for further construction.
-\begin{figure}[h]
- \centering
-  \includegraphics[width=4.5in]{images/Funnel}
-\caption{Dimensioned Drawing of Funnel}
-\end{figure}
-\subsubsection{Funnelling System}
-The funnelling system is the robot's primary means of gathering building materials. It consists of a bent sheet metal structure held in place by machined standoffs. The funnel system for block collection can tolerate inaccuracy, and the control system gains during this phase can be optimized for peak time efficiency.
-Key features include:
-\begin{itemize}
-\item Width of funnel is 2.075 Inches to guarantee that the blocks will "snap together" as they enter the funnel. The fillet built into each block allows a .07 Inch tolerance for head-on "snapping".
-\item The funnel will be placed in the center to minimize the robot's footprint and account for errors in visual servoing. 
-\item Gently curved surfaces guide the blocks into the funnel while minimizing jamming. 
-\item Long stack space allows robot to carry a maximum of 8 to 10 block lengths at a time (without taking into account doubled blocks). Increasing the length of the funnel would increase our robot's block storage capacity but inhibit its mobility by increasing its footprint.
-\end{itemize}
 \subsubsection{Manipulator Arm}
 We have not yet fully evaluated the mechanical limitations of the stock manipulator arm from Lab 7. Desired design criteria include:
 \begin{itemize}
