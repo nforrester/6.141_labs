@@ -103,26 +103,31 @@ Now the robot will use the robotic arm to rearrange the blocks into an arbitrary
 This will be precise and efficient, because the robot will not have to turn at all to place the blocks,
 and visual feedback can be used to check block placement.
 
-\subsection{Mechanical Design}
-Of the mechanical designs proposed, a system involving a simple funnel working in tandem with the manipulator built in Lab 7 was chosen.
+\subsection{Mechanical Systems Design}
+Of the mechanical designs considered, a system involving a simple funnel working in tandem with the manipulator built in Lab 7 was chosen because it allows the robot to cut corners during the block collection phase and thereby save time. The principle is simple: upon identifying a block in the environment, the robot will drive straight over it in order to collect it. The amount of time the robot should spend driving forward will be determined by the neck break-beam sensor and the robot's location in the environment. If a block is located in a position that the robot cannot reach with its funnel, the robot will use its manipulator arm as a countermeasure. The manipulator is also used for further construction.
 \begin{figure}[h]
  \centering
   \includegraphics[width=4.5in]{images/Funnel}
 \caption{Dimensioned Drawing of Funnel}
 \end{figure}
-\subsubsection{Funnel}
+\subsubsection{Funnelling System}
+The funnelling system is the robot's primary means of gathering building materials. It consists of a bent sheet metal structure held in place by machined standoffs. The funnel system for block collection can tolerate inaccuracy, and the control system gains during this phase can be optimized for peak time efficiency.
 Key features include:
 \begin{itemize}
-\item Width of funnel is 2.075 Inches to guarantee that the blocks will "snap together" as they enter the funnel. The fillet built into each block allows a .07 Inch tolerance for "snapping "
-\item The funnel will be placed in the center to minimize the robot's footprint and account for errors in visual servoing. The surfaces are gently curved to guide the blocks into the funnel.
-\item Long funnel Increasing the length of the funnel would increase our robot's block storage capacity but inhibit its mobility by increasing its footprint.
-\item asdasdasd
+\item Width of funnel is 2.075 Inches to guarantee that the blocks will "snap together" as they enter the funnel. The fillet built into each block allows a .07 Inch tolerance for head-on "snapping".
+\item The funnel will be placed in the center to minimize the robot's footprint and account for errors in visual servoing. 
+\item Gently curved surfaces guide the blocks into the funnel while minimizing jamming. 
+\item Long stack space allows robot to carry a maximum of 8 to 10 block lengths at a time (without taking into account doubled blocks). Increasing the length of the funnel would increase our robot's block storage capacity but inhibit its mobility by increasing its footprint.
 \end{itemize}
-Solidworks simulations proved 
-
-\subsubsection{Manipulator}
-
-
+\subsubsection{Manipulator Arm}
+We have not yet fully evaluated the mechanical limitations of the stock manipulator arm from Lab 7. Desired design criteria include:
+\begin{itemize}
+\item Strength to easily lift a single or double block
+\item Structural stability to accurately position
+\item A control system that favors accuracy over speed in order to properly place blocks to assemble intricate structures
+\end{itemize}
+\subsubsection {Motor Control System}
+In order to successfuly complete the challenge in the allotted time, the robot's motor control system gains should be optimized for the current state depending on the reliance on  odometry accuracy during
 \section{Systems}
 %TODO: do we want any text here?b
 \begin{figure}[h]
