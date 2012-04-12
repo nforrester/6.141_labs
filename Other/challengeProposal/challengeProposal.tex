@@ -138,7 +138,6 @@ We have not yet fully evaluated the mechanical limitations of the stock manipula
 \subsection {Motor Control System}
 In order to successfully complete the challenge in the allotted time, the robot's motor control system gains should be optimized for the accuracy demands of each state. Motor Velocities will be PID controlled and optimized to either maximize speed or increase accuracy and will use quadrature encoder feedback. Additionally, visual servoing will be used for precise positioning and will utilize position feedback from the vision system. The gains for each state will be experimentally determined. 
 \section{Software Systems Design}
-%TODO: do we want any text here?b
 \begin{figure}[h]
 \centering
  \includegraphics[width=4in]{images/System_Architecture}
@@ -148,7 +147,6 @@ In order to successfully complete the challenge in the allotted time, the robot'
 \subsection{Master Controller}
 The Master Controller is the brain of the system, does high-level planning, and decides when to stop.
 High level operations will be broken down and handed out to other modules for execution.
-%TODO: do we want to say anything more about this?
 
 \subsection{Inventory and Mapping}
 The Inventory and Mapping module provides the other modules with information about the environment.
@@ -158,28 +156,24 @@ the walls of the maze,
 the robot's current location,
 and anything else we decide is useful.
 The I\&M module takes input from the Perception module, and performs data fusion, mapping, and localization.
-%TODO: do we want to say anything more about this?
 
 \subsection{Navigation and Inverse Kinematics}
 The Navigation and Inverse Kinematics module directly controls the robot's actuators.
 Other modules give it commands such as ``travel to $(x, y, \theta)$'',
 or ``Move the robotic arm gripper to $(x, y, z, \theta, \phi)$'',
 and the N\&IK module will move the robot appropriately.
-%TODO: do we want to say anything more about this?
 
 \subsection{Manipulator}
 The Manipulator takes commands from the Master Controller
 and decides what motions need to be performed to manipulate the blocks.
 For example, if the Master Controller commands ``collect block 42'',
 the Manipulator will order the N\&IK module to make movements that will funnel the block into the stack.
-%TODO: do we want to say anything more about this?
 
 \subsection{Perception}
 The Perception module reads data from the sensors and feeds information to the Inventory and Mapping module.
 For example, if the camera image contains a hexagonal red blob,
 the Perception module will interpret this as a block at an angle,
 and report the presence of a block to the I\&M module.
-%TODO: do we want to say anything more about this?
 
 \begin{figure}[h]
 \centering
@@ -196,17 +190,20 @@ and report the presence of a block to the I\&M module.
 \newpage
 
 \section{Schedule}
-\begin{tabular}{r | l}
-Task & Timeframe\\
-\hline
-\sout{Steal} Obtain materials    & Week 1 \\
-Build the funnel                 & Week 1 \\
-Write code to collect blocks     & Week 1 \\
-Implement SLAM                   & Week 2 \\
-Write code to assemble structure & Week 2 \\
-Debugging and Optimization       & Week 3
-\end{tabular}
-%TODO: text here
+\begin{table}[h!]
+\caption{Work Schedule}
+\centering
+ \begin{tabular}{r | l}
+  Task & Timeframe\\
+  \hline
+  \sout{Steal} Obtain materials    & Week 1 \\
+  Build the funnel                 & Week 1 \\
+  Write code to collect blocks     & Week 1 \\
+  Implement SLAM                   & Week 2 \\
+  Write code to assemble structure & Week 2 \\
+  Debugging and Optimization       & Week 3
+ \end{tabular}
+\end{table}
 
 \section{Conclusion}
 The design described above fulfills the requirements as set by the problem statement.
