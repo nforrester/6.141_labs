@@ -132,11 +132,11 @@ Key features include:
 We have not yet fully evaluated the mechanical limitations of the stock manipulator arm from Lab 7. Desired design criteria include:
 \begin{itemize}
 \item Strength to easily lift a single or double block
-\item Structural stability to accurately position
+\item Structural stability to accurately position blocks
 \item A control system that favors accuracy over speed in order to properly place blocks to assemble intricate structures
 \end{itemize}
 \subsection {Motor Control System}
-In order to successfuly complete the challenge in the allotted time, the robot's motor control system gains should be optimized for the current state depending on the reliance on  odometry accuracy during
+In order to successfuly complete the challenge in the allotted time, the robot's motor control system gains should be optimized for the accuracy demands of each state. Motor Velocities will be PID controlled and optimized to either maximize speed or increase accuracy (negative D gain as damper) and will use quadrature encoder feedback. Additionally, visual servoing will be used for precise  and will utilize position feedback from . The gains for each state will be experimented
 \section{Software Systems Design}
 %TODO: do we want any text here?b
 \begin{figure}[h]
