@@ -79,7 +79,7 @@ successful block acquisition feedback, and for deciding when the stack is full.
 If a block gets stuck, the robot will back up, turn slightly, and approach the block again.
 
 After collecting a sufficient number of blocks in the stack, the robot will back up.
-This will deposit the blocks in a straight line in front of the robot, and aligned with the robot center.
+This will deposit the blocks in a straight line in front of the robot, aligned with the robot center.
 Now the robot will use the robotic arm to rearrange the blocks into an arbitrary planar structure.
 This will be precise and efficient, because the robot will not have to turn at all to place the blocks,
 and visual feedback can be used to check block placement.
@@ -91,7 +91,7 @@ and visual feedback can be used to check block placement.
 \end{figure}
 
 \section{Mechanical Systems Design}
-Of the mechanical designs considered, a system involving a simple funnel working in tandem with the manipulator built in Lab 7 was chosen because it allows the robot to cut corners during the block collection phase and thereby save time. The principle is simple: upon identifying a block in the environment, the robot will drive straight over it in order to collect it. The amount of time the robot should spend driving forward will be determined by the neck break-beam sensor and the robot's location in the environment. If a block is located in a position that the robot cannot reach with its funnel, the robot will use its manipulator arm instead. The manipulator is also used for further construction.
+Of the mechanical designs considered, a system involving a simple funnel working in tandem with the manipulator built in Lab~7 was chosen because it allows the robot to cut corners during the block collection phase and thereby save time. The principle is simple: upon identifying a block in the environment, the robot will drive straight over it in order to collect it. The amount of time the robot should spend driving forward will be determined by the neck break-beam sensor and the robot's location in the environment. If a block is located in a position that the robot cannot reach with its funnel, the robot will use its manipulator arm to reposition it. The manipulator is also used for further construction.
 \begin{figure}[h]
  \centering
   \includegraphics[width=4.5in]{images/Funnel}
@@ -129,7 +129,7 @@ Key features include:
 \end{figure}
 
 \subsection{Manipulator Arm}
-We have not yet fully evaluated the mechanical limitations of the stock manipulator arm from Lab 7. Desired design criteria include:
+We have not yet fully evaluated the mechanical limitations of the stock manipulator arm from Lab~7. Desired design criteria include:
 \begin{itemize}
 \item Strength to easily lift a single or double block
 \item Structural stability to accurately position blocks
