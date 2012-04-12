@@ -68,7 +68,7 @@ Before proceeding with the design of a solution to the given problem statement, 
  \item The robot must remain within a limited budget and cannot rely on expensive sensors or manipulators to complete the challenge.
 \end{itemize}
 
-\section{High level approach and mechanical structure}
+\section{High level approach}
 The solution we've decided on has two primary modes: collection and assembly.
 In collection mode, the robot uses a funnel in front of the body to collect blocks
 (see figures \ref{fig:robotFunnel}, \ref{fig:dimensioned} and \ref{fig:collection}).
@@ -90,7 +90,7 @@ and visual feedback can be used to check block placement.
 \label{fig:robotFunnel}
 \end{figure}
 
-\subsection{Mechanical Systems Design}
+\section{Mechanical Systems Design}
 Of the mechanical designs considered, a system involving a simple funnel working in tandem with the manipulator built in Lab 7 was chosen because it allows the robot to cut corners during the block collection phase and thereby save time. The principle is simple: upon identifying a block in the environment, the robot will drive straight over it in order to collect it. The amount of time the robot should spend driving forward will be determined by the neck break-beam sensor and the robot's location in the environment. If a block is located in a position that the robot cannot reach with its funnel, the robot will use its manipulator arm instead. The manipulator is also used for further construction.
 \begin{figure}[h]
  \centering
@@ -98,7 +98,7 @@ Of the mechanical designs considered, a system involving a simple funnel working
 \caption{Dimensioned Drawing of Funnel}
 \label{fig:dimensioned}
 \end{figure}
-\subsubsection{Funnelling System}
+\subsection{Funnelling System}
 The funnelling system is the robot's primary means of gathering building materials. It consists of a bent sheet metal structure held in place by machined standoffs. The funnel system for block collection can tolerate inaccuracy, and the control system gains during this phase can be optimized for peak time efficiency.
 Key features include:
 \begin{itemize}
@@ -128,16 +128,16 @@ Key features include:
 \label{fig:collection}
 \end{figure}
 
-\subsubsection{Manipulator Arm}
+\subsection{Manipulator Arm}
 We have not yet fully evaluated the mechanical limitations of the stock manipulator arm from Lab 7. Desired design criteria include:
 \begin{itemize}
 \item Strength to easily lift a single or double block
 \item Structural stability to accurately position
 \item A control system that favors accuracy over speed in order to properly place blocks to assemble intricate structures
 \end{itemize}
-\subsubsection {Motor Control System}
+\subsection {Motor Control System}
 In order to successfuly complete the challenge in the allotted time, the robot's motor control system gains should be optimized for the current state depending on the reliance on  odometry accuracy during
-\section{Systems}
+\section{Software Systems Design}
 %TODO: do we want any text here?b
 \begin{figure}[h]
 \centering
