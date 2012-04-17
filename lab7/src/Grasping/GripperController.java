@@ -4,8 +4,8 @@ import org.ros.message.rss_msgs.ArmMsg;
 
 public class GripperController extends JointController {
 
-    public static final long MIN_PWM = 1400; 
-    public static final long MAX_PWM = 645; 
+    public static final long MIN_PWM = 450; 
+    public static final long MAX_PWM = 1650; 
     
     /////////////////////////////////////
     // theta = 0 ; PWM = 452
@@ -33,9 +33,12 @@ public class GripperController extends JointController {
      *            the desired angle
      * @return the modified arm msg
      */
-   public ArmMsg getModifiedArmMsg(ArmMsg currentMsg, double desiredAngle) {
-       double limittedAngle = this.limitAngle(desiredAngle);
-       return new ArmMsg();
+   public static ArmMsg getArmMsgForAngle(double desiredAngle) {
+       long[] currentArray = {0,0,0,0,0,0,0,0};
+       currentArray[2] = getPWMEquivalent(desiredAngle);
+       ArmMsg returnMessage = new ArmMsg();
+       returnMessage.pwms = currentArray;
+       return returnMessage;
    }
    
    
@@ -80,5 +83,8 @@ public class GripperController extends JointController {
       else if(copyAngle < GripperController.MIN_PWM) copyAngle = GripperController.MIN_PWM;
       return copyAngle;
   }
+
+
+
   
 }

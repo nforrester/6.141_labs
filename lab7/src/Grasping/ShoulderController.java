@@ -7,8 +7,8 @@ import org.ros.message.rss_msgs.ArmMsg;
 
 public class ShoulderController extends JointController {
 
-    public static final long MIN_PWM = 2300; 
-    public static final long MAX_PWM = 600; 
+    public static final long MIN_PWM = 515; 
+    public static final long MAX_PWM = 2300; 
     
     /////////////////////////////////////
     // theta = 0 ; PWM = 516
@@ -35,9 +35,12 @@ public class ShoulderController extends JointController {
      *            the desired angle
      * @return the modified arm msg
      */
-   public ArmMsg getModifiedArmMsg(ArmMsg currentMsg, double desiredAngle) {
-       double limittedAngle = this.limitAngle(desiredAngle);
-       return new ArmMsg();
+   public static ArmMsg getArmMsgForAngle(double desiredAngle) {
+	   long[] currentArray = {0,0,0,0,0,0,0,0};
+       currentArray[5] = getPWMEquivalent(desiredAngle);
+       ArmMsg returnMessage = new ArmMsg();
+       returnMessage.pwms = currentArray;
+       return returnMessage;
    }
    
    
