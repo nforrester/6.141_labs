@@ -17,7 +17,8 @@ public class Grasping implements NodeMain{
 	
 	private Subscriber<org.ros.message.rss_msgs.ArmMsg> armSub;
 
-	
+	JointController jc;
+
 	public static void setServoAngles(double[] desiredAngles){
 		targetAngles = new double[] {desiredAngles[0],desiredAngles[1],desiredAngles[2]};
 	}
@@ -64,14 +65,14 @@ public class Grasping implements NodeMain{
 	public class ArmListener implements MessageListener<ArmMsg> {
 
 		@Override public void onNewMessage(ArmMsg currentMessage) {
-			double currentShoulderAngle = ShoulderController.getAngleEquivalent(currentMessage.pwms[5]);
-			double currentWristAngle = WristController.getAngleEquivalent(currentMessage.pwms[4]);
+			double currentShoulderAngle = ShoulderController.getAngleEquivalent(currentMessage.pwms[0]);
+			double currentWristAngle = WristController.getAngleEquivalent(currentMessage.pwms[1]);
 			double currentGripperAngle = GripperController.getAngleEquivalent(currentMessage.pwms[2]);
 			
 			if((currentShoulderAngle != targetAngles[0]) || (currentWristAngle != targetAngles[1])
 					|| (currentGripperAngle != targetAngles[2])){
 				
-				new JointController().commandServos(currentMessage, targetAngles);
+				jc.commandServos(currentMessage, targetAngles);
 			}
 		}
 	}
@@ -97,9 +98,12 @@ public class Grasping implements NodeMain{
 
 	@Override
 	public void onStart(Node node) {
+		jc = new JointController(node);
+
 		armSub = node.newSubscriber("rss/ArmStatus", "rss_msgs/ArmMsg");
 		armSub.addMessageListener(new ArmListener());
 
+		setServoAngles(new double[]{Math.PI/2, Math.PI/2, Math.PI/2});
 	}
 
 

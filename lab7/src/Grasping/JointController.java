@@ -29,8 +29,8 @@ public class JointController implements NodeMain {
 	    	   	// 2 gripper
 			
 			//get the actual angles
-			double currentShoulderAngle = ShoulderController.getAngleEquivalent(currentMessage.pwms[5]);
-			double currentWristAngle = WristController.getAngleEquivalent(currentMessage.pwms[4]);
+			double currentShoulderAngle = ShoulderController.getAngleEquivalent(currentMessage.pwms[0]);
+			double currentWristAngle = WristController.getAngleEquivalent(currentMessage.pwms[1]);
 			double currentGripperAngle = GripperController.getAngleEquivalent(currentMessage.pwms[2]);
 			
 			//limit the angles
@@ -89,7 +89,7 @@ public class JointController implements NodeMain {
     	   ArmMsg GripperMsg = GripperController.getArmMsgForAngle(desiredAngles[2]);
     	   
     	   ArmMsg returnMessage = new ArmMsg();
-    	   returnMessage.pwms = new long[] {0,0,GripperMsg.pwms[2],0,WristMsg.pwms[4],shoulderMsg.pwms[5],0,0,0};
+    	   returnMessage.pwms = new long[] {shoulderMsg.pwms[5],WristMsg.pwms[4],GripperMsg.pwms[2],0,0,0,0,0,0};
     	   return returnMessage;
        }
 
