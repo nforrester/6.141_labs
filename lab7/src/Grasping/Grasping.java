@@ -60,7 +60,7 @@ public class Grasping implements NodeMain{
 	@Override
 	public void onStart(Node node) {
 		armSub = node.newSubscriber("rss/ArmStatus", "rss_msgs/ArmMsg");
-		armSub.addMessageListener(new ArmListener(...));
+		armSub.addMessageListener(new ArmListener());
 
 	}
 
