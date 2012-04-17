@@ -30,13 +30,13 @@ public class ServoListener implements MessageListener<ArmMsg>{
 
 	public ServoListener(Orc orc, Publisher<ArmMsg> armPublisher, boolean safe){
 		if (safe){
-			bigServo = new SafeServo(orc, 0, 552, 2200, 2200);//start in the upright position
+			bigServo = new SafeServo(orc, 5, 552, 2200, 2200);//start in the upright position
 			gripperServo = new SafeServo(orc, 2, 1540, 1750, 1750);//start open
-			wristServo = new SafeServo(orc, 1, 1100, 1600, 1600);//start parallel to the ground
+			wristServo = new SafeServo(orc, 4, 1100, 1600, 1600);//start parallel to the ground
 		} else {
-			bigServo = new Servo(orc, 0, 0, 0, 0, 0);
+			bigServo = new Servo(orc, 5, 0, 0, 0, 0);
 			gripperServo = new Servo(orc, 2, 0, 0, 0, 0);
-			wristServo = new Servo(orc, 1, 0, 0, 0, 0);
+			wristServo = new Servo(orc, 4, 0, 0, 0, 0);
 		}
 		this.armThreadBase = new ArmPubThread(armPublisher);
 		pubThread = new Thread(this.armThreadBase);
