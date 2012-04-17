@@ -1,9 +1,11 @@
 package Grasping;
 
+import org.ros.message.rss_msgs.ArmMsg;
+
 public class WristController extends JointController {
 
-    public static final long MIN_PWM = 0; //to be set
-    public static final long MAX_PWM = 0; //to be set
+    public static final long MIN_PWM = 2075;
+    public static final long MAX_PWM = 435; 
     
     public static final double slope = 0; //to be set
     public static final double thetaIntercept = 0; //to be set
@@ -27,6 +29,7 @@ public class WristController extends JointController {
      */
    public ArmMsg getModifiedArmMsg(ArmMsg currentMsg, double desiredAngle) {
        double limittedAngle = this.limitAngle(desiredAngle);
+       return new ArmMsg();
    }
    
    /**

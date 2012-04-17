@@ -8,7 +8,12 @@ public class Grasping {
     
     
     
-    
+    public static void main(String[] args){
+    	Object[] valOne = new Object[] { 1.57,1200};
+    	Object[] valTwo = new Object[] { 1.57,1200};
+    	
+    	System.out.println(calculateM(valOne,valTwo));
+    }
     
     
 
