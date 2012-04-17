@@ -13,15 +13,16 @@ import org.ros.node.topic.Subscriber;
 public class Grasping implements NodeMain{
 
 	public static double[] targetAngles = {0.0,0.0,0.0};
+
+	
 	private Subscriber<org.ros.message.rss_msgs.ArmMsg> armSub;
 
-	public static void main(String[] args){
-
+	
+	public static void setServoAngles(double[] desiredAngles){
+		targetAngles = new double[] {desiredAngles[0],desiredAngles[1],desiredAngles[2]};
 	}
 
-
-
-
+	
 
 	public class ArmListener implements MessageListener<ArmMsg> {
 
