@@ -10,6 +10,8 @@ import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Subscriber;
 
+import LocalNavigation.Mat;
+
 public class Grasping implements NodeMain{
 
 	public static double[] targetAngles = {0.0,0.0,0.0};
@@ -53,7 +55,7 @@ public class Grasping implements NodeMain{
 		Mat p = new Mat(2, 1);
 		p.data[0][0] = x;
 		p.data[1][0] = y;
-		return p
+		return p;
 	}
 
 	public static double[] decodePoint2(Mat p) {
