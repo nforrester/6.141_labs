@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package Grasping;
 
 import org.ros.message.rss_msgs.ArmMsg;
@@ -7,8 +10,13 @@ public class ShoulderController extends JointController {
     public static final long MIN_PWM = 2300; 
     public static final long MAX_PWM = 600; 
     
-    public static final double slope = 0; //to be set
-    public static final double thetaIntercept = 0; //to be set
+    /////////////////////////////////////
+    // theta = 0 ; PWM = 516
+    // theta = pi/2 ; PWM = 1516
+    ////////////////////////////////////
+    
+    public static final double slope = 0.0015707963267948967; 
+    public static final double thetaIntercept = -0.8105309046261667; 
     
     /**
      * Gets the modified arm msg,
@@ -32,8 +40,35 @@ public class ShoulderController extends JointController {
        return new ArmMsg();
    }
    
+   
+   
    /**
-     * Limits the angle
+     * Gets the pWM equivalent
+     * of a given angle.
+     * 
+     * @param angle
+     *            the angle
+     * @return the pWM equivalent
+     */
+   public static long getPWMEquivalent(double angle) {
+       return limitAngle((long)((angle - ShoulderController.thetaIntercept)/ShoulderController.slope));
+   }
+   
+   /**
+     * Gets the limitted angle 
+     * equivalent for a given 
+     * PWM value.
+     * 
+     * @param pwmValue
+     *            the pwm value
+     * @return the angle equivalent
+     */
+   public static double getAngleEquivalent(long pwmValue) {
+       return ShoulderController.slope*limitAngle(pwmValue) + ShoulderController.thetaIntercept;
+   }
+   
+   /**
+     * Limits the PWM
      * depending on the constraints
      * of shoulder servo.
      * 
@@ -41,9 +76,11 @@ public class ShoulderController extends JointController {
      *            the input angle
      * @return the limitted angle
      */
-   public double limitAngle(double angle) {
-       // to be written
-       return 0;
+   private static long limitAngle(long pwmAngle) {
+       long copyAngle = pwmAngle;
+       if(copyAngle > ShoulderController.MAX_PWM) copyAngle = ShoulderController.MAX_PWM;
+       else if(copyAngle < ShoulderController.MIN_PWM) copyAngle = ShoulderController.MIN_PWM;
+       return copyAngle;
    }
     
 }
