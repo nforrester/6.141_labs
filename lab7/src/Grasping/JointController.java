@@ -36,9 +36,9 @@ public class JointController implements NodeMain {
 			double currentGripperAngle = GripperController.getAngleEquivalent(currentMessage.pwms[2]);
 			
 			//limit the angles
-			double shoulderError = currentShoulderAngle + limitChangeCommandAngle(currentShoulderAngle - desiredAngles[0]);							
-			double wristError =	currentWristAngle + limitChangeCommandAngle(currentWristAngle - desiredAngles[1]);								
-			double gripperError =currentGripperAngle + limitChangeCommandAngle(currentGripperAngle - desiredAngles[2]);
+			double shoulderError = currentShoulderAngle + limitChangeCommandAngle(desiredAngles[0] -currentShoulderAngle);							
+			double wristError =	currentWristAngle + limitChangeCommandAngle(desiredAngles[1] - currentWristAngle);								
+			double gripperError =currentGripperAngle + limitChangeCommandAngle(desiredAngles[2] - currentGripperAngle);
 
 			ArmMsg publishMsg = getEquivalentArmMsg(new double[] {shoulderError,wristError,gripperError});
 			
