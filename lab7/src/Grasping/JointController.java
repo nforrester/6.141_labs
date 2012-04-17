@@ -24,11 +24,9 @@ public class JointController implements NodeMain {
     	 * @param desiredPose
     	 */
 		public void commandServos(ArmMsg currentMessage, double[] desiredAngles) {
-				// 0 shoulder
+			// 0 shoulder
 	    	   	// 1 wrist
 	    	   	// 2 gripper
-			
-			Grasping.targetAngles = new double[]{desiredAngles[0],desiredAngles[1],desiredAngles[2]};
 			
 			//get the actual angles
 			double currentShoulderAngle = ShoulderController.getAngleEquivalent(currentMessage.pwms[5]);
