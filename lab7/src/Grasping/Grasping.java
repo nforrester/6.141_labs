@@ -19,17 +19,20 @@ import LocalNavigation.Mat;
 import VisualServo.BlobTracking;
 
 public class Grasping implements NodeMain{
-
 	public static double[] targetAngles = {0.0,0.0,0.0};
-	
-	
+
+
+	long startTime = 0;
+
 	private Subscriber<org.ros.message.rss_msgs.ArmMsg> armSub;
 	private Subscriber<org.ros.message.sensor_msgs.Image> rssVideoSub;
 	private Publisher<org.ros.message.sensor_msgs.Image> vidPub;
-	
+
 	private BlobTracking blobTrack = null;
 	private VisionGUI gui;
-	
+
+	private static boolean setyes = false;
+
 	private ArrayBlockingQueue<byte[]> visionImage = new ArrayBlockingQueue<byte[]>(1);
 	private static final int width = 160;
 	private static final int height = 120;
@@ -80,7 +83,7 @@ public class Grasping implements NodeMain{
 		return new double[]{x, y};
 	}
 
-	
+
 
 
 	@Override
@@ -104,20 +107,18 @@ public class Grasping implements NodeMain{
 	@Override
 	public void onStart(Node node) {
 		jc = new JointController(node);
-		
+
 		gui = new VisionGUI();
-		
+
 		blobTrack = new BlobTracking(width, height);
-		
+
 		armSub = node.newSubscriber("rss/ArmStatus", "rss_msgs/ArmMsg");
 		armSub.addMessageListener(new ArmListener());
 
 		rssVideoSub = node.newSubscriber("rss/video", "sensor_msgs/Image");
 		rssVideoSub.addMessageListener(new videoListener());
-		
-		vidPub = node.newPublisher("/rss/blobVideo", "sensor_msgs/Image");
 
-		setServoAngles(new double[]{Math.PI/2, Math.PI/2, Math.PI/2});
+		vidPub = node.newPublisher("/rss/blobVideo", "sensor_msgs/Image");
 	}
 
 
@@ -127,55 +128,78 @@ public class Grasping implements NodeMain{
 	public GraphName getDefaultNodeName() {
 		return null;
 	}
-	
-	
-	
-	
+
+
+
+
 	public class ArmListener implements MessageListener<ArmMsg> {
 
 		@Override public void onNewMessage(ArmMsg currentMessage) {
 			double currentShoulderAngle = ShoulderController.getAngleEquivalent(currentMessage.pwms[0]);
 			double currentWristAngle = WristController.getAngleEquivalent(currentMessage.pwms[1]);
 			double currentGripperAngle = GripperController.getAngleEquivalent(currentMessage.pwms[2]);
-			
+
+			System.err.println("Arm listener running!");
+
 			if((currentShoulderAngle != targetAngles[0]) || (currentWristAngle != targetAngles[1])
 					|| (currentGripperAngle != targetAngles[2])){
-				
+
 				jc.commandServos(currentMessage, targetAngles);
+				System.err.println("Target angles: " + targetAngles[0] + " " + targetAngles[1] + " " + targetAngles[2]);
 			}
+
+			if(!setyes){
+				setyes = true;
+				setServoAngles(new double[]{0, 0, 0});
+				System.err.println("Set target angles: " + targetAngles[0] + " " + targetAngles[1] + " " + targetAngles[2]);
+			}
+			if(compareCurrentPositionWithAngles(currentMessage,new double[]{0.0, 0.0, 0.0})){
+				setServoAngles(new double[]{Math.PI/2, 0, 0});
+				System.err.println("Set target angles: " + targetAngles[0] + " " + targetAngles[1] + " " + targetAngles[2]);
+			}
+			if(compareCurrentPositionWithAngles(currentMessage,new double[]{Math.PI/2, 0.0, 0.0})){
+				setServoAngles(new double[]{0, Math.PI/2, 0});
+				System.err.println("Set target angles: " + targetAngles[0] + " " + targetAngles[1] + " " + targetAngles[2]);
+			}
+			if(compareCurrentPositionWithAngles(currentMessage,new double[]{0.0, Math.PI/2, 0.0})){
+				setServoAngles(new double[]{0, 0, Math.PI/2});
+				System.err.println("Set target angles: " + targetAngles[0] + " " + targetAngles[1] + " " + targetAngles[2]);
+			}
+
 		}
+
 	}
-	
-	
-	
-	
+
+
+
+
 	public class videoListener implements MessageListener<org.ros.message.sensor_msgs.Image> {
 
 		@Override public void onNewMessage(org.ros.message.sensor_msgs.Image newImage) {
-			
-			
+
+
 			byte[] rgbData = Image.RGB2BGR(newImage.data,  (int)newImage.width, (int)newImage.height);
-			
+
 			synchronized (visionImage){
 				visionImage.offer(rgbData);
 			}
-			
-			
+
+
 			Image src = null;
-		    
+
 			try {
 				src = new Image(visionImage.take(), width, height);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-		    
-			
+
+
 			Image dest = new Image(src);
 
-			
+
 			blobTrack.apply(src,dest);
-			
-			
+
+
 			org.ros.message.sensor_msgs.Image pubImage =	new org.ros.message.sensor_msgs.Image();
 			pubImage.width = width;
 			pubImage.height = height;
@@ -186,6 +210,16 @@ public class Grasping implements NodeMain{
 			vidPub.publish(pubImage);
 		}
 	}
-	
-	
+
+
+
+
+	private static boolean compareCurrentPositionWithAngles(ArmMsg currentMessage,double[] compareAngles){
+		System.err.print( "Shoulder : " + ShoulderController.getAngleEquivalent(currentMessage.pwms[0]) + " ");
+		System.err.print( "Wrist : " + WristController.getAngleEquivalent(currentMessage.pwms[1]) + " ");
+		System.err.println(  "Gripper : " + GripperController.getAngleEquivalent(currentMessage.pwms[2]));
+		return Math.abs(ShoulderController.getAngleEquivalent(currentMessage.pwms[0])-compareAngles[0]) < 0.1 &&
+				Math.abs(WristController.getAngleEquivalent(currentMessage.pwms[1])-compareAngles[1]) < 0.1&&
+				Math.abs(GripperController.getAngleEquivalent(currentMessage.pwms[2])-compareAngles[2]) < 0.1;
+	}
 }

@@ -10,7 +10,7 @@ public class GripperController extends JointController {
 	}
 
 	public static final long MIN_PWM = 450; 
-    public static final long MAX_PWM = 1650; 
+    public static final long MAX_PWM = 1701; 
     
     /*
     /////////////////////////////////////

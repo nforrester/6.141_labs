@@ -10,7 +10,7 @@ public class WristController extends JointController {
 	}
 
 	public static final long MIN_PWM = 435;
-    public static final long MAX_PWM = 2075; 
+    public static final long MAX_PWM = 2101; 
     
     /*
     /////////////////////////////////////
