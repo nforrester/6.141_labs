@@ -51,17 +51,20 @@ public class Grasping implements NodeMain{
 	private ArrayList<double[]> taskList = new ArrayList<double[]>();
 
 	private void prepareToPickUpBlock() {
-		taskList.add(new double[] {-1.3, 1.3, 0.5});
+		taskList.add(new double[] { 0, 1.3859967589366735, 0.599758597503506});
+		taskList.add(new double[] { -1.9332877868244882, 1.3859967589366735, 0.599758597503506});
 	}
 
 	private void pickUpBlock() {
-		taskList.add(new double[] {-1.3, 1.3, 0});
+		taskList.add(new double[] { -1.9332877868244882, 1.3859967589366735, 0});
+		taskList.add(new double[] {0, 1.3859967589366735, 0});
 		taskList.add(new double[] {0, 0, 0});
 	}
 
 	private void putDownBlock() {
-		taskList.add(new double[] {-1.3, 1.3, 0});
-		taskList.add(new double[] {-1.3, 1.3, 0.5});
+		taskList.add(new double[] { 0, 1.3859967589366735, 0});
+		taskList.add(new double[] { -1.9332877868244882, 1.3859967589366735, 0});
+		taskList.add(new double[] { -1.9332877868244882, 1.3859967589366735, 0.599758597503506});
 	}
 
 	public static void setServoAngles(double[] desiredAngles){

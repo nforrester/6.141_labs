@@ -8,7 +8,7 @@ import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
 
 public class JointController {
-	public static final double servoCommandAngleTreshold = 0.1;
+	public static final double servoCommandAngleTreshold = 0.03;
 
 	Publisher<ArmMsg> armPublisher;
 
