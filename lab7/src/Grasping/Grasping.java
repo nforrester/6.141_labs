@@ -37,6 +37,14 @@ public class Grasping implements NodeMain{
 	private static final int width = 160;
 	private static final int height = 120;
 
+	
+	//////////////////////////////////////////////////////////////////////////////////////////////
+	/* Block pick up macro variables */
+	private static boolean armInPickingPosition = false;
+	private static boolean armInPickingPlace = false;
+	private static boolean blockPickedupAndMoveForward = false;
+	private static boolean placeBlockdown = false;
+	////////////////////////////////////////////////////////////////////////////////////////////
 
 	JointController jc;
 
@@ -139,32 +147,43 @@ public class Grasping implements NodeMain{
 			double currentWristAngle = WristController.getAngleEquivalent(currentMessage.pwms[1]);
 			double currentGripperAngle = GripperController.getAngleEquivalent(currentMessage.pwms[2]);
 
-			System.err.println("Arm listener running!");
+			
 
 			if((currentShoulderAngle != targetAngles[0]) || (currentWristAngle != targetAngles[1])
 					|| (currentGripperAngle != targetAngles[2])){
 
 				jc.commandServos(currentMessage, targetAngles);
-				System.err.println("Target angles: " + targetAngles[0] + " " + targetAngles[1] + " " + targetAngles[2]);
+				//System.err.println("Target angles: " + targetAngles[0] + " " + targetAngles[1] + " " + targetAngles[2]);
 			}
 
+			//////////////////////////////////////////////////////////////////////////////////////////////
+			/* Block pick up and move macro  */
+			 if(!armInPickingPosition){
+				 // call arm pick up position method here
+				 armInPickingPosition = true;
+			 }
+
+			////////////////////////////////////////////////////////////////////////////////////////////
+			
+			
+			/*
 			if(!setyes){
 				setyes = true;
 				setServoAngles(new double[]{0, 0, 0});
 				System.err.println("Set target angles: " + targetAngles[0] + " " + targetAngles[1] + " " + targetAngles[2]);
 			}
-			if(compareCurrentPositionWithAngles(currentMessage,new double[]{0.0, 0.0, 0.0})){
+			else if(compareCurrentPositionWithAngles(currentMessage,new double[]{0.0, 0.0, 0.0})){
 				setServoAngles(new double[]{Math.PI/2, 0, 0});
 				System.err.println("Set target angles: " + targetAngles[0] + " " + targetAngles[1] + " " + targetAngles[2]);
 			}
-			if(compareCurrentPositionWithAngles(currentMessage,new double[]{Math.PI/2, 0.0, 0.0})){
+			else if(compareCurrentPositionWithAngles(currentMessage,new double[]{Math.PI/2, 0.0, 0.0})){
 				setServoAngles(new double[]{0, Math.PI/2, 0});
 				System.err.println("Set target angles: " + targetAngles[0] + " " + targetAngles[1] + " " + targetAngles[2]);
 			}
-			if(compareCurrentPositionWithAngles(currentMessage,new double[]{0.0, Math.PI/2, 0.0})){
+			else if(compareCurrentPositionWithAngles(currentMessage,new double[]{0.0, Math.PI/2, 0.0})){
 				setServoAngles(new double[]{0, 0, Math.PI/2});
 				System.err.println("Set target angles: " + targetAngles[0] + " " + targetAngles[1] + " " + targetAngles[2]);
-			}
+			}*/
 
 		}
 
@@ -195,10 +214,9 @@ public class Grasping implements NodeMain{
 
 
 			Image dest = new Image(src);
+			int[] currentPositions = blobTrack.blobPresent(src,dest);
 
-
-			blobTrack.apply(src,dest);
-
+			System.err.println("Area -> " + currentPositions[0] + " X -> " + currentPositions[1] + " Y -> " + currentPositions[2]);
 
 			org.ros.message.sensor_msgs.Image pubImage =	new org.ros.message.sensor_msgs.Image();
 			pubImage.width = width;

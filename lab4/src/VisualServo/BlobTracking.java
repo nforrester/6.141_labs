@@ -96,12 +96,13 @@ public class BlobTracking {
 		stepTiming();  // monitors the frame rate
 		//log_node.getLog().info( src.getPixel(100, 100).getBlue());
 		// Begin Student Code
-		log_node.getLog().info("adjbgvfqaj");
+
+		
 		for(int i=0;i<src.getWidth();i++) {
 		    for(int j=0;j<src.getHeight();j++) {
 		        Pixel testPixel = src.getPixel(i, j);
 		        if(testPixel.getRed() > 220 && testPixel.getBlue() < 20 && testPixel.getGreen() < 20) {
-		            System.out.println("Pixel at i = " + i + " j = " + j);
+		            System.err.println("Pixel at i = " + i + " j = " + j);
 		        }
 		    }
 		}
@@ -114,7 +115,7 @@ public class BlobTracking {
 		
 				Pixel testPixel = src.getPixel(i, j);
 				
-				if(isHue(testPixel, hues[RED])){
+				if(isHue(testPixel, hues[preference])){
 					Pixel redPixel = new Pixel(255,255,255);
 					dest.setPixel(i, j, redPixel); //replaces desired pixels with white pixels.
 					numberOfPixels++;
@@ -132,7 +133,7 @@ public class BlobTracking {
 		
 		
 		if(redPositionSumX > 0 && redPositionSumY > 0){
-			log_node.getLog().info("Ball Found Estimated center at X -> " + redPositionSumX + "Y -> " +redPositionSumY);
+			System.err.println("Ball Found Estimated center at X -> " + redPositionSumX + "Y -> " +redPositionSumY);
 		}
 		// End Student Code
 	}

@@ -662,7 +662,7 @@ public class GlobalNavigation implements NodeMain {
 	GUISegmentMsg segMsg = new GUISegmentMsg();
 	
 	for (int i=0; i<pts.size()-2; i++) {
-	    fillSegmentMsg(segMsg, new Color(255, 0,0), new Point2D.Double(pts.get(i)[0], pts.get(i)[1]), new Point2D.Double(pts.get(i+1)[0], pts.get(i+1)[1]));
+	    fillSegmentMsg(segMsg, new Color(0,0,0), new Point2D.Double(pts.get(i)[0], pts.get(i)[1]), new Point2D.Double(pts.get(i+1)[0], pts.get(i+1)[1]));
 	    segPub.publish(segMsg);
 	    try{
 		Thread.sleep(100);

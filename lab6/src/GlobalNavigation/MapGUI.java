@@ -450,15 +450,15 @@ public class MapGUI extends SonarGUI implements NodeMain{
      * Hook called by ROS to start the gui
      **/
     public void onStart(Node node) {
-	guiRectSub = node.newSubscriber("gui/Rect", "lab6_msgs/GUIRectMsg");
+	guiRectSub = node.newSubscriber("/gui/Rect", "lab6_msgs/GUIRectMsg");
 	guiRectSub.addMessageListener(new RectMessageListener(this));
-	guiPolySub = node.newSubscriber("gui/Poly", "lab6_msgs/GUIPolyMsg");
+	guiPolySub = node.newSubscriber("/gui/Poly", "lab6_msgs/GUIPolyMsg");
 	guiPolySub.addMessageListener(new PolyMessageListener(this));
-	guiEraseSub = node.newSubscriber("gui/Erase", "lab5_msgs/GUIEraseMsg");
+	guiEraseSub = node.newSubscriber("/gui/Erase", "lab5_msgs/GUIEraseMsg");
 	guiEraseSub.addMessageListener(new EraseMessageListener(this));
-	guiPointSub = node.newSubscriber("gui/Point", "lab5_msgs/GUIPointMsg");
+	guiPointSub = node.newSubscriber("/gui/Point", "lab5_msgs/GUIPointMsg");
 	guiPointSub.addMessageListener(new PointMessageListener(this));
-	guiSegmentSub = node.newSubscriber("gui/Segment", "lab5_msgs/GUISegmentMsg");
+	guiSegmentSub = node.newSubscriber("/gui/Segment", "lab5_msgs/GUISegmentMsg");
 	guiSegmentSub.addMessageListener(new SegmentMessageListener(this));
 	super.onStart(node);
     }
