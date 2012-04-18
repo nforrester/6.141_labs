@@ -18,6 +18,8 @@ import VisualServo.VisionGUI;
 import LocalNavigation.Mat;
 import VisualServo.BlobTracking;
 
+import java.util.ArrayList;
+
 public class Grasping implements NodeMain{
 	public static double[] targetAngles = {0.0,0.0,0.0};
 
@@ -169,10 +171,10 @@ public class Grasping implements NodeMain{
 					System.err.println("Target angles: " + targetAngles[0] + " " + targetAngles[1] + " " + targetAngles[2]);
 				}
 
-				setServoAngles(taskList.get(0))
+				setServoAngles(taskList.get(0));
 				if (compareCurrentPositionWithAngles(currentMessage, taskList.get(0))) {
 					taskList.remove(0);
-					setServoAngles(taskList.get(0))
+					setServoAngles(taskList.get(0));
 					System.err.println("Set target angles: " + targetAngles[0] + " " + targetAngles[1] + " " + targetAngles[2]);
 				}
 			}
