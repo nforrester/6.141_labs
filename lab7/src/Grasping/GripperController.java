@@ -1,12 +1,18 @@
 package Grasping;
 
 import org.ros.message.rss_msgs.ArmMsg;
+import org.ros.node.Node;
 
 public class GripperController extends JointController {
 
-    public static final long MIN_PWM = 450; 
+    public GripperController(Node node) {
+		super(node);
+	}
+
+	public static final long MIN_PWM = 450; 
     public static final long MAX_PWM = 1650; 
     
+    /*
     /////////////////////////////////////
     // theta = 0 ; PWM = 452
     // theta = pi/2 ; PWM = 1645
@@ -15,7 +21,17 @@ public class GripperController extends JointController {
     
     public static final double slope = 0.0013166775580845738; 
     public static final double thetaIntercept = -0.5951382562542273; 
+    */
     
+    static final double theta1 = 0;
+    static final double theta2 = Math.PI / 2;
+
+    static final double pwm1 = 1290;
+    static final double pwm2 = 2160 - 1370 + pwm1;
+
+    public static final double slope = (theta2 - theta1) / (pwm2 - pwm1);
+    public static final double thetaIntercept = theta1 - slope * pwm1;
+
     /**
      * Gets the modified arm msg,
      * given the current arm msg

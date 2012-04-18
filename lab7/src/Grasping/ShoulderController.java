@@ -15,6 +15,7 @@ public class ShoulderController extends JointController {
 	public static final long MIN_PWM = 515; 
     public static final long MAX_PWM = 2300; 
     
+    /*
     /////////////////////////////////////
     // theta = 0 ; PWM = 516
     // theta = pi/2 ; PWM = 1516
@@ -22,6 +23,16 @@ public class ShoulderController extends JointController {
     
     public static final double slope = 0.0015707963267948967; 
     public static final double thetaIntercept = -0.8105309046261667; 
+    */
+
+    static final double theta1 = 0;
+    static final double theta2 = Math.PI / 2;
+
+    static final double pwm1 = 1500;
+    static final double pwm2 = 2150;
+
+    public static final double slope = (theta2 - theta1) / (pwm2 - pwm1);
+    public static final double thetaIntercept = theta1 - slope * pwm1;
     
     /**
      * Gets the modified arm msg,
