@@ -24,10 +24,10 @@ public class GripperController extends JointController {
     */
     
     static final double theta1 = 0;
-    static final double theta2 = Math.PI / 2;
+    static final double theta2 = 1.05 * Math.PI / 2;
 
-    static final double pwm1 = 1290;
-    static final double pwm2 = 2160 - 1370 + pwm1;
+    static final double pwm1 = 600;
+    static final double pwm2 = 1700;
 
     public static final double slope = (theta2 - theta1) / (pwm2 - pwm1);
     public static final double thetaIntercept = theta1 - slope * pwm1;
