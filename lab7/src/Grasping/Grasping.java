@@ -21,7 +21,6 @@ import VisualServo.BlobTracking;
 public class Grasping implements NodeMain{
 	public static double[] targetAngles = {0.0,0.0,0.0};
 
-
 	long startTime = 0;
 
 	private Subscriber<org.ros.message.rss_msgs.ArmMsg> armSub;
@@ -37,7 +36,6 @@ public class Grasping implements NodeMain{
 	private static final int width = 160;
 	private static final int height = 120;
 
-	
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	/* Block pick up macro variables */
 	private static boolean armInPickingPosition = false;
@@ -47,6 +45,22 @@ public class Grasping implements NodeMain{
 	////////////////////////////////////////////////////////////////////////////////////////////
 
 	JointController jc;
+
+	private ArrayList<double[]> taskList = new ArrayList<double[]>();
+
+	private void prepareToPickUpBlock() {
+		taskList.add(new double[] {-1.3, 1.3, 0.5});
+	}
+
+	private void pickUpBlock() {
+		taskList.add(new double[] {-1.3, 1.3, 0});
+		taskList.add(new double[] {0, 0, 0});
+	}
+
+	private void putDownBlock() {
+		taskList.add(new double[] {-1.3, 1.3, 0});
+		taskList.add(new double[] {-1.3, 1.3, 0.5});
+	}
 
 	public static void setServoAngles(double[] desiredAngles){
 		targetAngles = new double[] {desiredAngles[0],desiredAngles[1],desiredAngles[2]};
@@ -91,26 +105,17 @@ public class Grasping implements NodeMain{
 		return new double[]{x, y};
 	}
 
-
-
-
 	@Override
 	public void onShutdown(Node arg0) {
 		// TODO Auto-generated method stub
 
 	}
 
-
-
-
 	@Override
 	public void onShutdownComplete(Node arg0) {
 		// TODO Auto-generated method stub
 
 	}
-
-
-
 
 	@Override
 	public void onStart(Node node) {
@@ -127,34 +132,20 @@ public class Grasping implements NodeMain{
 		rssVideoSub.addMessageListener(new videoListener());
 
 		vidPub = node.newPublisher("/rss/blobVideo", "sensor_msgs/Image");
+
+		prepareToPickUpBlock();
+		pickUpBlock();
+		putDownBlock();
 	}
-
-
-
 
 	@Override
 	public GraphName getDefaultNodeName() {
 		return null;
 	}
 
-
-
-
 	public class ArmListener implements MessageListener<ArmMsg> {
 
 		@Override public void onNewMessage(ArmMsg currentMessage) {
-			double currentShoulderAngle = ShoulderController.getAngleEquivalent(currentMessage.pwms[0]);
-			double currentWristAngle = WristController.getAngleEquivalent(currentMessage.pwms[1]);
-			double currentGripperAngle = GripperController.getAngleEquivalent(currentMessage.pwms[2]);
-
-			
-
-			if((currentShoulderAngle != targetAngles[0]) || (currentWristAngle != targetAngles[1])
-					|| (currentGripperAngle != targetAngles[2])){
-
-				jc.commandServos(currentMessage, targetAngles);
-				//System.err.println("Target angles: " + targetAngles[0] + " " + targetAngles[1] + " " + targetAngles[2]);
-			}
 
 			//////////////////////////////////////////////////////////////////////////////////////////////
 			/* Block pick up and move macro  */
@@ -163,41 +154,37 @@ public class Grasping implements NodeMain{
 				 armInPickingPosition = true;
 			 }
 
-			////////////////////////////////////////////////////////////////////////////////////////////
-			
-			
-			/*
-			if(!setyes){
-				setyes = true;
-				setServoAngles(new double[]{0, 0, 0});
-				System.err.println("Set target angles: " + targetAngles[0] + " " + targetAngles[1] + " " + targetAngles[2]);
-			}
-			else if(compareCurrentPositionWithAngles(currentMessage,new double[]{0.0, 0.0, 0.0})){
-				setServoAngles(new double[]{Math.PI/2, 0, 0});
-				System.err.println("Set target angles: " + targetAngles[0] + " " + targetAngles[1] + " " + targetAngles[2]);
-			}
-			else if(compareCurrentPositionWithAngles(currentMessage,new double[]{Math.PI/2, 0.0, 0.0})){
-				setServoAngles(new double[]{0, Math.PI/2, 0});
-				System.err.println("Set target angles: " + targetAngles[0] + " " + targetAngles[1] + " " + targetAngles[2]);
-			}
-			else if(compareCurrentPositionWithAngles(currentMessage,new double[]{0.0, Math.PI/2, 0.0})){
-				setServoAngles(new double[]{0, 0, Math.PI/2});
-				System.err.println("Set target angles: " + targetAngles[0] + " " + targetAngles[1] + " " + targetAngles[2]);
-			}*/
+			System.err.println("Arm listener running!");
 
+			if (!taskList.isEmpty()) {
+				System.err.println("We've got work to do!");
+				double currentShoulderAngle = ShoulderController.getAngleEquivalent(currentMessage.pwms[0]);
+				double currentWristAngle = WristController.getAngleEquivalent(currentMessage.pwms[1]);
+				double currentGripperAngle = GripperController.getAngleEquivalent(currentMessage.pwms[2]);
+
+				if ((currentShoulderAngle != targetAngles[0]) ||
+				    (currentWristAngle    != targetAngles[1]) ||
+				    (currentGripperAngle  != targetAngles[2])) {
+					jc.commandServos(currentMessage, targetAngles);
+					System.err.println("Target angles: " + targetAngles[0] + " " + targetAngles[1] + " " + targetAngles[2]);
+				}
+
+				setServoAngles(taskList.get(0))
+				if (compareCurrentPositionWithAngles(currentMessage, taskList.get(0))) {
+					taskList.remove(0);
+					setServoAngles(taskList.get(0))
+					System.err.println("Set target angles: " + targetAngles[0] + " " + targetAngles[1] + " " + targetAngles[2]);
+				}
+			}
 		}
-
 	}
-
-
-
 
 	public class videoListener implements MessageListener<org.ros.message.sensor_msgs.Image> {
 
 		@Override public void onNewMessage(org.ros.message.sensor_msgs.Image newImage) {
 
 
-			byte[] rgbData = Image.RGB2BGR(newImage.data,  (int)newImage.width, (int)newImage.height);
+			byte[] rgbData = Image.RGB2BGR(newImage.data, (int)newImage.width, (int)newImage.height);
 
 			synchronized (visionImage){
 				visionImage.offer(rgbData);
@@ -233,11 +220,11 @@ public class Grasping implements NodeMain{
 
 
 	private static boolean compareCurrentPositionWithAngles(ArmMsg currentMessage,double[] compareAngles){
-		System.err.print( "Shoulder : " + ShoulderController.getAngleEquivalent(currentMessage.pwms[0]) + " ");
-		System.err.print( "Wrist : " + WristController.getAngleEquivalent(currentMessage.pwms[1]) + " ");
-		System.err.println(  "Gripper : " + GripperController.getAngleEquivalent(currentMessage.pwms[2]));
-		return Math.abs(ShoulderController.getAngleEquivalent(currentMessage.pwms[0])-compareAngles[0]) < 0.1 &&
-				Math.abs(WristController.getAngleEquivalent(currentMessage.pwms[1])-compareAngles[1]) < 0.1&&
-				Math.abs(GripperController.getAngleEquivalent(currentMessage.pwms[2])-compareAngles[2]) < 0.1;
+		System.err.print("Shoulder : " + ShoulderController.getAngleEquivalent(currentMessage.pwms[0]) + " ");
+		System.err.print("Wrist : " + WristController.getAngleEquivalent(currentMessage.pwms[1]) + " ");
+		System.err.println("Gripper : " + GripperController.getAngleEquivalent(currentMessage.pwms[2]));
+		return Math.abs(ShoulderController.getAngleEquivalent(currentMessage.pwms[0])-compareAngles[0]) < 0.05 &&
+		       Math.abs(WristController.getAngleEquivalent(currentMessage.pwms[1])-compareAngles[1])    < 0.05 &&
+		       Math.abs(GripperController.getAngleEquivalent(currentMessage.pwms[2])-compareAngles[2])  < 0.05;
 	}
 }
