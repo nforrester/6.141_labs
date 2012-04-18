@@ -20,6 +20,7 @@
  */
 
 package LocalNavigation;
+import java.io.PrintStream;
 
 public class Mat {
 	public double[][] data;
@@ -39,24 +40,28 @@ public class Mat {
 	 * <p>Print a matrix</p>
 	 */
 	public static Mat print(Mat m) {
-		System.out.println("(" + m.rows + " " + m.columns + ")");
+		return print(System.out, m);
+	}
+
+	public static Mat print(PrintStream o, Mat m) {
+		o.println("(" + m.rows + " " + m.columns + ")");
 
 		int row;
 		int column;
 
 		for (row = 0; row < m.rows; row++) {
 			if (row == 0) {
-				System.out.print("[");
+				o.print("[");
 			} else {
-				System.out.print(" ");
+				o.print(" ");
 			}
 			for (column = 0; column < m.columns; column++) {
-				System.out.print(" " + m.data[row][column]);
+				o.print(" " + m.data[row][column]);
 			}
 			if (row != m.rows - 1) {
-				System.out.println("");
+				o.println("");
 			} else {
-				System.out.println(" ]");
+				o.println(" ]");
 			}
 		}
 
@@ -230,6 +235,13 @@ public class Mat {
 	}
 
 	/**
+	 * <p>Subtract two matricies</p>
+	 */
+	public static Mat sub(Mat mA, Mat mB) {
+		return add(mA, mul(-1, mB));
+	}
+
+	/**
 	 * <p>Multiply two matricies</p>
 	 */
 	public static Mat mul(Mat mA, Mat mB) {
@@ -284,6 +296,40 @@ public class Mat {
 		}
 
 		return mC;
+	}
+
+	/**
+	 * <p>Transpose a matrix</p>
+	 */
+	public static Mat transpose(Mat m) {
+		Mat mT = new Mat(m.columns, m.rows);
+
+		int row;
+		int column;
+
+		for (row = 0; row < m.rows; row++) {
+			for (column = 0; column < m.columns; column++) {
+				mT.data[column][row] = m.data[row][column];
+			}
+		}
+
+		return mT;
+	}
+
+	/**
+	 * <p>Dot product of two vectors</p>
+	 */
+	public static double dot(Mat v1, Mat v2) {
+		Mat mR = mul(transpose(v1), v2);
+
+		return mR.data[0][0];
+	}
+
+	/**
+	 * <p>Find the distance between two points</p>
+	 */
+	public static double dist(Mat p1, Mat p2) {
+		return Math.pow(Math.pow(p1.data[0][0] - p2.data[0][0], 2.0) + Math.pow(p1.data[1][0] - p2.data[1][0], 2.0), 0.5);
 	}
 
 	/**
