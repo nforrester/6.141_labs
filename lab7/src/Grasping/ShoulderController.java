@@ -4,10 +4,15 @@
 package Grasping;
 
 import org.ros.message.rss_msgs.ArmMsg;
+import org.ros.node.Node;
 
 public class ShoulderController extends JointController {
 
-    public static final long MIN_PWM = 515; 
+    public ShoulderController(Node node) {
+		super(node);
+	}
+
+	public static final long MIN_PWM = 515; 
     public static final long MAX_PWM = 2300; 
     
     /////////////////////////////////////
