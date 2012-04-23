@@ -13,6 +13,7 @@ import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
+
 import VisualServo.Image;
 import VisualServo.VisionGUI;
 import LocalNavigation.Mat;
@@ -48,20 +49,20 @@ public class Grasping implements NodeMain{
 
 	JointController jc;
 
-	private ArrayList<double[]> taskList = new ArrayList<double[]>();
+	private static ArrayList<double[]> taskList = new ArrayList<double[]>();
 
-	private void prepareToPickUpBlock() {
+	private static void prepareToPickUpBlock() {
 		taskList.add(new double[] { 0, 1.3859967589366735, 0.599758597503506});
 		taskList.add(new double[] { -1.9332877868244882, 1.3859967589366735, 0.599758597503506});
 	}
 
-	private void pickUpBlock() {
+	private static void pickUpBlock() {
 		taskList.add(new double[] { -1.9332877868244882, 1.3859967589366735, 0});
 		taskList.add(new double[] {0, 1.3859967589366735, 0});
 		taskList.add(new double[] {0, 0, 0});
 	}
 
-	private void putDownBlock() {
+	private static void putDownBlock() {
 		taskList.add(new double[] { 0, 1.3859967589366735, 0});
 		taskList.add(new double[] { -1.9332877868244882, 1.3859967589366735, 0});
 		taskList.add(new double[] { -1.9332877868244882, 1.3859967589366735, 0.599758597503506});
@@ -155,7 +156,7 @@ public class Grasping implements NodeMain{
 			//////////////////////////////////////////////////////////////////////////////////////////////
 			/* Block pick up and move macro  */
 			 if(!armInPickingPosition){
-				 // call arm pick up position method here
+				 Grasping.prepareToPickUpBlock();
 				 armInPickingPosition = true;
 			 }
 
