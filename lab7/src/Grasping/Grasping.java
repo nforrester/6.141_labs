@@ -19,7 +19,7 @@ import VisualServo.VisionGUI;
 import LocalNavigation.Mat;
 import VisualServo.BlobTracking;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class Grasping implements NodeMain{
 	public static double[] targetAngles = {0.0,0.0,0.0};
@@ -49,7 +49,7 @@ public class Grasping implements NodeMain{
 
 	JointController jc;
 
-	private static ArrayList<double[]> taskList = new ArrayList<double[]>();
+	private static LinkedList<double[]> taskList = new LinkedList<double[]>();
 
 	private static void prepareToPickUpBlock() {
 		taskList.add(new double[] { 0, 1.3859967589366735, 0.599758597503506});
@@ -67,6 +67,26 @@ public class Grasping implements NodeMain{
 		taskList.add(new double[] { -1.9332877868244882, 1.3859967589366735, 0});
 		taskList.add(new double[] { -1.9332877868244882, 1.3859967589366735, 0.599758597503506});
 	}
+
+    private static void openGripper() {
+	taskList.add( new double[] {taskList.getLast()[0], taskList.getLast()[1], 0.599758597503506});
+    }
+
+    private static void closeGripper() {
+	taskList.add( new double[] {taskList.getLast()[0], taskList.getLast()[1], 0});
+    }
+
+    private static void moveUp(double angle) {
+	taskList.add( new double[] {angle, taskList.getLast()[1], taskList.getLast()[2]});
+    }
+    
+    private static void bendElbow(double angle) {
+	taskList.add( new double[] {taskList.getLast()[0], angle, taskList.getLast()[2]});
+    }
+
+    private static void moveToGround() {
+	taskList.add(new double[] { -1.9332877868244882, 1.3859967589366735, 0.599758597503506});
+    }
 
 	public static void setServoAngles(double[] desiredAngles){
 		targetAngles = new double[] {desiredAngles[0],desiredAngles[1],desiredAngles[2]};
