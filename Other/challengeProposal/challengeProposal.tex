@@ -35,7 +35,7 @@
 \section{Problem Statement}
 The scenario we wish to emulate can be pictured as a robot being parachuted onto the surface of Mars with the purpose of building a shelter of some form.  Building materials have also been parachuted down and are distributed across the Martian landscape.  The robot has been provided with a map of the local area and the locations of some of the building materials.  However, some of the materials have not landed in the designated areas and thus do not show up on the map despite being useful, or perhaps essential, to the construction of the shelter.  The robot must navigate the countryside, gather materials, and use said materials to build a structure.
 
-Similarly, our robot must perform four main tasks.  
+Therefore, our robot must perform four main tasks.  
 
 \begin{enumerate}
  \item {\bf Navigate about an area}: The robot will be placed in a maze of some undefined size and complexity.  The robot will be provided a map of the maze beforehand and must be able to autonomously navigate the area.
@@ -51,14 +51,15 @@ Before proceeding with the design of a solution to the given problem statement, 
 \subsection{Assumptions about the environment}
 \begin{itemize}
  \item The maze is flat. While the walls stick up out of the floor, all the blocks will be sitting on the floor, and the robot will never be required to climb up or over anything, or retrieve any blocks from anywhere other than the floor.
- \item The walls of the maze are fixed, and nothing will move unless it was pushed by the robot. If the robot goes away and comes back, it can reasonably expect to find all the blocks and walls where it left them.
+ \item The walls of the maze are fixed, and nothing will move unless it was pushed by the robot. If the robot goes away and comes back, it can reasonably expect to find all the blocks, unless they are inadvertently moved, and walls where it left them.
  \item The maze will be appropriately sized and bounded such the robot is reasonably able to explore at least the majority of the map within the allotted challenge time. The robot also can't explore for an unlimited distance in one direction, leaving critical building materials behind.
  \item All areas of the maze will be reasonably accessible by the robot (i.e. no narrow passages, low overhangs, etc.).  All areas of the maze will be properly illuminated such that the robot can rely on vision for navigation and identification without unnecessary recalibration.
 \end{itemize}
 \subsection{Assumptions about the building materials}
 \begin{itemize}
- \item The blocks will be reasonably sized such that the robot can easily lift them.  The block will also not be shaped such that it is incompatible with all other blocks. Ideally, the longest dimension of any block will not exceed 6 inches and all blocks will be common geometric 3D shapes.
- \item The blocks will not be unreasonably heavy such that the robot is not able to easily lift them.  The blocks will not be made of a material that is overly difficult to identify with vision (i.e. reflective surfaces, transparent/translucent, etc.).  Ideally, the blocks will be opaque plastic or painted wood.
+ \item The blocks will be reasonably sized such that the robot can easily lift them.  A block will also not be shaped such that it is incompatible with all other blocks. Ideally, the longest dimension of any block will not exceed 6 inches and all blocks will be common geometric 3D shapes.
+ \item The blocks will be lightweight enough such that the robot is able to easily lift them.  
+ \item The blocks will not be made of a material that is overly difficult to identify with vision (i.e. reflective surfaces, transparent/translucent, etc.).  Ideally, the blocks will be opaque plastic or painted wood.
  \item The blocks are contrasting colors from the maze walls and floor, making optical identification easier.
 \end{itemize}
 \subsection{Assumptions about the robot}
@@ -68,25 +69,19 @@ Before proceeding with the design of a solution to the given problem statement, 
  \item The robot must remain within a limited budget and cannot rely on expensive sensors or manipulators to complete the challenge.
 \end{itemize}
 
-\section{High level approach}
-The solution we've decided on has two primary modes: collection and assembly.
-In collection mode, the robot uses a funnel in front of the body to collect blocks
-(see figures \ref{fig:robotFunnel}, \ref{fig:dimensioned} and \ref{fig:collection}).
-The blocks are stored in a stack under the body.
-The stack is sufficiently narrow so that the blocks will interlock.
-There will be a break-beam sensor in the throat for uses such as jam detection,
-successful block acquisition feedback, and for deciding when the stack is full.
-If a block gets stuck, the robot will back up, turn slightly, and approach the block again.
+\section{High Level Approach}
+The solution we've decided on has two primary modes: collection and assembly. This approach allows us to divide the challenge into two relatively manageable tasks.  The division of these tasks also allows us to prioritize different things for each mode.  Namely, speed will be prioritized during the collection phase and precision during assembly.
 
-After collecting a sufficient number of blocks in the stack, the robot will back up.
-This will deposit the blocks in a straight line in front of the robot, aligned with the robot center.
-Now the robot will use the robotic arm to rearrange the blocks into an arbitrary planar structure.
-This will be precise and efficient, because the robot will not have to turn at all to place the blocks,
-and visual feedback can be used to check block placement.
+\subsection{Collection}
+In collection mode, the robot uses a funnel in front of the body to collect blocks (see figures \ref{fig:robotFunnel}, \ref{fig:dimensioned} and \ref{fig:collection}). The blocks are stored in a stack under the body. The stack is sufficiently narrow so that the blocks will interlock. There will be a break-beam sensor in the throat for uses such as jam detection, successful block acquisition feedback, and for deciding when the stack is full. If a block gets stuck, the robot will back up, turn slightly, and  approach the block again.
+
+\subsection{Assembly}
+In assembly mode, the robot uses the manipulator arm to build a structure with the blocks gathered during the collection mode.  After collecting a sufficient number of blocks in the stack, the robot will back up. This action will deposit the blocks in a straight line in front of the robot, aligned with the robot center (see figures \ref{fig:dimensioned} and \ref{fig:collection}). Now the robot will use the robotic arm to rearrange the blocks into an arbitrary planar structure. This will be precise and efficient, because the robot will not have to turn at all to place the blocks, and visual feedback can be used to check block placement.
+
 \begin{figure}[h]
  \centering
   \includegraphics[width=4.5in]{images/AssemblyIso}
-\caption{The robot with the funnel}
+\caption{The Robot With the Funnel}
 \label{fig:robotFunnel}
 \end{figure}
 
@@ -98,14 +93,13 @@ Of the mechanical designs considered, a system involving a simple funnel working
 \caption{Dimensioned Drawing of Funnel}
 \label{fig:dimensioned}
 \end{figure}
-\subsection{Funnelling System}
-The funnelling system is the robot's primary means of gathering building materials. It consists of a bent sheet metal structure held in place by machined standoffs. The funnel system for block collection can tolerate inaccuracy, and the control system gains during this phase can be optimized for peak time efficiency.
-Key features include:
+\subsection{Funneling System}
+The funneling system is the robot's primary means of gathering building materials. It consists of a bent sheet metal structure held in place by machined standoffs. The funnel system for block collection can tolerate inaccuracy and the control system gains during this phase can be optimized for time efficiency. Key features include:
 \begin{itemize}
 \item Width of funnel is 2.075 Inches to guarantee that the blocks will "snap together" as they enter the funnel. The fillet built into each block allows a .07 Inch tolerance for head-on "snapping".
 \item The funnel will be placed in the center to minimize the robot's footprint and account for errors in visual servoing. 
 \item Gently curved surfaces guide the blocks into the funnel while minimizing jamming. 
-\item Long stack space allows robot to carry a maximum of 8 to 10 block lengths at a time (without taking into account doubled blocks). Increasing the length of the funnel would increase our robot's block storage capacity but inhibit its mobility by increasing its footprint.
+\item Long stack space allows robot to carry a maximum of 7 single block lengths at a time (using the 14 inch length shown in figure \ref{fig:dimensioned}). Increasing the length of the funnel would increase our robot's block storage capacity but inhibit its mobility by increasing its footprint.
 \end{itemize}
 
 \newlength{\demowidth}
@@ -190,20 +184,32 @@ and report the presence of a block to the I\&M module.
 \newpage
 
 \section{Schedule}
+
+Our implementation schedule is divided into three weeks.  A general description of the milestones is shown in table 1.
+
 \begin{table}[h!]
 \caption{Work Schedule}
 \centering
  \begin{tabular}{r | l}
   Task & Timeframe\\
   \hline
-  \sout{Steal} Obtain materials    & Week 1 \\
-  Build the funnel                 & Week 1 \\
-  Write code to collect blocks     & Week 1 \\
-  Implement SLAM                   & Week 2 \\
-  Write code to assemble structure & Week 2 \\
-  Debugging and Optimization       & Week 3
+  Obtain materials    			& Week 1 \\
+  Build the funnel                 	& Week 1 \\
+  Write code to collect blocks     	& Week 1 \\
+  Write code to assemble structure 	& Week 2 \\
+  Implement secondary improvements 	& Week 2 \\
+  Debugging and optimization       	& Week 3
  \end{tabular}
 \end{table}
+
+\subsection{Week 1 | Baseline Implementation}
+During the first week we will complete all of the hardware requirements and implement the most basic functionality needed to complete the grand challenge.  By the end of the first week, all hardware for the robot will be designed and manufactured.  Namely, the funnel, manipulator, and any sensor mounts will be built and integrated.  The robot will be able to complete the grand challenge in the most basic manner.  At the end of the week, the robot will be able to navigate the environment, collect blocks, and deposit them in a straight line at the construction zone.  This implementation is largely an extension of lab 6 and does not require using the manipulator arm or any other improvements to the robot except the funnel. 
+
+\subsection{Week 2 | Improvement Implementation}
+During the second week we will implement the improvements above the basic functionality described in this document.  The most important improvement is using the manipulator arm to build a structure more complex than a straight line 7 blocks long.  We are also planning to implement two improvements that are not on the critical path.  The first is mounting two optical mice to the bottom of the robot to improve odometry through the use of visual odometry.  The second is using a Kinect to improve the visual servoing by adding depth data.   
+
+\subsection{Week 3 | Debugging and Optimization}
+During the third week we will not add any new functionality to the robot.  This time will be used to debug the functionality the robot has at the end of the second week.  We will also work to optimize the robot for speed during the collection phase and precision during assembly.
 
 \section{Conclusion}
 The design described above fulfills the requirements as set by the problem statement.
