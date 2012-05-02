@@ -1,0 +1,18 @@
+<package>
+  <description brief="Challenge_msgs">
+
+     Challenge_msgs
+
+  </description>
+  <author>rss-staff</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/Challenge_msgs</url>
+  <depend package="lab5_msgs"/>
+  <depend package="lab6_msgs"/>
+  <depend package="std_msgs"/>
+  <depend package="rss_msgs"/>
+
+</package>
+
+
