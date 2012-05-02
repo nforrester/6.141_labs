@@ -1,0 +1,17 @@
+
+<launch>
+  <include file="$(find lab4)/launch/config.launch" />
+
+  <node name="lis" pkg="rosjava_bootstrap" type="run.py" args="uorc_listener Listener" machine="netbook" />
+  <node name="pub" pkg="rosjava_bootstrap" type="run.py" args="uorc_publisher Publisher" machine="netbook" />
+  <node name="odo" pkg="rosjava_bootstrap" type="run.py" args="odometry odometry.Odometry" machine="netbook" />
+<!--  <node name="gui" pkg="rosjava_bootstrap" type="run.py" args="lab6 GlobalNavigation.MapGUI" machine="workstation" /> -->
+
+<!--  <node name="controller" pkg="rosjava_bootstrap" type="run.py" args="lab6 GlobalNavigation.RobotController" machine="workstation"/> -->
+  <node name="nav" pkg="rosjava_bootstrap" type="run.py" args="Odometry Challenge.Sentinel" machine="workstation">
+<!-- 	<param name="mapFileName" value="/home/rss-student/RSS-I-group/lab6/src/global-nav-maze-2011-med.map" /> -->
+
+
+  </node>
+
+</launch>
