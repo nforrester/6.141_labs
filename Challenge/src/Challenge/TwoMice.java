@@ -53,6 +53,7 @@ public class TwoMice implements NodeMain {
 	}
 
 	public void onStart(Node node) {
+		System.err.println("TWOMICE INITIALIZING");
 		thisNode = node;
 
 		x     = 0;
@@ -83,6 +84,7 @@ public class TwoMice implements NodeMain {
 			throw new NullPointerException("You don't have a keyboard");
 		}
 
+		System.err.println("LAUNCHING TWOMICE MONITOR");
 		mouseMonitorThread = new Thread(new Runnable() {
 				@Override
 				public void run() {
@@ -131,6 +133,7 @@ public class TwoMice implements NodeMain {
 					}
 				}
 			});
+		System.err.println("LAUNCHING ODOMETRY PUBLISHER");
 		odometryPublisherThread = new Thread(new Runnable() {
 				@Override
 				public void run() {
@@ -147,6 +150,7 @@ public class TwoMice implements NodeMain {
 					}
 				}
 			});
+		System.err.println("ALL TWOMICE THREAD LAUNCHED");
 	}
 
 
@@ -225,9 +229,12 @@ public class TwoMice implements NodeMain {
 		x = xNew;
 		y = yNew;
 		theta = thetaNew;
+
+		System.err.println("updating odometry: " + x + " " + y + " " + theta);
 	}
 
 	private synchronized void publishOdometry() {
+		System.err.println("publishing odometry: " + x + " " + y + " " + theta);
 		msg.x = x;
 		msg.y = y;
 		msg.theta = theta;

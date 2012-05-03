@@ -123,6 +123,7 @@ public class RobotController implements NodeMain, Runnable  {
 	 * @param the message
 	 */
 	public void handleOdometry(org.ros.message.rss_msgs.OdometryMsg message) {
+		System.err.println("handling odometry");
 		if ( firstUpdate ) {
 			odoToWorld = Mat.mul(Mat.rotation(-message.theta), Mat.translation(-message.x, -message.y));
 			worldToOdo = Mat.inverse(odoToWorld);

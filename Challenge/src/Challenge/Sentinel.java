@@ -63,12 +63,17 @@ public class Sentinel implements NodeMain {
 	public void onStart(Node node) {
 		thisNode = node;
 
+		System.err.println("SENTINEL INITIALIZING");
 		navigator = new RobotController();
+		System.err.println("ROBOT CONTROLLER CREATED");
 		navigator.onStart(thisNode);
+		System.err.println("ROBOT CONTROLLER INITIALIZED");
 		navigator.addWaypoint(new Waypoint(1,   0, (short) 1));
 		navigator.addWaypoint(new Waypoint(0.5, 1, (short) 1));
 		navigator.addWaypoint(new Waypoint(0,   0, (short) 1));
 		navigator.addWaypoint(new Waypoint(1,   0, (short) -1));
+		System.err.println("WAYPOINTS ADDED");
+		System.err.println("SENTINEL INITIALIZED");
 
 		/*
 		ParameterTree paramTree = node.newParameterTree();
