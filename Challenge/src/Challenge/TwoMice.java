@@ -133,6 +133,7 @@ public class TwoMice implements NodeMain {
 					}
 				}
 			});
+		mouseMonitorThread.start();
 		System.err.println("LAUNCHING ODOMETRY PUBLISHER");
 		odometryPublisherThread = new Thread(new Runnable() {
 				@Override
@@ -150,6 +151,7 @@ public class TwoMice implements NodeMain {
 					}
 				}
 			});
+		odometryPublisherThread.start();
 		System.err.println("ALL TWOMICE THREAD LAUNCHED");
 	}
 
