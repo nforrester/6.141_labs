@@ -5,6 +5,12 @@ import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
 import net.java.games.input.Controller.Type;
 
+import org.ros.node.Node;
+import org.ros.node.NodeMain;
+import org.ros.node.topic.Publisher;
+import org.ros.message.rss_msgs.OdometryMsg;
+import org.ros.namespace.GraphName;
+
 public class TwoMice implements NodeMain {
 	//put this in VM arguments before running
 	// -Djava.library.path=dist/
@@ -230,6 +236,14 @@ public class TwoMice implements NodeMain {
 
 	@Override
 	public GraphName getDefaultNodeName() {
-		return new GraphName("rss/TwoMice");
+		return new GraphName("/rss/TwoMice");
+	}
+
+	@Override
+	public void onShutdown(Node node) {
+	}
+
+	@Override
+	public void onShutdownComplete(Node node) {
 	}
 }

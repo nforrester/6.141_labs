@@ -18,6 +18,8 @@
 
   <path id="classpath">
     <pathelement path="${ros.compile.classpath}" />
+    <pathelement path="jinput.jar" />
+    <pathelement path="jinput-test.jar" />
   </path>
 
   <path id="test.classpath">

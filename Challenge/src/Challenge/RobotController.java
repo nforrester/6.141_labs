@@ -20,10 +20,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 */
 
-
-/*
 import org.ros.message.MessageListener;
-*/
 import org.ros.message.rss_msgs.MotionMsg;
 /*
 import org.ros.message.lab5_msgs.GUIPointMsg;

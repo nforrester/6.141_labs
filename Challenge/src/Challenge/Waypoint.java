@@ -1,4 +1,4 @@
-package GlobalNavigation;
+package Challenge;
 
 public class Waypoint {
 	
