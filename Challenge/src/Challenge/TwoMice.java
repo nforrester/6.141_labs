@@ -5,9 +5,12 @@ import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
 import net.java.games.input.Controller.Type;
 
-public class TwoMice {
+public class TwoMice implements NodeMain {
 	//put this in VM arguments before running
 	// -Djava.library.path=dist/
+
+	private Node thisNode;
+	public static final String APPNAME = "TwoMice";
 
 	private Controller mouseOne = null;
 	private Controller mouseTwo = null;
@@ -34,7 +37,22 @@ public class TwoMice {
 	private double TICKS_PER_METER = 17000; // needs to be measured, not guessed
 	private double DISTANCE_BETWEEN_SENSORS = .064; // meters, needs to be measured, not guessed
 
+	private Thread mouseMonitorThread;
+	private Thread odometryPublisherThread;
+
+	private Publisher<OdometryMsg> pub;
+	private OdometryMsg msg = new OdometryMsg();
+
 	public TwoMice() {
+	}
+
+	public void onStart(Node node) {
+		thisNode = node;
+
+		x     = 0;
+		y     = 0;
+		theta = 0;
+
 		Controller[] ca = ControllerEnvironment.getDefaultEnvironment().getControllers();
 
 		for (Controller controller : ca) {
@@ -58,45 +76,73 @@ public class TwoMice {
 		else if(keyboard == null) {
 			throw new NullPointerException("You don't have a keyboard");
 		}
+
+		mouseMonitorThread = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					while (true) {
+						mouseOne.poll();
+						Component[] componentsOne = mouseOne.getComponents();
+
+						for(int i=0;i< componentsOne.length;i++) {
+							if(componentsOne[i].isAnalog()) {
+								if(componentsOne[i].getName().equals("x")) {
+									mouseOneDeltaX = (double)componentsOne[i].getPollData();
+									mouseOneX += mouseOneDeltaX;
+								}
+								else if(componentsOne[i].getName().equals("y")) {
+									mouseOneDeltaY = (double)componentsOne[i].getPollData();
+									mouseOneY += mouseOneDeltaY;
+								}
+							}
+						}
+
+						mouseTwo.poll();
+						Component[] componentsTwo = mouseTwo.getComponents();
+
+						for(int i=0;i< componentsTwo.length;i++) {
+							if(componentsTwo[i].isAnalog()) {
+								if(componentsTwo[i].getName().equals("x")) {
+									mouseTwoDeltaX = (double)componentsTwo[i].getPollData();
+									mouseTwoX += mouseTwoDeltaX;
+								}
+								else if(componentsTwo[i].getName().equals("y")) {
+									mouseTwoDeltaY = (double)componentsTwo[i].getPollData();
+									mouseTwoY += mouseTwoDeltaY;
+								}
+							}
+						}
+
+						// call the computeOdometry method here
+						// mouseOne is left and MouseTwo is right
+						computeOdometry(getMouseOneDeltaX(),getMouseOneDeltaY(),getMouseTwoDeltaX(),getMouseTwoDeltaY());
+
+						try {
+							Thread.sleep(20);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			});
+		odometryPublisherThread = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					pub = thisNode.newPublisher("/rss/mouseOdometry", "rss_msgs/OdometryMsg");
+
+					while (true) {
+						publishOdometry();
+
+						try {
+							Thread.sleep(200);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			});
 	}
 
-	public void update() {
-		mouseOne.poll();
-		Component[] componentsOne = mouseOne.getComponents();
-
-		for(int i=0;i< componentsOne.length;i++) {
-			if(componentsOne[i].isAnalog()) {
-				if(componentsOne[i].getName().equals("x")) {
-					mouseOneDeltaX = (double)componentsOne[i].getPollData();
-					mouseOneX += mouseOneDeltaX;
-				}
-				else if(componentsOne[i].getName().equals("y")) {
-					mouseOneDeltaY = (double)componentsOne[i].getPollData();
-					mouseOneY += mouseOneDeltaY;
-				}
-			}
-		}
-
-		mouseTwo.poll();
-		Component[] componentsTwo = mouseTwo.getComponents();
-
-		for(int i=0;i< componentsTwo.length;i++) {
-			if(componentsTwo[i].isAnalog()) {
-				if(componentsTwo[i].getName().equals("x")) {
-					mouseTwoDeltaX = (double)componentsTwo[i].getPollData();
-					mouseTwoX += mouseTwoDeltaX;
-				}
-				else if(componentsTwo[i].getName().equals("y")) {
-					mouseTwoDeltaY = (double)componentsTwo[i].getPollData();
-					mouseTwoY += mouseTwoDeltaY;
-				}
-			}
-		}
-
-		// call the computeOdometry method here
-		// mouseOne is left and MouseTwo is right
-		computeOdometry(getMouseOneDeltaX(),getMouseOneDeltaY(),getMouseTwoDeltaX(),getMouseTwoDeltaY());
-	}
 
 	private double getMouseOneX() {
 		return mouseOneX;
@@ -143,7 +189,7 @@ public class TwoMice {
 	}
 
 	// mouse 1 is left, mouse 2 is right
-	private void computeOdometry(double dx1, double dy1, double dx2, double dy2) {
+	private synchronized void computeOdometry(double dx1, double dy1, double dx2, double dy2) {
 		// ticks to meters
 		dx1 /= TICKS_PER_METER;
 		dy1 /= TICKS_PER_METER;
@@ -173,5 +219,17 @@ public class TwoMice {
 		x = xNew;
 		y = yNew;
 		theta = thetaNew;
+	}
+
+	private synchronized void publishOdometry() {
+		msg.x = x;
+		msg.y = y;
+		msg.theta = theta;
+		pub.publish(msg);
+	}
+
+	@Override
+	public GraphName getDefaultNodeName() {
+		return new GraphName("rss/TwoMice");
 	}
 }

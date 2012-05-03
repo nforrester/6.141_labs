@@ -126,11 +126,6 @@ public class RobotController implements NodeMain, Runnable  {
 	 * @param the message
 	 */
 	public void handleOdometry(org.ros.message.rss_msgs.OdometryMsg message) {
-		/* ALERT! ALERT! This doesn't actually give a flying fuck what the odometry message says.
-		 * It just uses the odometry messages as a clock to query the TwoMice object.
-		 * We could pay attention to the odometry messages if we want to, but it's not necessary.
-		 */
-		/*
 		if ( firstUpdate ) {
 			odoToWorld = Mat.mul(Mat.rotation(-message.theta), Mat.translation(-message.x, -message.y));
 			worldToOdo = Mat.inverse(odoToWorld);
@@ -143,12 +138,6 @@ public class RobotController implements NodeMain, Runnable  {
 		x     = robotPose[0];
 		y     = robotPose[1];
 		theta = robotPose[2];
-		*/
-
-		mice.update();
-		x     = mice.getX();
-		y     = mice.getY();
-		theta = mice.getTheta();
 
 		theta=fixAngle(theta);
 
@@ -241,8 +230,8 @@ public class RobotController implements NodeMain, Runnable  {
 	public void onStart(Node node) {
 		logNode = node;
 		logNode.getLog().info("RobotController Online");
-		// initialize the ROS subscription to rss/odometry
-		odoSub = node.newSubscriber("/rss/odometry", "rss_msgs/OdometryMsg");
+		// initialize the ROS subscription to rss/mouseOdometry
+		odoSub = node.newSubscriber("/rss/mouseOdometry", "rss_msgs/OdometryMsg");
 		odoSub.addMessageListener(new MessageListener<org.ros.message.rss_msgs.OdometryMsg>() {
 				@Override
 				public void onNewMessage(org.ros.message.rss_msgs.OdometryMsg message) {
