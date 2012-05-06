@@ -110,23 +110,4 @@ public class Manipulator {
 	//	goToX(x);
 	}
 	
-	public void onStart(Node node) {
-		jc = new JointController(node);
-
-		gui = new VisionGUI();
-
-		blobTrack = new BlobTracking(width, height);
-
-		armSub = node.newSubscriber("rss/ArmStatus", "rss_msgs/ArmMsg");
-		armSub.addMessageListener(new ArmListener());
-
-		rssVideoSub = node.newSubscriber("rss/video", "sensor_msgs/Image");
-		rssVideoSub.addMessageListener(new videoListener());
-
-		vidPub = node.newPublisher("/rss/blobVideo", "sensor_msgs/Image");
-
-		prepareToPickUpBlock();
-		pickUpBlock();
-		putDownBlock();
-	}
 }
