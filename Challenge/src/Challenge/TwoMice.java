@@ -45,7 +45,7 @@ public class TwoMice implements NodeMain {
 	private double y;
 	private double theta;
 	private double TICKS_PER_METER = 17000; // needs to be measured, not guessed
-	private double DISTANCE_BETWEEN_SENSORS = .064; // meters, needs to be measured, not guessed
+	private double DISTANCE_BETWEEN_SENSORS = .200; // meters
 
 	private Thread mouseMonitorThread;
 	private Thread odometryPublisherThread;
