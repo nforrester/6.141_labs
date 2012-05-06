@@ -47,11 +47,11 @@ public class PhaseTwoController {
 	}
 	
 	public void goToX(double xNew){
-		if(xNew>robotController.getX()){
+	//	if(xNew>robotController.getX()){
+	//		robotController.addWaypoint(new Waypoint(xNew,0,(short) 1));
+	//	}else{
 			robotController.addWaypoint(new Waypoint(xNew,0,(short) 1));
-		}else{
-			robotController.addWaypoint(new Waypoint(xNew,0,(short) 1));
-		}
+	//	}
 	}
 
 }

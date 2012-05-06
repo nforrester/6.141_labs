@@ -3,15 +3,6 @@ package Challenge.PhaseTwo;
 import java.util.ArrayList;
 
 import Challenge.Waypoint;
-import Grasping.ArmMsg;
-import Grasping.BlobTracking;
-import Grasping.JointController;
-import Grasping.Node;
-import Grasping.Publisher;
-import Grasping.Subscriber;
-import Grasping.VisionGUI;
-import Grasping.Grasping.ArmListener;
-import Grasping.Grasping.videoListener;
 
 import org.ros.message.rss_msgs.ArmMsg;
 import org.ros.namespace.GraphName;
@@ -74,14 +65,14 @@ public class Manipulator {
 	//ArrayList<Waypoint> myWaypoints=new ArrayList<Waypoint>();
 	
 	public Manipulator(){
-		armPublisher = node.newPublisher("command/Arm", "rss_msgs/ArmMsg");
+	//	armPublisher = node.newPublisher("command/Arm", "rss_msgs/ArmMsg");
 		
 		goToPose(0,L_ARM+O_Z_A+A_Z_B,w);		
 	}
 	public void servoOut(short port,int value){
 		ArmMsg publishMsg = new ArmMsg();
 	
-		publishMsg.pwms = new long[] {shoulderMsg.pwms[5],WristMsg.pwms[4],GripperMsg.pwms[2],0,0,0,0,0};
+	//	publishMsg.pwms = new long[] {shoulderMsg.pwms[5],WristMsg.pwms[4],GripperMsg.pwms[2],0,0,0,0,0};
 		
 		//publish the message made
 		this.armPublisher.publish(publishMsg);
