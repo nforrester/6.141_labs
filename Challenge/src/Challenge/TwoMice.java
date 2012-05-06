@@ -56,21 +56,8 @@ public class TwoMice implements NodeMain {
 	public TwoMice() {
 	}
 
-	private PrintWriter logFile;
-
-	private synchronized void log(String str) {
-		logFile.println(str);
-	}
-
 	public void onStart(Node node) {
-		try {
-			logFile = new PrintWriter(new FileWriter("~/twoMice.log"));
-		} catch (IOException e) {
-			System.err.println("FFFFFFUUUUUUUCK! Can't open the log file.");
-			e.printStackTrace();
-		}
 		System.err.println("TWOMICE INITIALIZING");
-		log("TwoMice initalizing");
 		thisNode = node;
 
 		x     = 0;
@@ -102,12 +89,11 @@ public class TwoMice implements NodeMain {
 		}
 
 		System.err.println("LAUNCHING TWOMICE MONITOR");
-		log("Launching monitor thread");
 
 		mouseMonitorThread = new Thread(new Runnable() {
 				@Override
 				public void run() {
-					log("Mouse monitor thread starting");
+					System.err.println("Mouse monitor thread starting");
 					while (true) {
 						mouseOne.poll();
 						Component[] componentsOne = mouseOne.getComponents();
@@ -155,11 +141,10 @@ public class TwoMice implements NodeMain {
 			});
 		mouseMonitorThread.start();
 		System.err.println("LAUNCHING ODOMETRY PUBLISHER");
-		log("Launching publisher thread");
 		odometryPublisherThread = new Thread(new Runnable() {
 				@Override
 				public void run() {
-					log("publisher thread starting");
+					System.err.println("publisher thread starting");
 					pub = thisNode.newPublisher("/rss/mouseOdometry", "rss_msgs/OdometryMsg");
 
 					while (true) {
@@ -175,7 +160,6 @@ public class TwoMice implements NodeMain {
 			});
 		odometryPublisherThread.start();
 		System.err.println("ALL TWOMICE THREAD LAUNCHED");
-		log("All threads launched");
 	}
 
 
