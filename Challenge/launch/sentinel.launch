@@ -9,7 +9,7 @@
 
 <!--  <node name="controller" pkg="rosjava_bootstrap" type="run.py" args="lab6 GlobalNavigation.RobotController" machine="workstation"/> -->
   <node name="nav" pkg="rosjava_bootstrap" type="run.py" args="Challenge Challenge.Sentinel" machine="workstation">
-  <node name="nav" pkg="rosjava_bootstrap" type="run.py" args="Challenge Challenge.TwoMice" machine="netbook">
+  <node name="nav" pkg="rosjava_bootstrap" type="run.py" args="-Djava.library.path=/home/rss-student/dist/dist/ Challenge Challenge.TwoMice" machine="netbook">
 <!-- 	<param name="mapFileName" value="/home/rss-student/RSS-I-group/lab6/src/global-nav-maze-2011-med.map" /> -->
 
 
