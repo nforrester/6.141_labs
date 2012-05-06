@@ -11,6 +11,10 @@ import org.ros.node.topic.Publisher;
 import org.ros.message.rss_msgs.OdometryMsg;
 import org.ros.namespace.GraphName;
 
+import java.io.PrintWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+
 public class TwoMice implements NodeMain {
 	//put this in VM arguments before running
 	// -Djava.library.path=dist/
@@ -23,7 +27,7 @@ public class TwoMice implements NodeMain {
 
 	private Controller keyboard = null;
 
-	private final String mouseName = "DELL USB Laser Mouse";
+	private final String mouseName = "DELL DELL USB Laser Mouse";
 
 	private double mouseOneX = 0;
 	private double mouseOneY = 0;
@@ -52,13 +56,19 @@ public class TwoMice implements NodeMain {
 	public TwoMice() {
 	}
 
-	private PrintWriter logFile = new PrintWriter(new FileWriter("~/twoMice.log"));
+	private PrintWriter logFile;
 
 	private synchronized void log(String str) {
 		logFile.println(str);
 	}
 
 	public void onStart(Node node) {
+		try {
+			logFile = new PrintWriter(new FileWriter("~/twoMice.log"));
+		} catch (IOException e) {
+			System.err.println("FFFFFFUUUUUUUCK! Can't open the log file.");
+			e.printStackTrace();
+		}
 		System.err.println("TWOMICE INITIALIZING");
 		log("TwoMice initalizing");
 		thisNode = node;
