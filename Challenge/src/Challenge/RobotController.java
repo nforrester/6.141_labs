@@ -146,6 +146,12 @@ public class RobotController implements NodeMain, Runnable  {
 		motorUpdate();
 	}
 	
+	public double getX(){
+		return x;
+	}
+	public double getY(){
+		return y;
+	}
 	
 	//Set of useful functions
 	public boolean comparePoints(double x1, double y1, double x2, double y2, double tolerance) {

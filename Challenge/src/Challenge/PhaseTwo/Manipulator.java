@@ -59,21 +59,23 @@ public class Manipulator {
 	//state variables
 	double w=0; //Wrist Angle
 	double a=0; //Arm Angle
-	
-	
-	//Command Queue.
-	//ArrayList<Waypoint> myWaypoints=new ArrayList<Waypoint>();
+	int h=0; //Hand State (PWM)
 	
 	public Manipulator(){
-	//	armPublisher = node.newPublisher("command/Arm", "rss_msgs/ArmMsg");
+		armPublisher = node.newPublisher("command/Arm", "rss_msgs/ArmMsg");
 		
-		goToPose(0,L_ARM+O_Z_A+A_Z_B,w);		
+		goToPose(0,L_ARM+O_Z_A+A_Z_B,w,HAND_SMALLOPEN);		
 	}
 	public void servoOut(short port,int value){
 		ArmMsg publishMsg = new ArmMsg();
-	
-	//	publishMsg.pwms = new long[] {shoulderMsg.pwms[5],WristMsg.pwms[4],GripperMsg.pwms[2],0,0,0,0,0};
 		
+		if (port==(short)5){
+			publishMsg.pwms = new long[] {value,degToServo(w,M_WRIST,B_WRIST),h,0,0,0,0,0};
+		}else if(port==(short)4){
+			publishMsg.pwms = new long[] {degToServo(a,M_ARM,B_ARM),value,h,0,0,0,0,0};
+		}else if(port==(short)2){
+			publishMsg.pwms = new long[] {degToServo(a,M_ARM,B_ARM),degToServo(w,M_WRIST,B_WRIST),value,0,0,0,0,0};
+		}
 		//publish the message made
 		this.armPublisher.publish(publishMsg);
 	}
@@ -85,6 +87,7 @@ public class Manipulator {
 	public void goToPickUp(){
 		goToY(Y_MIN);
 		servoOut(HAND_PORT,HAND_BIGOPEN);
+		h=HAND_BIGOPEN;
 	}
 	
 	public void goToY(double y){
@@ -95,9 +98,10 @@ public class Manipulator {
 	}
 
 	
-	public void goToPose(double x, double y, double t){
+	public void goToPose(double x, double y, double t, int handPWM){
 		goToY(y);
 		servoOut(WRIST_PORT,degToServo(t,M_WRIST,B_WRIST));
+		servoOut(HAND_PORT,handPWM);
 	//	goToX(x);
 	}
 	
