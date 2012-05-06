@@ -80,12 +80,7 @@ public class Manipulator {
 	}
 	public void servoOut(short port,int value){
 		ArmMsg publishMsg = new ArmMsg();
-		
-		if (port==(short)5){
-			
-		}else if (port==(short)4){
-			
-		}else if (port==)
+	
 		publishMsg.pwms = new long[] {shoulderMsg.pwms[5],WristMsg.pwms[4],GripperMsg.pwms[2],0,0,0,0,0};
 		
 		//publish the message made
