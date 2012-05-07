@@ -92,9 +92,10 @@ public class PhaseTwoController implements NodeMain, Runnable{
 		//  ChangeState(DEPOSIT_BLOCKS);
 		changeState(DEBUG);
 		}else if(state==DEPOSIT_BLOCKS){
-			
+		    //assumes that odometry has been reset at the beginning of phase 2		        
+		    robotController.addWaypoint(new Waypoint(0, -2*15*Manipulator.I2M, -1));
 		}else if(state==PICK_UP){
-			
+		        manipulator.goToPickUp();
 		}else if(state==PLACE){
 			
 		}else if(state==DONE){
@@ -144,7 +145,6 @@ public class PhaseTwoController implements NodeMain, Runnable{
 			stateMsg.data = "DEBUG";
 		}
 		
-
 		statePub.publish(stateMsg);
 	}
 
