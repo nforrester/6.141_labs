@@ -154,6 +154,11 @@ public class RobotController implements NodeMain, Runnable  {
 	public double getY(){
 		return y;
 	}
+	public void setTranslationalVelocity(double v){
+		commandMotors.rotationalVelocity=v;
+		motorPub.publish(commandMotors);
+	}
+	
 	
 	//Set of useful functions
 	public boolean comparePoints(double x1, double y1, double x2, double y2, double tolerance) {

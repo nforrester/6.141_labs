@@ -66,9 +66,9 @@ public class PhaseTwoController implements NodeMain, Runnable{
 	
 	public void goToY(double yNew){
 		manipulator.goToY(yNew);
-		double xOld=x;		
-		goToX(manipulator.A_X_B+manipulator.L_ARM*Math.cos(manipulator.a)-x);
-		x=xOld;
+	//	double xOld=x;		
+	//	goToX(manipulator.A_X_B+manipulator.L_ARM*Math.cos(manipulator.a)-x);
+	//	x=xOld;
 		y=yNew;
 		
 	}
