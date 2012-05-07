@@ -80,7 +80,7 @@ public class RobotController implements NodeMain, Runnable  {
 	//ROS stuff to read odometry, command the motors and publish our current state
 	private Subscriber<org.ros.message.rss_msgs.OdometryMsg> odoSub;
 	
-	private Publisher<MotionMsg> motorPub;
+	public Publisher<MotionMsg> motorPub;
 	private MotionMsg commandMotors;
 
 	private Publisher<org.ros.message.std_msgs.String> statePub;
@@ -136,6 +136,8 @@ public class RobotController implements NodeMain, Runnable  {
 		x     = robotPose[0];
 		y     = robotPose[1];
 		theta = robotPose[2];
+
+		System.err.println("(" + x + " " + y + " " + theta + ")");
 
 		theta=fixAngle(theta);
 

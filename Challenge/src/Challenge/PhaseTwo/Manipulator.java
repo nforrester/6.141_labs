@@ -24,14 +24,14 @@ public class Manipulator {
 	//Some definitions and variables
 	
 	//Constants
-	public static final double I2M=.0254;  //Inches to Meters
-	public static final double O_Z_A=5*I2M;  //Height from ground to Robot origin. To measure in m
-	public static final double A_Z_B=5.25*I2M;  //Height from Robot origin to Arm. To measure in m
-	public static final double A_X_B=2.5*I2M;  //Length from Robot origin to base of Arm. To measure in m
-	public static final double L_ARM=.245;  //Length of Arm. To measure in m
-	public static final double L_WRIST=.13;  //Length of Wrist. to measure in m
-	public static final double Y_MAX=.505;  //Max Height
-	public static final double Y_MIN=.035;  //Min Height
+	public final double I2M=.0254;  //Inches to Meters
+	public final double O_Z_A=5*I2M;  //Height from ground to Robot origin. To measure in m
+	public final double A_Z_B=5.25*I2M;  //Height from Robot origin to Arm. To measure in m
+	public final double A_X_B=2.5*I2M;  //Length from Robot origin to base of Arm. To measure in m
+	public final double L_ARM=.245;  //Length of Arm. To measure in m
+	public final double L_WRIST=.13;  //Length of Wrist. to measure in m
+	public final double Y_MAX=.505;  //Max Height
+	public final double Y_MIN=.015;  //Min Height
 	
 	public static final short HAND_PORT=2;  //Servo port for gripper
 	public static final int HAND_BIGOPEN=1000;  //Servo value for gripper full open
@@ -61,11 +61,29 @@ public class Manipulator {
 	double a=0; //Arm Angle
 	int h=0; //Hand State (PWM)
 	
-	public Manipulator(){
+	public Manipulator(Node node){
 		armPublisher = node.newPublisher("command/Arm", "rss_msgs/ArmMsg");
-		
-		goToPose(0,L_ARM+O_Z_A+A_Z_B,w,HAND_SMALLOPEN);		
+		while(!armPublisher.hasSubscribers()){
+			
+		}
+		goToPose(0,L_ARM+O_Z_A+A_Z_B,w,HAND_SMALLOPEN);
 	}
+	public void debugMe(){
+		System.err.println("Manipulator Debug\n" +
+				"degToServo(0,M_ARM,B_ARM): "+degToServo(0,M_ARM,B_ARM)+
+				"\ndegToServo(20,M_ARM,B_ARM): "+degToServo(20,M_ARM,B_ARM)+
+				"\ndegToServo(80,M_ARM,B_ARM): "+degToServo(80,M_ARM,B_ARM)+
+				"\ndegToServo(-30,M_ARM,B_ARM): "+degToServo(-30,M_ARM,B_ARM)+
+				"\ndegToServo(-45,M_ARM,B_ARM): "+degToServo(-45,M_ARM,B_ARM)+
+				"\ndegToServo(0,M_WRIST,B_WRIST): "+degToServo(0,M_WRIST,B_WRIST)+
+				"\ndegToServo(45,M_WRIST,B_WRIST): "+degToServo(45,M_WRIST,B_WRIST)+
+				"\ndegToServo(-45,M_WRIST,B_WRIST): "+degToServo(-45,M_WRIST,B_WRIST)+
+				"\nMath.asin((.2-O_Z_A-A_Z_B)/L_ARM)="+Math.asin((.2-O_Z_A-A_Z_B)/L_ARM)+
+				"\nMath.asin((.4-O_Z_A-A_Z_B)/L_ARM)="+Math.asin((.4-O_Z_A-A_Z_B)/L_ARM)+
+				"\nMath.asin((Y_MIN-O_Z_A-A_Z_B)/L_ARM)="+Math.asin((Y_MIN-O_Z_A-A_Z_B)/L_ARM)+
+				"\nMath.asin((Y_MAX-O_Z_A-A_Z_B)/L_ARM)="+Math.asin((Y_MAX-O_Z_A-A_Z_B)/L_ARM));
+	}
+	
 	public void servoOut(short port,int value){
 		ArmMsg publishMsg = new ArmMsg();
 		
@@ -91,7 +109,7 @@ public class Manipulator {
 	}
 	
 	public void goToY(double y){
-		a=Math.asin((y-O_Z_A-A_Z_B)/L_ARM);
+		a=Math.asin((y-O_Z_A-A_Z_B)/L_ARM)*180/Math.PI;
 		w=-a;
 		servoOut(ARM_PORT,degToServo(a,M_ARM,B_ARM));
 		servoOut(WRIST_PORT,degToServo(w,M_WRIST,B_WRIST));
@@ -102,7 +120,6 @@ public class Manipulator {
 		goToY(y);
 		servoOut(WRIST_PORT,degToServo(t,M_WRIST,B_WRIST));
 		servoOut(HAND_PORT,handPWM);
-	//	goToX(x);
 	}
 	
 }
