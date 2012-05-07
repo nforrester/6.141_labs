@@ -101,7 +101,37 @@ public class PhaseTwoController implements NodeMain, Runnable{
 		}else if(state==DONE){
 			
 		}else if(state==DEBUG){
-			goToY(percentToY(0));
+			goToY(manipulator.Y_MAX);
+			try {
+				Thread.sleep(3000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			System.err.println("going to Ymax");
+			
+			goToY(percentToY(80));
+			try {
+				Thread.sleep(3000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			System.err.println("going to 80");
+			
+			goToY(percentToY(60));
+			try {
+				Thread.sleep(3000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			System.err.println("going to 60");
+			
+			goToY(percentToY(1));
+			try {
+				Thread.sleep(3000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			System.err.println("going to 0");
 		}
 	}
 	
