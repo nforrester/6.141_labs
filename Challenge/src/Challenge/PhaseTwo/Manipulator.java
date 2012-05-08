@@ -141,15 +141,21 @@ public class Manipulator {
 		double wOld=w;
 		a=Math.asin((y-O_Z_A-A_Z_B)/L_ARM)*180/Math.PI;
 		w=-a;
-		for (double i=0;i<=1;i+=.01){
+		/*for (double i=0;i<=1;i+=.01){ 
 			servoOut(ARM_PORT,degToServo(aOld-(aOld-a)*i,M_ARM,B_ARM));
 			servoOut(WRIST_PORT,degToServo(wOld-(wOld-w)*i,M_WRIST,B_WRIST));
-			/*try {
+			try {
 				Thread.sleep(250);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
-			}*/
-		}
+			}
+
+		servoOut(ARM_PORT,degToServo(a,M_ARM,B_ARM));
+		servoOut(WRIST_PORT,degToServo(w,M_WRIST,B_WRIST));
+		}*/
+
+		servoOut(ARM_PORT,degToServo(a,M_ARM,B_ARM));
+		servoOut(WRIST_PORT,degToServo(w,M_WRIST,B_WRIST));
 	}
 
 	
@@ -157,7 +163,7 @@ public class Manipulator {
 		double tOld=t;
 		goToY(y);
 		servoOut(HAND_PORT,handPWM);
-		for (double i=0;i<=1;i+=.1){
+	/*	for (double i=0;i<=1;i+=.01){
 			servoOut(WRIST_PORT,degToServo(tOld-(tOld-t)*i,M_WRIST,B_WRIST));
 			
 			try {
@@ -165,7 +171,10 @@ public class Manipulator {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-		}
+		}*/
+		
+
+		servoOut(WRIST_PORT,degToServo(t,M_WRIST,B_WRIST));
 	}
 	
 }

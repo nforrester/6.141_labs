@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.ros.message.MessageListener;
 import org.ros.message.rss_msgs.ArmMsg;
+import org.ros.message.rss_msgs.BreakBeamMsg;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
@@ -37,6 +38,8 @@ public class PhaseTwoController implements NodeMain, Runnable{
 	public static final int LOCALIZE=6;
 	public static final int GO_TO_NEXT=6;
 	
+	private boolean currentBreakBeamValue = false;
+	
 	private int state;
 	private int towerHeight=5;
 	private int iterator=1;
@@ -53,6 +56,7 @@ public class PhaseTwoController implements NodeMain, Runnable{
 	//ROS stuff
 	private Node node;
 	private Publisher<org.ros.message.std_msgs.String> statePub;
+	private Subscriber<org.ros.message.rss_msgs.BreakBeamMsg> breakBeamSub;
 	private org.ros.message.std_msgs.String stateMsg;
 	
 	
@@ -115,12 +119,14 @@ public class PhaseTwoController implements NodeMain, Runnable{
 	//Main FSM Handles
 	private void step(){
 		if(state==INIT){
-			
+
+			System.err.println("Init");
 			changeState(DEPOSIT_BLOCKS);
 			//changeState(DEBUG);
 		
 		}else if(state==DEPOSIT_BLOCKS){
-			
+
+			System.err.println("deposit");
 		    //assumes that odometry has been reset at the beginning of phase 2		        
 		    robotController.addWaypoint(new Waypoint(-2*15*Manipulator.I2M,0, (short)-1));
 		    while(robotController.getWaypoints().size()>0){
@@ -128,12 +134,12 @@ public class PhaseTwoController implements NodeMain, Runnable{
 		    changeState(LOCALIZE);
 		    
 		}else if(state==LOCALIZE){
-			
+			System.err.println("localize");
 			manipulator.goToPickUp2();
-			/*
-			while(true){//while(IR Sensor is unbroken)
+			
+			while(!currentBreakBeamValue){//while(IR Sensor is unbroken)
 				robotController.setTranslationalVelocity(.1);
-			}*/
+			}
 			robotController.setTranslationalVelocity(0);
 			changeState(PICK_UP);
 			
@@ -218,17 +224,29 @@ public class PhaseTwoController implements NodeMain, Runnable{
 		//add ConstructionBlocks to structure to define the structure we want to make. 6 or 7 or 8 blocks total?
 		manipulator=new Manipulator(node);		
 		robotController=new RobotController();
+		robotController.onStart(node);
 		
 		goToY(percentToY(100));
 		
 		//reset robot odometry somehow so we only have to deal with the robot's x value from this point onward. 
 		
 		// initialize the ROS publication to rss/state
+		breakBeamSub = node.newSubscriber("rss/BreakBeam", "rss_msgs/ArmMsg");
 		statePub = node.newPublisher("/rss/state","std_msgs/String");
 		stateMsg = new org.ros.message.std_msgs.String();
 		
+		breakBeamSub.addMessageListener(new BreakBeamListener());
+		
 		Thread t=new Thread(this);
 		t.start();
+	}
+	
+	public class BreakBeamListener implements MessageListener<org.ros.message.rss_msgs.BreakBeamMsg> {
+		@Override
+		public void onNewMessage(BreakBeamMsg msg) {	
+			currentBreakBeamValue = msg.beamBroken;
+		}
+		
 	}
 	
 	private void changeState(int newState){
@@ -276,6 +294,7 @@ public class PhaseTwoController implements NodeMain, Runnable{
 		// TODO Auto-generated method stub
 		while(state!=DONE){
 			step();
+			Thread.yield();
 		}
 	}	
 	
