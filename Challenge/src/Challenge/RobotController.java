@@ -214,7 +214,7 @@ public class RobotController implements NodeMain, Runnable  {
 		}else if(state==TRANSLATING){
 			distanceError=getDistance(x, y, myWaypoints.get(0).getX() ,myWaypoints.get(0).getY() );
 
-			headingError = fixAngle2(getAngle(x, y, myWaypoints.get(0).getX(), myWaypoints.get(0).getY()))
+			headingError = fixAngle2(getAngle(x, y, myWaypoints.get(0).getX(), myWaypoints.get(0).getY()));
 			commandMotors.rotationalVelocity = headingKp * headingError + headingKi * headingErrorIntegral;
 			
 			//commandMotors.rotationalVelocity = 0;
