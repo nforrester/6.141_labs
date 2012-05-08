@@ -44,7 +44,7 @@ public class TwoMice implements NodeMain {
 	private double x;
 	private double y;
 	private double theta;
-	private double TICKS_PER_METER = 20958; // needs to be measured, not guessed
+	private double TICKS_PER_METER = 17428;
 	private double DISTANCE_BETWEEN_SENSORS = .200; // meters
 	private double SENSOR_Y_OFFSET = .035; // meters
 
