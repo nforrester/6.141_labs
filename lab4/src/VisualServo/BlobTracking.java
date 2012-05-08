@@ -34,7 +34,7 @@ public class BlobTracking {
 	private int GREEN = 1;
 	private int BLUE  = 2;
 
-	private int preference = RED;
+	private int preference = BLUE;
 
 	// Variables used for velocity controller that are available to calling
 	// process.  Visual results are valid only if targetDetected==true; motor

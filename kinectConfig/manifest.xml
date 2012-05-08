@@ -1,0 +1,21 @@
+<package>
+  <description brief="kinectConfig">
+
+     kinectConfig
+
+  </description>
+  <author>rss-student</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/kinectConfig</url>
+  <depend package="rosjava"/>
+  <depend package="sensor_msgs"/>
+
+  <export>
+    <rosjava-src location="src"/>
+    <rosjava-pathelement location="target/" groupId="org.ros" artifactId="kinectConfig" version="0.0" built="true" />
+  </export>
+
+</package>
+
+

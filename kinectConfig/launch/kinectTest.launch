@@ -1,0 +1,10 @@
+<launch>
+  <machine name="workstation" address="workstation">
+     <env name="ROS_MASTER_URI" value="http://workstation:11311" />
+     <env name="ROS_HOSTNAME" value="workstation" />
+  </machine>
+
+ <node name="gui" pkg="rosjava_bootstrap" type="run.py" args="kinectConfig KinectClean" machine="workstation">
+  </node> 	  
+
+</launch>
