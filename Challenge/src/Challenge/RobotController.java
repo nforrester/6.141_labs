@@ -66,6 +66,9 @@ public class RobotController implements NodeMain, Runnable  {
 	private double x;     // continuously updated in handleOdometry
 	private double y;     // continuously updated in handleOdometry
 	private double theta; // continuously updated in handleOdometry
+
+	private double legStartX;
+	private double legStartY;
 	
 	//Waypoint list
 	ArrayList<Waypoint> myWaypoints=new ArrayList<Waypoint>();
@@ -210,14 +213,19 @@ public class RobotController implements NodeMain, Runnable  {
 
 		}else if(state==TRANSLATING){
 			distanceError=getDistance(x, y, myWaypoints.get(0).getX() ,myWaypoints.get(0).getY() );
+
+			headingError = fixAngle2(getAngle(x, y, myWaypoints.get(0).getX(), myWaypoints.get(0).getY()))
+			commandMotors.rotationalVelocity = headingKp * headingError + headingKi * headingErrorIntegral;
 			
-			commandMotors.rotationalVelocity = 0;
+			//commandMotors.rotationalVelocity = 0;
 			commandMotors.translationalVelocity = myWaypoints.get(0).getDir()*(distanceKp * distanceError + distanceKi * distanceErrorIntegral);
 			distanceErrorIntegral += distanceError;
 			
-			if(comparePoints(x,y,myWaypoints.get(0).getX(),myWaypoints.get(0).getY(), .2 )){
+			if(getDistance(x, y, legStartX, legStartY) >= getDistance(myWaypoints.get(0).getX(), myWaypoints.get(0).getY(), legStartX, legStartY)) {
 				distanceErrorIntegral=0;
 				commandMotors.translationalVelocity = 0;
+				legStartX = myWaypoints.get(0).getX();
+				legStartY = myWaypoints.get(0).getY();
 				myWaypoints.remove(0);
 				changeState(IDLE);
 			}
@@ -257,6 +265,9 @@ public class RobotController implements NodeMain, Runnable  {
 		// initialize the ROS publication to rss/state
 		statePub = node.newPublisher("/rss/state","std_msgs/String");
 		stateMsg = new org.ros.message.std_msgs.String();
+
+		legStartX = 0;
+		legStartY = 0;
 		
 		Thread runningStuff = new Thread(this);
 		runningStuff.start();
