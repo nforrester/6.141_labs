@@ -44,8 +44,9 @@ public class TwoMice implements NodeMain {
 	private double x;
 	private double y;
 	private double theta;
-	private double TICKS_PER_METER = 17000; // needs to be measured, not guessed
+	private double TICKS_PER_METER = 20958; // needs to be measured, not guessed
 	private double DISTANCE_BETWEEN_SENSORS = .200; // meters
+	private double SENSOR_Y_OFFSET = .035; // meters
 
 	private Thread mouseMonitorThread;
 	private Thread odometryPublisherThread;
@@ -60,7 +61,7 @@ public class TwoMice implements NodeMain {
 		System.err.println("TWOMICE INITIALIZING");
 		thisNode = node;
 
-		x     = 0;
+		x     = -1 * SENSOR_Y_OFFSET;
 		y     = 0;
 		theta = 0;
 
@@ -151,7 +152,7 @@ public class TwoMice implements NodeMain {
 						publishOdometry();
 
 						try {
-							Thread.sleep(200);
+							Thread.sleep(100);
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
@@ -243,10 +244,14 @@ public class TwoMice implements NodeMain {
 	}
 
 	private synchronized void publishOdometry() {
-		System.err.println("publishing odometry: " + x + " " + y + " " + theta);
-		msg.x = x;
-		msg.y = y;
-		msg.theta = theta;
+		double robotX = x + Math.cos(theta) * SENSOR_Y_OFFSET;
+		double robotY = y + Math.sin(theta) * SENSOR_Y_OFFSET;
+		double robotTheta = theta;
+
+		System.err.println("publishing odometry: " + robotX + " " + robotY + " " + robotTheta);
+		msg.x = robotX;
+		msg.y = robotY;
+		msg.theta = robotTheta;
 		pub.publish(msg);
 	}
 
