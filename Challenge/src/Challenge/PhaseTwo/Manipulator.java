@@ -61,12 +61,16 @@ public class Manipulator {
 	double a=0; //Arm Angle
 	int h=0; //Hand State (PWM)
 	
+	public int armPWM=0;
+	public int wristPWM=0;
+	public int handPWM=0;
+	
 	public Manipulator(Node node){
 		armPublisher = node.newPublisher("command/Arm", "rss_msgs/ArmMsg");
 		while(!armPublisher.hasSubscribers()){
 			
 		}
-		goToPose(0,L_ARM+O_Z_A+A_Z_B,w,HAND_SMALLOPEN);
+		//goToPose(0,L_ARM+O_Z_A+A_Z_B,w,HAND_SMALLOPEN);
 	}
 	public void debugMe(){
 		System.err.println("Manipulator Debug\n" +
@@ -85,29 +89,36 @@ public class Manipulator {
 	}
 	
 	public void servoOut(short port,int value){
+		
 		ArmMsg publishMsg = new ArmMsg();
 		
 		if (port==(short)5){
 			publishMsg.pwms = new long[] {value,degToServo(w,M_WRIST,B_WRIST),h,0,0,0,0,0};
+			armPWM=value;
 		}else if(port==(short)4){
 			publishMsg.pwms = new long[] {degToServo(a,M_ARM,B_ARM),value,h,0,0,0,0,0};
+			wristPWM=value;
 		}else if(port==(short)2){
 			publishMsg.pwms = new long[] {degToServo(a,M_ARM,B_ARM),degToServo(w,M_WRIST,B_WRIST),value,0,0,0,0,0};
+			handPWM=value;
 		}
 		
 		//publish the message made
 		this.armPublisher.publish(publishMsg);
 	}
 	
-	public void servoOut2(int armVal,int wristVal,int handVal){
+	public void servoOut2(int wristVal,int armVal,int handVal){
+		armPWM=armVal;
+		wristPWM=wristVal;
+		handPWM=handVal;
 		ArmMsg publishMsg = new ArmMsg();
-		publishMsg.pwms = new long[] {armVal,wristVal,handVal,0,0,0,0,0};
+		publishMsg.pwms = new long[] {(long)armVal,(long)wristVal,(long)handVal,0,0,0,0,0};
 		//publish the message made
 		this.armPublisher.publish(publishMsg);
 	}
 	
 	public void closeGripper(){
-		servoOut(HAND_PORT,HAND_HOLD);
+		servoOut2(wristPWM,armPWM,HAND_HOLD);
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
@@ -115,7 +126,7 @@ public class Manipulator {
 		}
 	}
 	public void openGripper(){
-		servoOut(HAND_PORT,HAND_BIGOPEN);
+		servoOut2(wristPWM,armPWM,HAND_BIGOPEN);
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
@@ -133,7 +144,7 @@ public class Manipulator {
 		h=HAND_BIGOPEN;
 	}
 	public void goToPickUp2(){
-		servoOut2(600,500,HAND_SMALLOPEN);
+		servoOut2(600,500,HAND_BIGOPEN);
 	}
 	
 	public void goToY(double y){

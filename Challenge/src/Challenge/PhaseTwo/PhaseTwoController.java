@@ -48,10 +48,10 @@ public class PhaseTwoController implements NodeMain, Runnable{
 	public static final double BLOCK_SIZE=2.07*Manipulator.I2M;
 	
 	public final double[][] DATA={{600,500,0},
-										{750,800,-.08},
+										{725,800,-.08},
 										{900,1000,-.115},
-										{1000,1150,-.135},
-										{0,0,-.145}};
+										{1010,1150,-.135},
+										{1050,1250,-.145}};
 	
 	//ROS stuff
 	private Node node;
@@ -96,6 +96,7 @@ public class PhaseTwoController implements NodeMain, Runnable{
 	}
 	
 	public void waitUp(int val){
+		System.err.println("Waiting "+val+" microseconds.");
 		try {
 			Thread.sleep(val);
 		} catch (InterruptedException e) {
@@ -121,16 +122,21 @@ public class PhaseTwoController implements NodeMain, Runnable{
 		if(state==INIT){
 
 			System.err.println("Init");
-			changeState(DEPOSIT_BLOCKS);
-			//changeState(DEBUG);
+			//changeState(DEPOSIT_BLOCKS);
+			changeState(DEBUG);
+			//changeState(PICK_UP);
 		
 		}else if(state==DEPOSIT_BLOCKS){
 
 			System.err.println("deposit");
 		    //assumes that odometry has been reset at the beginning of phase 2		        
 		    robotController.addWaypoint(new Waypoint(-2*15*Manipulator.I2M,0, (short)-1));
+		    waitUp(1000);
 		    while(robotController.getWaypoints().size()>0){
+		    	//System.err.println(robotController.getWaypoints().size());
 		    }
+
+			System.err.println("Done Depositing!");
 		    changeState(LOCALIZE);
 		    
 		}else if(state==LOCALIZE){
@@ -144,33 +150,50 @@ public class PhaseTwoController implements NodeMain, Runnable{
 			changeState(PICK_UP);
 			
 		}else if(state==PICK_UP){
-			
+
+			System.err.println("pick up");
+			manipulator.goToPickUp2();
+			waitUp(2000);
 			manipulator.closeGripper();
+			waitUp(2000);
 			robotController.addWaypoint(new Waypoint(DATA[iterator][2],0, (short)-1));
+			System.err.println(robotController.getWaypoints().size());
+			waitUp(2000);
 		    while(robotController.getWaypoints().size()>0){
+		    //	System.err.println(robotController.getWaypoints().size());
 		    }
 	        manipulator.servoOut2((int)DATA[iterator][0],(int)DATA[iterator][1],500);
-		    waitUp(1000);
+		    waitUp(2000);
 		    changeState(PLACE);
 		    
 		}else if(state==PLACE){
+			
+			System.err.println("place");
 			robotController.addWaypoint(new Waypoint((towerHeight-iterator)*BLOCK_SIZE+DATA[iterator][2],0, (short)1));
+			waitUp(2000);
 		    while(robotController.getWaypoints().size()>0){
+		    	
 		    }
 		    manipulator.openGripper();
+		    waitUp(2000);
 		    iterator++;
+		    changeState(GO_TO_NEXT);
 		}else if(state==GO_TO_NEXT){
 			if (iterator==towerHeight){
 				robotController.addWaypoint(new Waypoint(-.1,0, (short)-1));
+				waitUp(2000);
 			    while(robotController.getWaypoints().size()>0){
 			    }
 				changeState(DONE);
 			}else{
 				robotController.addWaypoint(new Waypoint((iterator-1)*BLOCK_SIZE+DATA[iterator][2],0, (short)-1));
+				waitUp(2000);
 			    while(robotController.getWaypoints().size()>0){
 			    }
 			    manipulator.goToPickUp2();
+			    waitUp(2000);
 			    robotController.addWaypoint(new Waypoint((iterator-1)*BLOCK_SIZE,0, (short)-1));
+			    waitUp(2000);
 			    while(robotController.getWaypoints().size()>0){
 			    }
 				changeState(PICK_UP);
@@ -178,37 +201,28 @@ public class PhaseTwoController implements NodeMain, Runnable{
 		}else if(state==DONE){
 			
 		}else if(state==DEBUG){
-			goToY(manipulator.Y_MAX);
-			try {
-				Thread.sleep(3000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			System.err.println("going to Ymax");
 			
-			goToY(percentToY(80));
-			try {
-				Thread.sleep(3000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+			manipulator.goToPickUp2();
+			System.err.println("go to pickup");
+			waitUp(3000);
+			manipulator.closeGripper();
+			System.err.println("close gripper");
+			waitUp(3000);			
+	        manipulator.servoOut2((int)DATA[iterator][0],(int)DATA[iterator][1],500);
+	        System.err.println("Move arm up to level "+iterator);
+		    waitUp(3000);
+		    manipulator.openGripper();
+			System.err.println("open gripper");
+		    waitUp(3000);
+		    iterator++;
+		    manipulator.goToPickUp2();
+		    if (iterator==towerHeight){
+				changeState(DONE);
+			}else{
+			System.err.println("go to pickup next block");
+		    waitUp(3000);
 			}
-			System.err.println("going to 80");
-			
-			goToY(percentToY(60));
-			try {
-				Thread.sleep(3000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			System.err.println("going to 60");
-			
-			goToY(percentToY(1));
-			try {
-				Thread.sleep(3000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			System.err.println("going to 0");
+		    
 		}
 	}
 	
@@ -225,8 +239,9 @@ public class PhaseTwoController implements NodeMain, Runnable{
 		manipulator=new Manipulator(node);		
 		robotController=new RobotController();
 		robotController.onStart(node);
-		
-		goToY(percentToY(100));
+		while(!manipulator.armPublisher.hasSubscribers()){
+			
+		}
 		
 		//reset robot odometry somehow so we only have to deal with the robot's x value from this point onward. 
 		
