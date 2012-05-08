@@ -35,11 +35,20 @@ public class PhaseTwoController implements NodeMain, Runnable{
 	public static final int DONE=4;
 	public static final int DEBUG=5;
 	public static final int LOCALIZE=6;
+	public static final int GO_TO_NEXT=6;
 	
 	private int state;
+	private int towerHeight=5;
+	private int iterator=1;
 	
 	//Measured Stuff
 	public static final double BLOCK_SIZE=2.07*Manipulator.I2M;
+	
+	public final double[][] DATA={{600,500,0},
+										{750,800,-.08},
+										{900,1000,-.115},
+										{1000,1150,-.135},
+										{0,0,-.145}};
 	
 	//ROS stuff
 	private Node node;
@@ -82,6 +91,14 @@ public class PhaseTwoController implements NodeMain, Runnable{
 		
 	}
 	
+	public void waitUp(int val){
+		try {
+			Thread.sleep(val);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public void goToX(double xNew){
 		if(xNew>robotController.getX()){
 			robotController.addWaypoint(new Waypoint(xNew,0,(short) 1));
@@ -99,37 +116,59 @@ public class PhaseTwoController implements NodeMain, Runnable{
 	private void step(){
 		if(state==INIT){
 			
-			//changeState(DEPOSIT_BLOCKS);
-			changeState(DEBUG);
+			changeState(DEPOSIT_BLOCKS);
+			//changeState(DEBUG);
 		
 		}else if(state==DEPOSIT_BLOCKS){
 			
 		    //assumes that odometry has been reset at the beginning of phase 2		        
-		    robotController.addWaypoint(new Waypoint(0, -2*15*Manipulator.I2M, (short)-1));
+		    robotController.addWaypoint(new Waypoint(-2*15*Manipulator.I2M,0, (short)-1));
 		    while(robotController.getWaypoints().size()>0){
 		    }
 		    changeState(LOCALIZE);
 		    
 		}else if(state==LOCALIZE){
 			
-			manipulator.goToPickUp();
+			manipulator.goToPickUp2();
+			/*
 			while(true){//while(IR Sensor is unbroken)
 				robotController.setTranslationalVelocity(.1);
-			}
+			}*/
 			robotController.setTranslationalVelocity(0);
 			changeState(PICK_UP);
 			
 		}else if(state==PICK_UP){
 			
-	        manipulator.goToPickUp();
-	        while(true){//while(IR Sensor is unbroken)					
-			}
-	        manipulator.closeGripper();
-	        
-	        goToY(percentToY(20));
-		        
+			manipulator.closeGripper();
+			robotController.addWaypoint(new Waypoint(DATA[iterator][2],0, (short)-1));
+		    while(robotController.getWaypoints().size()>0){
+		    }
+	        manipulator.servoOut2((int)DATA[iterator][0],(int)DATA[iterator][1],500);
+		    waitUp(1000);
+		    changeState(PLACE);
+		    
 		}else if(state==PLACE){
-			
+			robotController.addWaypoint(new Waypoint((towerHeight-iterator)*BLOCK_SIZE+DATA[iterator][2],0, (short)1));
+		    while(robotController.getWaypoints().size()>0){
+		    }
+		    manipulator.openGripper();
+		    iterator++;
+		}else if(state==GO_TO_NEXT){
+			if (iterator==towerHeight){
+				robotController.addWaypoint(new Waypoint(-.1,0, (short)-1));
+			    while(robotController.getWaypoints().size()>0){
+			    }
+				changeState(DONE);
+			}else{
+				robotController.addWaypoint(new Waypoint((iterator-1)*BLOCK_SIZE+DATA[iterator][2],0, (short)-1));
+			    while(robotController.getWaypoints().size()>0){
+			    }
+			    manipulator.goToPickUp2();
+			    robotController.addWaypoint(new Waypoint((iterator-1)*BLOCK_SIZE,0, (short)-1));
+			    while(robotController.getWaypoints().size()>0){
+			    }
+				changeState(PICK_UP);
+			}
 		}else if(state==DONE){
 			
 		}else if(state==DEBUG){
@@ -206,6 +245,8 @@ public class PhaseTwoController implements NodeMain, Runnable{
 			stateMsg.data = "DEBUG";
 		}else if (state==LOCALIZE){
 			stateMsg.data = "LOCALIZE";
+		}else if (state==GO_TO_NEXT){
+			stateMsg.data = "GO_TO_NEXT";
 		}
 		
 		statePub.publish(stateMsg);

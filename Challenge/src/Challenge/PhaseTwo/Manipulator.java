@@ -35,7 +35,7 @@ public class Manipulator {
 	
 	public static final short HAND_PORT=2;  //Servo port for gripper
 	public static final int HAND_BIGOPEN=1000;  //Servo value for gripper full open
-	public static final int HAND_SMALLOPEN=800;  //Servo value for gripper open but still with IR sensor working
+	public static final int HAND_SMALLOPEN=850;  //Servo value for gripper open but still with IR sensor working
 	public static final int HAND_HOLD=500;  //Servo value for max gripping force
 	
 	public static final short WRIST_PORT=4;  //Servo port for wrist	
@@ -99,8 +99,23 @@ public class Manipulator {
 		this.armPublisher.publish(publishMsg);
 	}
 	
+	public void servoOut2(int armVal,int wristVal,int handVal){
+		ArmMsg publishMsg = new ArmMsg();
+		publishMsg.pwms = new long[] {armVal,wristVal,handVal,0,0,0,0,0};
+		//publish the message made
+		this.armPublisher.publish(publishMsg);
+	}
+	
 	public void closeGripper(){
 		servoOut(HAND_PORT,HAND_HOLD);
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	public void openGripper(){
+		servoOut(HAND_PORT,HAND_BIGOPEN);
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
@@ -116,6 +131,9 @@ public class Manipulator {
 		goToY(Y_MIN);
 		servoOut(HAND_PORT,HAND_BIGOPEN);
 		h=HAND_BIGOPEN;
+	}
+	public void goToPickUp2(){
+		servoOut2(600,500,HAND_SMALLOPEN);
 	}
 	
 	public void goToY(double y){
