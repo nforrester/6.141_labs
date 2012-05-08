@@ -24,7 +24,7 @@ public class Manipulator {
 	//Some definitions and variables
 	
 	//Constants
-	public final double I2M=.0254;  //Inches to Meters
+	public final static double I2M=.0254;  //Inches to Meters
 	public final double O_Z_A=5*I2M;  //Height from ground to Robot origin. To measure in m
 	public final double A_Z_B=5.25*I2M;  //Height from Robot origin to Arm. To measure in m
 	public final double A_X_B=2.5*I2M;  //Length from Robot origin to base of Arm. To measure in m
@@ -94,8 +94,18 @@ public class Manipulator {
 		}else if(port==(short)2){
 			publishMsg.pwms = new long[] {degToServo(a,M_ARM,B_ARM),degToServo(w,M_WRIST,B_WRIST),value,0,0,0,0,0};
 		}
+		
 		//publish the message made
 		this.armPublisher.publish(publishMsg);
+	}
+	
+	public void closeGripper(){
+		servoOut(HAND_PORT,HAND_HOLD);
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public int degToServo(double theta, double m, int b){
@@ -109,17 +119,35 @@ public class Manipulator {
 	}
 	
 	public void goToY(double y){
+		double aOld=a;
+		double wOld=w;
 		a=Math.asin((y-O_Z_A-A_Z_B)/L_ARM)*180/Math.PI;
 		w=-a;
-		servoOut(ARM_PORT,degToServo(a,M_ARM,B_ARM));
-		servoOut(WRIST_PORT,degToServo(w,M_WRIST,B_WRIST));
+		for (double i=0;i<=1;i+=.01){
+			servoOut(ARM_PORT,degToServo(aOld-(aOld-a)*i,M_ARM,B_ARM));
+			servoOut(WRIST_PORT,degToServo(wOld-(wOld-w)*i,M_WRIST,B_WRIST));
+			/*try {
+				Thread.sleep(250);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}*/
+		}
 	}
 
 	
 	public void goToPose(double x, double y, double t, int handPWM){
+		double tOld=t;
 		goToY(y);
-		servoOut(WRIST_PORT,degToServo(t,M_WRIST,B_WRIST));
 		servoOut(HAND_PORT,handPWM);
+		for (double i=0;i<=1;i+=.1){
+			servoOut(WRIST_PORT,degToServo(tOld-(tOld-t)*i,M_WRIST,B_WRIST));
+			
+			try {
+				Thread.sleep(250);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 }

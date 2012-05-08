@@ -34,6 +34,7 @@ import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
+import Challenge.PhaseTwo.ConstructionBlock;
 import LocalNavigation.Mat;
 /*
 import VisualServo.VisionGUI;
@@ -325,6 +326,10 @@ public class RobotController implements NodeMain, Runnable  {
 		
 
 		statePub.publish(stateMsg);
+	}
+
+	public ArrayList<Waypoint> getWaypoints() {
+		return myWaypoints;
 	}
 	
 	

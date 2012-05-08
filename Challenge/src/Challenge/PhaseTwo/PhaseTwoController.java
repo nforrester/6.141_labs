@@ -34,20 +34,29 @@ public class PhaseTwoController implements NodeMain, Runnable{
 	public static final int PLACE=3;
 	public static final int DONE=4;
 	public static final int DEBUG=5;
-	private int state;
-	private Node node;
+	public static final int LOCALIZE=6;
 	
+	private int state;
+	
+	//Measured Stuff
+	public static final double BLOCK_SIZE=2.07*Manipulator.I2M;
+	
+	//ROS stuff
+	private Node node;
+	private Publisher<org.ros.message.std_msgs.String> statePub;
+	private org.ros.message.std_msgs.String stateMsg;
+	
+	
+	//Controller Stuff
 	double x=0; //end effector x
 	double y=0; //end effector y
-	double theta=0;//end effector theta
-	
+	double theta=0;//end effector theta	
 	Structure structure;
 	Manipulator manipulator;
 	RobotController robotController;
 	ArrayList<ConstructionBlock> collectedBlocks;
 	
-	private Publisher<org.ros.message.std_msgs.String> statePub;
-	private org.ros.message.std_msgs.String stateMsg;
+	
 	
 	//Command Queue.
 	//ArrayList<Waypoint> myWaypoints=new ArrayList<Waypoint>();
@@ -89,13 +98,36 @@ public class PhaseTwoController implements NodeMain, Runnable{
 	//Main FSM Handles
 	private void step(){
 		if(state==INIT){
-		//  ChangeState(DEPOSIT_BLOCKS);
-		changeState(DEBUG);
+			
+			//changeState(DEPOSIT_BLOCKS);
+			changeState(DEBUG);
+		
 		}else if(state==DEPOSIT_BLOCKS){
+			
 		    //assumes that odometry has been reset at the beginning of phase 2		        
-		    //robotController.addWaypoint(new Waypoint(0, -2*15*Manipulator.I2M, -1));
+		    robotController.addWaypoint(new Waypoint(0, -2*15*Manipulator.I2M, (short)-1));
+		    while(robotController.getWaypoints().size()>0){
+		    }
+		    changeState(LOCALIZE);
+		    
+		}else if(state==LOCALIZE){
+			
+			manipulator.goToPickUp();
+			while(true){//while(IR Sensor is unbroken)
+				robotController.setTranslationalVelocity(.1);
+			}
+			robotController.setTranslationalVelocity(0);
+			changeState(PICK_UP);
+			
 		}else if(state==PICK_UP){
-		        manipulator.goToPickUp();
+			
+	        manipulator.goToPickUp();
+	        while(true){//while(IR Sensor is unbroken)					
+			}
+	        manipulator.closeGripper();
+	        
+	        goToY(percentToY(20));
+		        
 		}else if(state==PLACE){
 			
 		}else if(state==DONE){
@@ -170,9 +202,10 @@ public class PhaseTwoController implements NodeMain, Runnable{
 			stateMsg.data = "PLACE";
 		}else if (state==DONE){
 			stateMsg.data = "DONE!";
-		}
-		else if (state==DEBUG){
+		}else if (state==DEBUG){
 			stateMsg.data = "DEBUG";
+		}else if (state==LOCALIZE){
+			stateMsg.data = "LOCALIZE";
 		}
 		
 		statePub.publish(stateMsg);
