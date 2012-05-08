@@ -3,6 +3,7 @@ package Motor;
 import MotorControlSolution.RobotBase;
 import MotorControlSolution.RobotVelocityControllerBalanced;
 import MotorControlSolution.RobotVelocityController;
+import MotorControlSolution.WheelVelocityControllerI;
 import org.ros.message.rss_msgs.MotionMsg;
 import org.ros.message.MessageListener;
 import org.ros.node.Node;
@@ -75,7 +76,11 @@ public class MotorControl implements NodeMain {
 
 			//final task: balanced velocity control
 
-			robotVelocityController = new RobotVelocityControllerBalanced();
+			// This was changed by Neil Forrester for the final challenge on 5/7/2012
+			// The balanced functionality is conflicting with optical odometry
+			robotVelocityController = new RobotVelocityController(new WheelVelocityControllerI(), new WheelVelocityControllerI());
+			//robotVelocityController = new RobotVelocityControllerBalanced();
+
 			System.out.println("robot velocity controller created");
 			robot.setRobotVelocityController(robotVelocityController);
 
