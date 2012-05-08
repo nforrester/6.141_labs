@@ -68,12 +68,21 @@ public class Sentinel implements NodeMain {
 		System.err.println("ROBOT CONTROLLER CREATED");
 		navigator.onStart(thisNode);
 		System.err.println("ROBOT CONTROLLER INITIALIZED");
-		navigator.addWaypoint(new Waypoint(1,   0, (short) 1));
-		navigator.addWaypoint(new Waypoint(1,   1, (short) 1));
-		//navigator.addWaypoint(new Waypoint(0.5, 1, (short) 1));
-		//navigator.addWaypoint(new Waypoint(0,   0, (short) 1));
-		//navigator.addWaypoint(new Waypoint(1,   0, (short) 1));
-		//navigator.addWaypoint(new Waypoint(0,   0, (short) -1));
+
+		double f2m = .3048;
+		navigator.addWaypoint(new Waypoint(2   * f2m,   0   * f2m, (short) 1));
+		navigator.addWaypoint(new Waypoint(3   * f2m,  -2   * f2m, (short) 1));
+		navigator.addWaypoint(new Waypoint(6   * f2m,  -2   * f2m, (short) 1));
+		navigator.addWaypoint(new Waypoint(6.5 * f2m,  -3.5 * f2m, (short) 1));
+		navigator.addWaypoint(new Waypoint(7.5 * f2m,  -4.5 * f2m, (short) 1));
+		navigator.addWaypoint(new Waypoint(9   * f2m,  -4.5 * f2m, (short) 1));
+		navigator.addWaypoint(new Waypoint(7.5 * f2m,  -3.5 * f2m, (short) 1));
+		navigator.addWaypoint(new Waypoint(6.5 * f2m,  -3.5 * f2m, (short) 1));
+		navigator.addWaypoint(new Waypoint(6   * f2m,  -1   * f2m, (short) 1));
+		navigator.addWaypoint(new Waypoint(2   * f2m,   0   * f2m, (short) 1));
+		navigator.addWaypoint(new Waypoint(0   * f2m,   0   * f2m, (short) 1));
+		navigator.addWaypoint(new Waypoint(2   * f2m,   0   * f2m, (short)-1));
+
 		System.err.println("WAYPOINTS ADDED");
 		System.err.println("SENTINEL INITIALIZED");
 

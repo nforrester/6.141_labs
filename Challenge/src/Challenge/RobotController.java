@@ -52,15 +52,17 @@ public class RobotController implements NodeMain, Runnable  {
 	//PI Parameters
 	private double distanceError=0;
 	private double distanceErrorIntegral=0;
-	private double distanceKp=.15;
+	private double distanceKp=.65;
 	private double distanceKi=0.002;
 	private double distanceOutput=0;
 	private double headingDesired=0;
 	private double headingError=0;
 	private double headingErrorIntegral=0;
 	private double headingKp=.15;
-	private double headingKi=0.005;
+	private double headingKi=0.001;
 	private double headingOutput=0;
+
+	private double headingKpTrans =.25;
 	
 	// x, y, and theta record the robot's current position in the world frame
 	private double x;     // continuously updated in handleOdometry
@@ -126,7 +128,6 @@ public class RobotController implements NodeMain, Runnable  {
 	 * @param the message
 	 */
 	public void handleOdometry(org.ros.message.rss_msgs.OdometryMsg message) {
-		System.err.println("handling odometry");
 		if ( firstUpdate ) {
 			odoToWorld = Mat.mul(Mat.rotation(-message.theta), Mat.translation(-message.x, -message.y));
 			worldToOdo = Mat.inverse(odoToWorld);
@@ -140,7 +141,7 @@ public class RobotController implements NodeMain, Runnable  {
 		y     = robotPose[1];
 		theta = robotPose[2];
 
-		System.err.println("(" + x + " " + y + " " + theta + ")");
+		System.err.println("(odometry " + x + " " + y + " " + theta + ")");
 
 		theta=fixAngle(theta);
 
@@ -198,6 +199,7 @@ public class RobotController implements NodeMain, Runnable  {
 				changeState(ROTATING);
 			}
 		}else if(state==ROTATING){
+			System.err.println("Rotating");
 			headingError = fixAngle2(headingDesired - theta);
 			
 			commandMotors.translationalVelocity = 0;
@@ -212,12 +214,20 @@ public class RobotController implements NodeMain, Runnable  {
 			}
 
 		}else if(state==TRANSLATING){
+			System.err.println("Translating");
 			distanceError=getDistance(x, y, myWaypoints.get(0).getX() ,myWaypoints.get(0).getY() );
 
-			headingError = fixAngle2(getAngle(x, y, myWaypoints.get(0).getX(), myWaypoints.get(0).getY()));
-			commandMotors.rotationalVelocity = headingKp * headingError + headingKi * headingErrorIntegral;
+			distanceError += 0.05; // cause it to aim to overshoot, so that it arrives in finite time
+
+			System.err.println("distanceError = " + distanceError);
+			if (distanceError > 0.15) { // cause rotation guidance to shift to a point beyond the goal, towards the very end, so we get accurate distance, and no crazy turning about at the end of the leg
+				headingError = fixAngle2(getAngle(x, y, myWaypoints.get(0).getX(), myWaypoints.get(0).getY()) - theta);
+			} else {
+				headingError = fixAngle2(getAngle(x, y, (myWaypoints.get(0).getX() - x) * 1.1 + x, (myWaypoints.get(0).getY() - y) * 1.1 + y) - theta);
+			}
+			System.err.println("headingError = " + headingError);
+			commandMotors.rotationalVelocity = headingKpTrans * headingError + headingKi * headingErrorIntegral;
 			
-			//commandMotors.rotationalVelocity = 0;
 			commandMotors.translationalVelocity = myWaypoints.get(0).getDir()*(distanceKp * distanceError + distanceKi * distanceErrorIntegral);
 			distanceErrorIntegral += distanceError;
 			
@@ -230,7 +240,10 @@ public class RobotController implements NodeMain, Runnable  {
 				changeState(IDLE);
 			}
 		}
-	motorPub.publish(commandMotors);
+		if (myWaypoints.size() > 0) {
+			System.err.println("(waypoint " + myWaypoints.get(0).getX() + " " + myWaypoints.get(0).getY() + ")");
+		}
+		motorPub.publish(commandMotors);
 	}
 	
 	@Override
@@ -250,7 +263,8 @@ public class RobotController implements NodeMain, Runnable  {
 		logNode = node;
 		logNode.getLog().info("RobotController Online");
 		// initialize the ROS subscription to rss/mouseOdometry
-		odoSub = node.newSubscriber("/rss/mouseOdometry", "rss_msgs/OdometryMsg");
+		odoSub = node.newSubscriber("/rss/odometry", "rss_msgs/OdometryMsg");
+		//odoSub = node.newSubscriber("/rss/mouseOdometry", "rss_msgs/OdometryMsg");
 		odoSub.addMessageListener(new MessageListener<org.ros.message.rss_msgs.OdometryMsg>() {
 				@Override
 				public void onNewMessage(org.ros.message.rss_msgs.OdometryMsg message) {
