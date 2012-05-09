@@ -175,8 +175,12 @@ public static ArrayList<int[]> pathFind(boolean[][] cspace,int[] start,int[] goa
     int[] currentPosition = start.clone();
     int currentFieldValue = potentialField[start[0]][start[1]].getFieldValue();
     
+    System.err.println("currentFieldValue = " + currentFieldValue);
     if(currentFieldValue == -1) {
         throw new Exception("No solution Exists because the robot is on an obstacle!");
+    }
+    if(currentFieldValue == -100) {
+        throw new Exception("No solution Exists because you can't get there from here!");
     }
     
    while(potentialField[currentPosition[0]][currentPosition[1]].getFieldValue() != 0) { //terminating condition
@@ -187,8 +191,7 @@ public static ArrayList<int[]> pathFind(boolean[][] cspace,int[] start,int[] goa
        if(tempCurrentPosition[0] == -1000 && potentialField[currentPosition[0]][currentPosition[1]].getTempStats().isEmpty()) {
            //cspace[currentPosition[0]][currentPosition[1]] = false; //newly added line
            //pathFind(cspace,start,goal);      //newly added line
-           System.err.println("No Solution as the robot is surrounded by obstacles!!!");
-           return wayPoints;
+           throw new Exception("No Solution as WTF!!!");
        }
        
        else if(tempCurrentPosition[0] == -1000 && !potentialField[currentPosition[0]][currentPosition[1]].getTempStats().isEmpty()) {
@@ -205,13 +208,13 @@ public static ArrayList<int[]> pathFind(boolean[][] cspace,int[] start,int[] goa
    return wayPoints;
 }
     
-	public static ArrayList<Waypoint> findWaypoints(CSpace cspace, Mat start, Mat end) {
+	public static ArrayList<Waypoint> findWaypoints(CSpace cspace, Mat start, Mat end) throws Exception {
 		double[] startA = Mat.decodePoint(start);
 		double[] endA = Mat.decodePoint(end);
 		return findWaypoints(cspace, startA[0], startA[1], endA[0], endA[1]);
 	}
 
-	public static ArrayList<Waypoint> findWaypoints(CSpace cspace, double startX, double startY, double endX, double endY) {
+	public static ArrayList<Waypoint> findWaypoints(CSpace cspace, double startX, double startY, double endX, double endY) throws Exception {
 		float mazeSize = Math.max((float)cspace.xMax - (float)cspace.xMin, (float)cspace.yMax - (float)cspace.yMin);
 		int nCells = 60;
 
@@ -220,18 +223,21 @@ public static ArrayList<int[]> pathFind(boolean[][] cspace,int[] start,int[] goa
 		int endXi   = (int)Math.round((endX   - (float)cspace.xMin) / mazeSize * nCells);
 		int endYi   = (int)Math.round((endY   - (float)cspace.yMin) / mazeSize * nCells);
 
+		System.err.println("(xyMin " + cspace.xMin + " " + cspace.yMin + ")");
+		System.err.println("(xyMax " + cspace.xMax + " " + cspace.yMax + ")");
+
+		System.err.println("(startXY " + startX + " " + startY + ")");
+		System.err.println("(startXYi " + startXi + " " + startYi + ")");
+		System.err.println("(endXY " + endX + " " + endY + ")");
+		System.err.println("(endXYi " + endXi + " " + endYi + ")");
+
 		ArrayList<int[]> intWaypoints = new ArrayList<int[]>();
-		try {
-			intWaypoints = pathFind(cspace.getOccupancyGrid(nCells), new int[] {startXi, startYi}, new int[] {endXi, endYi});
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
+		intWaypoints = pathFind(cspace.getOccupancyGrid(nCells), new int[] {startXi, startYi}, new int[] {endXi, endYi});
 
 		ArrayList<Waypoint> waypoints = new ArrayList<Waypoint>();
 		for (int[] pt: intWaypoints) {
-			float wpX = (float)pt[0] * mazeSize / (float)nCells + mazeSize / (float)nCells / 2 + (float)cspace.xMin - (float)startX;
-			float wpY = (float)pt[1] * mazeSize / (float)nCells + mazeSize / (float)nCells / 2 + (float)cspace.yMin - (float)startY;
+			float wpX = (float)pt[0] * mazeSize / (float)nCells + mazeSize / (float)nCells / 2 + (float)cspace.xMin;
+			float wpY = (float)pt[1] * mazeSize / (float)nCells + mazeSize / (float)nCells / 2 + (float)cspace.yMin;
 			waypoints.add(new Waypoint(wpX, wpY, (short) 1));
 		}
 

@@ -72,9 +72,6 @@ public class CSpace {
 			addObstacle(new Polygon(boundary));
 		}
 
-		for (Polygon obstacle : obstacles) {
-			csObstacles.add(Polygon.minkowskiSumSimple(obstacle, reflectedRobot));
-		}
 	}
 
 	public void addObstacle(PolygonObstacle obstacle) {
@@ -87,6 +84,13 @@ public class CSpace {
 
 	public void addObstacle(Polygon obstacle) {
 		obstacles.add(obstacle);
+		csObstacles.add(Polygon.minkowskiSumSimple(obstacle, reflectedRobot));
+		System.err.print("(obstacle");
+		for (Mat vertex: obstacle.vertices) {
+			double[] pt = Mat.decodePoint(vertex);
+			System.err.print("\n    (vertex " + pt[0] + " " + pt[1] + ")");
+		}
+		System.err.println(")");
 	}
 
 	public boolean pointInCSpace(Mat point) {
@@ -144,7 +148,13 @@ public class CSpace {
 						break;
 					}
 				}
+				if (occupancyGrid[i][j]) {
+					System.err.print(".");
+				} else {
+					System.err.print("#");
+				}
 			}
+			System.err.println("");
 		}
 
 		System.err.println("GOT HERE TOO!");

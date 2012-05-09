@@ -93,6 +93,14 @@ public class RobotController implements NodeMain, Runnable  {
 	private org.ros.message.std_msgs.String stateMsg;
 
 	private TwoMice mice = new TwoMice();
+
+	private double startX;
+	private double startY;
+
+	public RobotController(double sX, double sY) {
+		startX = sX;
+		startY = sY;
+	}
 	
 	/**
 	 * <p>
@@ -130,7 +138,7 @@ public class RobotController implements NodeMain, Runnable  {
 	 */
 	public void handleOdometry(org.ros.message.rss_msgs.OdometryMsg message) {
 		if ( firstUpdate ) {
-			odoToWorld = Mat.mul(Mat.rotation(-message.theta), Mat.translation(-message.x, -message.y));
+			odoToWorld = Mat.mul(Mat.rotation(-message.theta), Mat.translation(startX - message.x, startY - message.y));
 			worldToOdo = Mat.inverse(odoToWorld);
 			
 			firstUpdate = false;

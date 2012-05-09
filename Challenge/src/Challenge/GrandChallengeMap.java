@@ -57,7 +57,7 @@ public class GrandChallengeMap implements NodeMain {
      */
     private Rectangle2D.Double worldRect;
 
-    private Point2D.Double robotStart;
+    public Point2D.Double robotStart;
     private Point2D.Double robotGoal;
 
     //These are a few things that are used a lot in the file parsing, so they have

@@ -15,6 +15,9 @@ import org.ros.node.topic.Subscriber;
 
 import java.io.IOException;
 
+import java.awt.geom.Point2D;
+import java.awt.geom.Point2D.Double;
+
 public class Sentinel implements NodeMain {
 
 	private Node thisNode;
@@ -23,6 +26,7 @@ public class Sentinel implements NodeMain {
 	private RobotController navigator;
 
 	private GrandChallengeMap map;
+	private CSpace cspace;
 
 	public Sentinel() {
 	}
@@ -31,10 +35,6 @@ public class Sentinel implements NodeMain {
 		thisNode = node;
 
 		System.err.println("SENTINEL INITIALIZING");
-		navigator = new RobotController();
-		System.err.println("ROBOT CONTROLLER CREATED");
-		navigator.onStart(thisNode);
-		System.err.println("ROBOT CONTROLLER INITIALIZED");
 
 		/*
 		double f2m = .3048;
@@ -54,7 +54,7 @@ public class Sentinel implements NodeMain {
 		System.err.println("WAYPOINTS ADDED");
 		*/
 
-		String mapFile = "/home/rss-student/RSS-I-group/Challenge/src/construction_map_2012.txt";
+		String mapFile = "/home/rss-student/gitrss/Challenge/src/construction_map_2012.txt";
 		try {
 			map = GrandChallengeMap.parseFile(mapFile);
 		} catch(IOException e) {
@@ -75,30 +75,58 @@ public class Sentinel implements NodeMain {
 		}
 		CSpace.Polygon robot = new CSpace.Polygon(robotVerts);
 
-		CSpace cspace = new CSpace(robot, map);
+		cspace = new CSpace(robot, map);
 
 		ArrayList<Mat> goals = new ArrayList<Mat>();
 		for (ConstructionObject block: map.getConstructionObjects()) {
-			Point2D.Double pos = block.getPosition()
+			Point2D.Double pos = block.getPosition();
 			goals.add(Mat.encodePoint(pos.getX(), pos.getY()));
 		}
 
-		Mat legStart = Mat.encodePoint(0, 0);
+		navigator = new RobotController(map.robotStart.getX(), map.robotStart.getY());
+		System.err.println("ROBOT CONTROLLER CREATED");
+		navigator.onStart(thisNode);
+		System.err.println("ROBOT CONTROLLER INITIALIZED");
+		Mat legStart = Mat.encodePoint(map.robotStart.getX(), map.robotStart.getY());
 		ArrayList<Waypoint> waypoints;
 		for (Mat goal: goals) {
-			waypoints = PotentialField.findWaypoints(cspace, legStart, goal);
-			System.err.println("Waypoints computed");
-			for (Waypoint waypoint: waypoints) {
-				//navigator.addWaypoint(waypoint);
-				System.err.println("(waypoint " + waypoint.getX() + " " + waypoint.getY() + ")");
+			try {
+				System.err.println("hello world!");
+				waypoints = PotentialField.findWaypoints(cspace, legStart, goal);
+				System.err.println("Waypoints computed:");
+				for (Waypoint waypoint: waypoints) {
+					System.err.println("(waypoint " + waypoint.getX() + " " + waypoint.getY() + ")");
+				}
+				waypoints = trimWaypoints(waypoints);
+				System.err.println("Waypoints trimmed:");
+				for (Waypoint waypoint: waypoints) {
+					navigator.addWaypoint(waypoint);
+					System.err.println("(waypoint " + waypoint.getX() + " " + waypoint.getY() + ")");
+				}
+				System.err.println("Waypoints added");
+				legStart = goal;
+			} catch (Exception e) {
+				System.err.println("Goal is impossible");
+				e.printStackTrace();
 			}
-			System.err.println("Waypoints added");
-			legStart = goal;
 		}
 
 		System.err.println("WAYPOINTS ADDED");
 
 		System.err.println("SENTINEL INITIALIZED");
+	}
+
+	private ArrayList<Waypoint> trimWaypoints(ArrayList<Waypoint> waypoints) {
+		for (int legStart = 0; legStart < waypoints.size() - 2; legStart++) {
+			Mat legStartPoint = Mat.encodePoint(waypoints.get(legStart).getX(), waypoints.get(legStart).getY());
+			Mat legEndPoint = Mat.encodePoint(waypoints.get(legStart + 2).getX(), waypoints.get(legStart + 2).getY());
+			if (cspace.lineSegInCSpace(legStartPoint, legEndPoint)) {
+				waypoints.remove(legStart + 1);
+			} else {
+				legStart++;
+			}
+		}
+		return waypoints;
 	}
 
 	@Override
