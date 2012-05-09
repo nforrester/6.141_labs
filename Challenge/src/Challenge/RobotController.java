@@ -95,10 +95,12 @@ public class RobotController implements NodeMain, Runnable  {
 
 	private double startX;
 	private double startY;
+	CSpace cspace;
 
-	public RobotController(double sX, double sY) {
+	public RobotController(double sX, double sY, CSpace cs) {
 		startX = sX;
 		startY = sY;
+		cspace = cs;
 	}
 
 	/**
@@ -207,6 +209,7 @@ public class RobotController implements NodeMain, Runnable  {
 				changeState(ROTATING);
 			}
 		}else if(state==ROTATING){
+			cspace.printASCIICSpace(60, x, y, theta);
 			System.err.println("Rotating");
 			headingError = fixAngle2(headingDesired - theta);
 
@@ -222,6 +225,7 @@ public class RobotController implements NodeMain, Runnable  {
 			}
 
 		}else if(state==TRANSLATING){
+			cspace.printASCIICSpace(60, x, y, theta);
 			System.err.println("Translating");
 			distanceError=getDistance(x, y, myWaypoints.get(0).getX() ,myWaypoints.get(0).getY() );
 

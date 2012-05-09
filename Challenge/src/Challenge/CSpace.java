@@ -137,6 +137,41 @@ public class CSpace {
 		return true;
 	}
 
+	public void printASCIICSpace(int nCellsLinear, double x, double y, double theta) {
+		int i, j;
+		double xLow, xHigh, yLow, yHigh;
+		double xPt, yPt;
+		double maxDimension = Math.max(xMax - xMin, yMax - yMin);
+		double resolutionLinear = maxDimension / nCellsLinear;
+
+		Mat rotationMatrix = Mat.rotation(theta);
+		Polygon rotatedRobot = Polygon.mul(rotationMatrix, reflectedRobot);
+		ArrayList<Polygon> csObstacles3D = new ArrayList<Polygon>();
+		for (Polygon obstacle: obstacles) {
+			csObstacles3D.add(Polygon.minkowskiSumSimple(obstacle, rotatedRobot));
+		}
+
+		for (i = 0; i < nCellsLinear; i++) {
+			xPt = xMin + resolutionLinear * (i + 0.5);
+			xLow = xMin + resolutionLinear * i;
+			xHigh = xLow + resolutionLinear;
+			for (j = 0; j < nCellsLinear; j++) {
+				yPt = yMin + resolutionLinear * (j + 0.5);
+				yLow = yMin + resolutionLinear * j;
+				yHigh = yLow + resolutionLinear;
+
+				if (x < xHigh && x > xLow && y < yHigh && y > yLow) {
+					System.err.print("@");
+				} else if (pointInCSpace(Mat.encodePoint(xPt, yPt), csObstacles3D)) {
+					System.err.print(".");
+				} else {
+					System.err.print("#");
+				}
+			}
+			System.err.println("");
+		}
+	}
+	/*
 	// occupancy grid is indexed from (xMin, yMin)
 	public boolean[][] getOccupancyGrid(int nCellsLinear) {
 		System.err.println("GOT HERE YO!");
@@ -183,6 +218,7 @@ public class CSpace {
 		System.err.println("GOT HERE TOO!");
 		return occupancyGrid;
 	}
+	*/
 
 	public static class Polygon {
 		private static final double DEFAULT_TOLERANCE = 0.0001;
