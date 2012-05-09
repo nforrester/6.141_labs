@@ -42,14 +42,14 @@ import VisualServo.VisionGUI;
 
 public class RobotController implements NodeMain, Runnable  {
 	private Node logNode;
-	
+
 	//State stuff
 	protected boolean firstUpdate = true;
 	public static final int IDLE=0;
 	public static final int ROTATING=1;
 	public static final int TRANSLATING=2;
 	private int state = IDLE;
-	
+
 	//PI Parameters
 	private double distanceError=0;
 	private double distanceErrorIntegral=0;
@@ -64,7 +64,7 @@ public class RobotController implements NodeMain, Runnable  {
 	private double headingOutput=0;
 
 	private double headingKpTrans =.25;
-	
+
 	// x, y, and theta record the robot's current position in the world frame
 	private double x;     // continuously updated in handleOdometry
 	private double y;     // continuously updated in handleOdometry
@@ -72,20 +72,20 @@ public class RobotController implements NodeMain, Runnable  {
 
 	private double legStartX;
 	private double legStartY;
-	
+
 	//Waypoint list
 	ArrayList<Waypoint> myWaypoints=new ArrayList<Waypoint>();
 
 	// transforms between odometry and world frames
 	private Mat odoToWorld; // initialized in handleOdometry
 	private Mat worldToOdo; // initialized in handleOdometry
-	
+
 	// transforms between robot and world frames
 	private Mat robotToWorld; // continuously updated in handleOdometry
-	
+
 	//ROS stuff to read odometry, command the motors and publish our current state
 	private Subscriber<org.ros.message.rss_msgs.OdometryMsg> odoSub;
-	
+
 	public Publisher<MotionMsg> motorPub;
 	private MotionMsg commandMotors;
 
@@ -101,7 +101,7 @@ public class RobotController implements NodeMain, Runnable  {
 		startX = sX;
 		startY = sY;
 	}
-	
+
 	/**
 	 * <p>
 	 * Add a waypoint to our queue of waypoints.
@@ -112,7 +112,7 @@ public class RobotController implements NodeMain, Runnable  {
 	public void addWaypoint(Waypoint p){
 		myWaypoints.add(p);
 	}
-	
+
 	public double fixAngle(double theta){
 		while (theta>=2*Math.PI){
 			theta-=2*Math.PI;
@@ -140,7 +140,7 @@ public class RobotController implements NodeMain, Runnable  {
 		if ( firstUpdate ) {
 			odoToWorld = Mat.mul(Mat.rotation(-message.theta), Mat.translation(startX - message.x, startY - message.y));
 			worldToOdo = Mat.inverse(odoToWorld);
-			
+
 			firstUpdate = false;
 		}
 
@@ -160,7 +160,7 @@ public class RobotController implements NodeMain, Runnable  {
 		//                    "\nODOM processed: " +         x + " " +         y + " " +         theta);
 		motorUpdate();
 	}
-	
+
 	public double getX(){
 		return x;
 	}
@@ -171,33 +171,33 @@ public class RobotController implements NodeMain, Runnable  {
 		commandMotors.rotationalVelocity=v;
 		motorPub.publish(commandMotors);
 	}
-	
-	
+
+
 	//Set of useful functions
 	public boolean comparePoints(double x1, double y1, double x2, double y2, double tolerance) {
 		return Math.pow(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2), 0.5) < tolerance;
 	}
-	
+
 	public double getAngle(double x1, double y1, double x2, double y2) {
 		return fixAngle(Math.atan2(y2-y1, x2-x1));
 	}
-	
+
 	public boolean compareAngles(double thetaOne, double thetaTwo, double tolerance) {
 		return fixAngle2(Math.abs(thetaTwo-thetaOne)) < tolerance;
 	}
-	
+
 	public double getDistance(double x1, double y1, double x2, double y2){
 		return Math.pow(Math.pow(x2-x1, 2)+Math.pow(y2-y1, 2), .5);
 	}
-	
-	
+
+
 	// Main FSM handler
 	private void motorUpdate(){
 		if (state==IDLE){
 			commandMotors.rotationalVelocity = 0;
 			commandMotors.translationalVelocity = 0;
 			if(myWaypoints.size()>0){
-				
+
 				//Set the desired heading, taking into account the direction we wish to face
 				if(myWaypoints.get(0).getDir()==1){
 					headingDesired=fixAngle(getAngle(x,y,myWaypoints.get(0).getX(),myWaypoints.get(0).getY()));
@@ -210,11 +210,11 @@ public class RobotController implements NodeMain, Runnable  {
 		}else if(state==ROTATING){
 			System.err.println("Rotating");
 			headingError = fixAngle2(headingDesired - theta);
-			
+
 			commandMotors.translationalVelocity = 0;
 			commandMotors.rotationalVelocity = headingKp * headingError + headingKi * headingErrorIntegral;
 			headingErrorIntegral+=headingError;
-			
+
 			if(compareAngles(theta,headingDesired, .15)){
 				commandMotors.rotationalVelocity = 0;
 				headingErrorIntegral=0;
@@ -243,15 +243,15 @@ public class RobotController implements NodeMain, Runnable  {
 					headingError = fixAngle2(getAngle((myWaypoints.get(0).getX() - x) * 1.1 + x, (myWaypoints.get(0).getY() - y) * 1.1 + y, x, y) - theta);
 				}
 			}*/
-			
+
 			System.err.println("headingError = " + headingError);
 			//commandMotors.rotationalVelocity =  headingKpTrans * headingError + headingKi * headingErrorIntegral;
 			//myWaypoints.get(0).getDir() *
 			commandMotors.translationalVelocity = myWaypoints.get(0).getDir()*(distanceKp * distanceError + distanceKi * distanceErrorIntegral);
 			distanceErrorIntegral += distanceError;
-			
+
 			System.err.println("rvel = " + commandMotors.rotationalVelocity + "tvel = " + commandMotors.translationalVelocity);
-			
+
 			//if(getDistance(x, y, legStartX, legStartY) >= getDistance(myWaypoints.get(0).getX(), myWaypoints.get(0).getY(), legStartX, legStartY)) {
 			if (comparePoints(x,y,myWaypoints.get(0).getX(),myWaypoints.get(0).getY(),.05)){
 				distanceErrorIntegral=0;
@@ -267,13 +267,13 @@ public class RobotController implements NodeMain, Runnable  {
 		}
 		motorPub.publish(commandMotors);
 	}
-	
+
 	@Override
 	public void run() {
-		
-		
+
+
 	}
-	
+
 	/**
 	 * <p>
 	 * Run the RobotController process
@@ -295,22 +295,22 @@ public class RobotController implements NodeMain, Runnable  {
 					handleOdometry(message);
 				}
 			});
-		
+
 		// initialize the ROS publication to command/Motors
 		motorPub = node.newPublisher("/command/Motors","rss_msgs/MotionMsg");
 		commandMotors = new MotionMsg();
-		
-		
+
+
 		// initialize the ROS publication to rss/state
 		statePub = node.newPublisher("/rss/state","std_msgs/String");
 		stateMsg = new org.ros.message.std_msgs.String();
 
 		legStartX = 0;
 		legStartY = 0;
-		
+
 		Thread runningStuff = new Thread(this);
 		runningStuff.start();
-		
+
 /*		addWaypoint(new Waypoint(.5, 0, (short) 1));
 		addWaypoint(new Waypoint(1, 1, (short) 1));
 		addWaypoint(new Waypoint(0, 0, (short) -1));
@@ -321,7 +321,7 @@ public class RobotController implements NodeMain, Runnable  {
 		addWaypoint(new Waypoint(0, 1, (short) -1));
 		addWaypoint(new Waypoint(1, 1, (short) -1));*/
 	}
-	
+
 	@Override
 	public void onShutdown(Node node){
 		if(node != null){
@@ -347,7 +347,7 @@ public class RobotController implements NodeMain, Runnable  {
 		}else if (state==TRANSLATING){
 			stateMsg.data = "TRANSLATING";
 		}
-		
+
 
 		statePub.publish(stateMsg);
 	}
@@ -355,7 +355,7 @@ public class RobotController implements NodeMain, Runnable  {
 	public ArrayList<Waypoint> getWaypoints() {
 		return myWaypoints;
 	}
-	
-	
-	
+
+
+
 	}

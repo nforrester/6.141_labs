@@ -9,7 +9,7 @@ import java.util.Iterator;
 
 public class PotentialField{
     private int[][] returnfield;
-    
+
     public static void main(String[] args) throws Exception {
         boolean[][] cspace = {{true,true,true,true,true,true,false,true,true,true},
                                 {false,false,false,true,false,false,false,true,false,true},
@@ -22,7 +22,7 @@ public class PotentialField{
                                 {true,true,false,true,true,true,false,true,false,true},
                                 {true,true,true,true,true,true,true,true,false,true}};
 
-       
+
         boolean[][] testCspace = {{true,true,true,true,true,true,true,true,true,true},
                 {true,true,true,true,true,false,true,true,true,true},
                 {true,true,true,true,true,true,true,true,true,true},
@@ -34,7 +34,7 @@ public class PotentialField{
                 {true,true,true,true,true,true,true,true,true,true},
                 {true,true,true,true,true,true,true,true,true,true}};
     }
-    
+
     public static ArrayList<int[]> getWayPoints(ArrayList<int[]> intialWayPoints){
         ArrayList<int[]> reduceOne = new ArrayList<int[]>();
         ArrayList<int[]> reduceTwo = new ArrayList<int[]>();
@@ -58,7 +58,7 @@ public class PotentialField{
                 checkReplicas.add(b);
             }
         }
-        
+
         checkReplicas = new ArrayList<int[]>(); //resetting replicas
             for(int[] b: reduceOne) { //reducing angles rotations and making them implicit
                 if(checkReplicas.size() == 0) {
@@ -81,10 +81,10 @@ public class PotentialField{
             int currentXValue = -100;
             int currentYValue = -100;
             for(int[] a: reduceTwo) {
-                
+
             }
-            
-            
+
+
 
             ArrayList<int[]> printValues = reduceTwo;
             System.out.println("reduced stuff"+ reduceTwo.size());
@@ -94,13 +94,13 @@ public class PotentialField{
 
             return reduceOne;
         }
-    
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
-/////////////////////////////////////////////////////2-Dimension///////////////////////////////////////////////////////////////////////////////      
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////     
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////    
-    
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////2-Dimension///////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     public static int[][] twoDPath(boolean[][] cspace,int x,int y) throws Exception {
         // two dimensional no theta
         int length = cspace.length;
@@ -111,7 +111,7 @@ public class PotentialField{
                 array[i][j] = -100;
             }
         }
-        
+
         if(!cspace[x][y]) {
             throw new Exception("Goal cannot be reached as the requested goal is on an obstacle");
         }
@@ -121,15 +121,15 @@ public class PotentialField{
                 for(int j=0;j<array[i].length;j++) {
                     if(cspace[i][j]) { //if the value is true
                         if(array[i][j] >= 0) {
-                            if(isValid(i+1,j,length,breadth)&& array[i+1][j] == -100) array[i+1][j] = array[i][j]+1; 
-                            if(isValid(i-1,j,length,breadth)&& array[i-1][j] == -100 ) array[i-1][j] = array[i][j]+1; 
-                            if(isValid(i,j+1,length,breadth)&& array[i][j+1] == -100) array[i][j+1] = array[i][j]+ 1; 
+                            if(isValid(i+1,j,length,breadth)&& array[i+1][j] == -100) array[i+1][j] = array[i][j]+1;
+                            if(isValid(i-1,j,length,breadth)&& array[i-1][j] == -100 ) array[i-1][j] = array[i][j]+1;
+                            if(isValid(i,j+1,length,breadth)&& array[i][j+1] == -100) array[i][j+1] = array[i][j]+ 1;
                             if(isValid(i,j-1,length,breadth)&& array[i][j-1] == -100) array[i][j-1] = array[i][j]+ 1;
 
-                            if(isValid(i+1,j+1,length,breadth)&& array[i+1][j+1] == -100) array[i+1][j+1] = array[i][j]+1; 
-                            if(isValid(i-1,j+1,length,breadth)&& array[i-1][j+1] == -100) array[i-1][j+1] = array[i][j]+1; 
-                            if(isValid(i-1,j-1,length,breadth)&& array[i-1][j-1] == -100) array[i-1][j-1] = array[i][j]+1; 
-                            if(isValid(i+1,j-1,length,breadth)&& array[i+1][j-1] == -100) array[i+1][j-1] = array[i][j]+1; 
+                            if(isValid(i+1,j+1,length,breadth)&& array[i+1][j+1] == -100) array[i+1][j+1] = array[i][j]+1;
+                            if(isValid(i-1,j+1,length,breadth)&& array[i-1][j+1] == -100) array[i-1][j+1] = array[i][j]+1;
+                            if(isValid(i-1,j-1,length,breadth)&& array[i-1][j-1] == -100) array[i-1][j-1] = array[i][j]+1;
+                            if(isValid(i+1,j-1,length,breadth)&& array[i+1][j-1] == -100) array[i+1][j-1] = array[i][j]+1;
                         }
                     }
                     else {
@@ -139,7 +139,7 @@ public class PotentialField{
             }
         }
 
-        
+
         ///////////////////////////////////Print Out Values///////////////////////////////
         for (int i = length - 1; i >= 0; i--) {
             for (int j = 0; j < length; j++) {
@@ -156,25 +156,25 @@ public class PotentialField{
         /////////////////////////////////////////////////////////////////////////////////////
         return array;
     }
-    
-    
-    
+
+
+
     private static boolean isValid(int xVal,int yVal,int maxX,int maxY) {
         return xVal >=0 && yVal >=0 && xVal < maxX && yVal < maxY;
     }
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
 public static ArrayList<int[]> pathFind(boolean[][] cspace,int[] start,int[] goal) throws Exception {
     ArrayList<int[]> wayPoints = new ArrayList<int[]>();
     int[][] numberArray = PotentialField.twoDPath(cspace, goal[0], goal[1]);
     PotentialCell[][] potentialField = PotentialField.makeCells(numberArray);
     int[] currentPosition = start.clone();
     int currentFieldValue = potentialField[start[0]][start[1]].getFieldValue();
-    
+
     System.err.println("currentFieldValue = " + currentFieldValue);
     if(currentFieldValue == -1) {
         throw new Exception("No solution Exists because the robot is on an obstacle!");
@@ -182,24 +182,24 @@ public static ArrayList<int[]> pathFind(boolean[][] cspace,int[] start,int[] goa
     if(currentFieldValue == -100) {
         throw new Exception("No solution Exists because you can't get there from here!");
     }
-    
+
    while(potentialField[currentPosition[0]][currentPosition[1]].getFieldValue() != 0) { //terminating condition
 
        int[] tempCurrentPosition = PotentialField.findNextCell(potentialField, potentialField[currentPosition[0]][currentPosition[1]]);
-       
-       
+
+
        if(tempCurrentPosition[0] == -1000 && potentialField[currentPosition[0]][currentPosition[1]].getTempStats().isEmpty()) {
            //cspace[currentPosition[0]][currentPosition[1]] = false; //newly added line
            //pathFind(cspace,start,goal);      //newly added line
            throw new Exception("No Solution as WTF!!!");
        }
-       
+
        else if(tempCurrentPosition[0] == -1000 && !potentialField[currentPosition[0]][currentPosition[1]].getTempStats().isEmpty()) {
            potentialField[currentPosition[0]][currentPosition[1]].clearTemporaryNeighbors(); //clear Neighbors if end reached!
        }
-       
+
        if(tempCurrentPosition[0] != -1000) {
-           currentPosition = tempCurrentPosition.clone(); 
+           currentPosition = tempCurrentPosition.clone();
        }
        // printing where the robot is headed!!
        wayPoints.add(currentPosition);
@@ -207,7 +207,7 @@ public static ArrayList<int[]> pathFind(boolean[][] cspace,int[] start,int[] goa
    }
    return wayPoints;
 }
-    
+
 	public static ArrayList<Waypoint> findWaypoints(CSpace cspace, Mat start, Mat end) throws Exception {
 		double[] startA = Mat.decodePoint(start);
 		double[] endA = Mat.decodePoint(end);
@@ -243,45 +243,45 @@ public static ArrayList<int[]> pathFind(boolean[][] cspace,int[] start,int[] goa
 
 		return waypoints;
 	}
-        
-   
+
+
   private static int[] findNextCell(PotentialCell[][] potentialField,PotentialCell currentCell) {
-        
-        HashMap<int[],Boolean> neighborStats = currentCell.getStats();      
-        
+
+        HashMap<int[],Boolean> neighborStats = currentCell.getStats();
+
         int currentCellFieldValue = currentCell.getFieldValue();
         int[] currentCellCoordinates = new int[] {currentCell.getX(),currentCell.getY()};
-        
+
         Iterator populate = neighborStats.keySet().iterator();
         if(!populate.hasNext()) return new int[] {-1000,-1000};
         int[] currentNextTarget = new int[] {-1000,-1000};
-        
+
         HashMap<int[],Boolean> validPopulation = new HashMap<int[],Boolean>();
-        
+
         while(populate.hasNext()) {
             int[] nextValue = (int[]) populate.next();
             if(neighborStats.get(nextValue) && !currentCell.checkTempOmit(nextValue)) {      //Add temporary stats check here
                 validPopulation.put(nextValue, true);
             }
         }
-        
+
         if(validPopulation.keySet().isEmpty()) return currentNextTarget;
-        
+
         Iterator leastFind = validPopulation.keySet().iterator();
         int[] currentArray = (int[]) leastFind.next();
         int currentMinimum = potentialField[currentArray[0]][currentArray[1]].getFieldValue();
         currentNextTarget = currentArray.clone();
         while(leastFind.hasNext()) {
             currentArray = (int[]) leastFind.next();
-            int dummyValue = potentialField[currentArray[0]][currentArray[1]].getFieldValue(); 
+            int dummyValue = potentialField[currentArray[0]][currentArray[1]].getFieldValue();
             if(dummyValue < currentMinimum) {
                 currentMinimum = dummyValue;
                 currentNextTarget = currentArray.clone();
             }
         }
-        
+
       // if moving to cell of same value, so restrict direction
-        if(currentCellFieldValue == currentMinimum && (validPopulation.size() <= 2)) { 
+        if(currentCellFieldValue == currentMinimum && (validPopulation.size() <= 2)) {
             potentialField[currentNextTarget[0]][currentNextTarget[1]].addTemporaryOmit(currentCellCoordinates);
         }
         else if(currentCellFieldValue == currentMinimum && (validPopulation.size() > 2)){ // If the robot is not really stuck in an obstacle box withjust one pathway.
@@ -292,7 +292,7 @@ public static ArrayList<int[]> pathFind(boolean[][] cspace,int[] start,int[] goa
                 potentialField[nextNeighbor[0]][nextNeighbor[1]].changeStatus(new int[] {currentCellCoordinates[0],currentCellCoordinates[1]}, false);
             }
         }
-        
+
         //if moving to a cell of Value greater than current cell, it is a local minimum.
         if(currentCellFieldValue < currentMinimum) {
             HashMap<int[],Boolean> elementNeighbors = potentialField[currentCellCoordinates[0]][currentCellCoordinates[1]].getStats();
@@ -301,38 +301,38 @@ public static ArrayList<int[]> pathFind(boolean[][] cspace,int[] start,int[] goa
                 int[] nextNeighbor = (int[]) it.next();
                 potentialField[nextNeighbor[0]][nextNeighbor[1]].changeStatus(new int[] {currentCellCoordinates[0],currentCellCoordinates[1]}, false);
             }
-        }       
+        }
         return currentNextTarget;
     }
-    
- 
-    
-    
-    
+
+
+
+
+
     public static PotentialCell[][] makeCells(int[][] numberArray) throws Exception {
         // two dimensional no theta
         int length = numberArray.length;
         int breadth = numberArray[0].length;
         PotentialCell[][] array = new PotentialCell[length][breadth];
         for(int i=0;i<array.length;i++) {
-            for(int j=0;j<array[i].length;j++) { 
+            for(int j=0;j<array[i].length;j++) {
                 if(numberArray[i][j] != -1) {
-                    array[i][j] = new PotentialCell(i,j,length,breadth,false,numberArray[i][j]);              
+                    array[i][j] = new PotentialCell(i,j,length,breadth,false,numberArray[i][j]);
                 }
                 else {
-                    array[i][j] = new PotentialCell(i,j,length,breadth,true,numberArray[i][j]);  
+                    array[i][j] = new PotentialCell(i,j,length,breadth,true,numberArray[i][j]);
                 }
             }
         }
-        
+
         ////// Change Obstacle stats as per obstacle Values////////////////////////////
         for(int i=0;i<array.length;i++) {
             for(int j=0;j<array[i].length;j++) {
                 array[i][j].formatNeighbors(array);
             }
-        }        
+        }
         ////////////////////////////////////////////////////////////////////////////////
-        
+
         ///////////////////////////////////Print Out Values///////////////////////////////
         /*for(PotentialCell[] a:array) {
             for(PotentialCell b: a) {
@@ -343,13 +343,13 @@ public static ArrayList<int[]> pathFind(boolean[][] cspace,int[] start,int[] goa
         /////////////////////////////////////////////////////////////////////////////////////
         return array;
     }
-    
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
-/////////////////////////////////////////////////////2-Dimension///////////////////////////////////////////////////////////////////////////////      
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////     
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////      
-    
-    
-    
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////2-Dimension///////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
 
 }
