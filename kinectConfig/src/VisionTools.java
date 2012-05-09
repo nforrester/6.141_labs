@@ -33,11 +33,11 @@ public class VisionTools {
 
 
 
-	public int[][] blobPresent(KinectImage src, KinectImage dest){
+	public double[][] blobPresent(KinectImage src, KinectImage dest){
 
 		this.classify(src,dest);
 
-		int[][] returnArray = new int[4][3];
+		double[][] returnArray = new double[4][6];
 		int[] matchingPixels = new int[4];
 		long[] matchingPixelsXCount = new long[4];
 		long[] matchingPixelsYCount = new long[4];
@@ -72,7 +72,7 @@ public class VisionTools {
 		}
 
 		for(int i=0;i<4;i++){
-			if(matchingPixels[i] > 500){
+			if(matchingPixels[i] > 100){
 				matchingPixelsXCount[i] /= (long)matchingPixels[i];
 				matchingPixelsYCount[i] /= (long)matchingPixels[i];
 			}
@@ -85,10 +85,15 @@ public class VisionTools {
 			returnArray[i][0] = (int) matchingPixels[i]; //area
 			returnArray[i][1] = (int)matchingPixelsXCount[i] - (int)(dest.getWidth()/2); // Averaged X with (0,0) as center of image
 			returnArray[i][2] = (int)matchingPixelsYCount[i] - (int)(dest.getHeight()/2); // Averaged Y with (0,0) as center of image
+			double[] depthData = getDepthData((int)matchingPixelsXCount[i],(int)matchingPixelsYCount[i],src);
+			returnArray[i][3] = (depthData[0] > 5) ? -100 : depthData[0];
+			returnArray[i][4] = (depthData[1] > 5) ? -100 : depthData[1];
+			returnArray[i][5] = (depthData[2] > 5) ? -100 : depthData[2];
+
 
 			if(matchingPixelsXCount[i] > 0 && matchingPixelsYCount[i] > 0){
 				for (int j = (int)matchingPixelsXCount[i] - 8; j< (int)matchingPixelsXCount[i] + 9;j++){
-				
+
 					if(j < dest.getWidth() && j > 0){
 						dest.setPixel(dest.getPixel(j,(int)matchingPixelsYCount[i]).changeColor(255,   255,   255),
 								j,(int)matchingPixelsYCount[i]);
@@ -96,7 +101,7 @@ public class VisionTools {
 					}
 				}
 				for (int j = (int)matchingPixelsYCount[i] - 8; j< (int)matchingPixelsYCount[i] + 9;j++){
-					
+
 					if(j < dest.getHeight() && j > 0){
 						dest.setPixel(dest.getPixel((int)matchingPixelsYCount[i],j).changeColor(255,   255,   255),
 								(int)matchingPixelsYCount[i],j);
@@ -106,9 +111,9 @@ public class VisionTools {
 			}
 
 		}
-		
-	
-			System.err.println("Red Area -> " + returnArray[0][0] + "Red X -> " + returnArray[0][1]
+
+
+		/*System.err.println("Red Area -> " + returnArray[0][0] + "Red X -> " + returnArray[0][1]
 					+ "Red Y -> " + returnArray[0][2]);
 			System.err.println("green Area -> " + returnArray[1][0] + "green X -> " + returnArray[1][1]
 					+ "green Y -> " + returnArray[1][2]);
@@ -116,9 +121,19 @@ public class VisionTools {
 					+ "blue Y -> " + returnArray[2][2]);
 			System.err.println("yellow Area -> " + returnArray[3][0] + "yellow X -> " + returnArray[3][1]
 					+ "yellow Y -> " + returnArray[3][2]);
-			System.err.println();
-		
-		
+			System.err.println();*/
+
+		System.err.println("Red X -> " + returnArray[0][3] + "Red Y -> " + returnArray[0][4]
+				+ "Red Z -> " + returnArray[0][5]);
+		System.err.println("green X -> " + returnArray[1][3] + "green Y -> " + returnArray[1][4]
+				+ "green Z -> " + returnArray[1][5]);
+		System.err.println("blue X -> " + returnArray[2][3] + "blue Y -> " + returnArray[2][4]
+				+ "blue Z -> " + returnArray[2][5]);
+		System.err.println("yellow X -> " + returnArray[3][3] + "yellow Y -> " + returnArray[3][4]
+				+ "yellow Z -> " + returnArray[3][5]);
+		System.err.println();
+
+
 		return returnArray;
 	}
 
@@ -299,6 +314,34 @@ public class VisionTools {
 		}
 
 		return Math.abs(pixHue) < tolerance;
+	}
+
+
+	private double[] getDepthData(int row,int col,KinectImage src) {
+		KinectPixel testPixel = src.getPixel(row, col);
+		if(!Float.isNaN(testPixel.getX()) && !Float.isNaN(testPixel.getY()) && !Float.isNaN(testPixel.getZ())){
+			return new double[]{testPixel.getX(),testPixel.getY(),testPixel.getZ()};
+		}
+		else{
+
+			if(isValid(row,col-1,src)){
+				return getDepthData(row,col-1,src);
+			}
+
+		}
+		return new double[]{-100,-100,-100};
+	}
+
+
+
+	private boolean isValid(int xVal,int yVal,KinectImage src) {
+		return xVal >=0 && yVal >=0 && xVal < src.getWidth() && yVal < src.getHeight();
+	}
+
+	private ArrayList<int[]> getNeighborsOne(int x,int y) {
+		ArrayList<int[]> neighborList = new ArrayList<int[]>();
+		neighborList.add(new int[]{x,y-1});
+		return neighborList;
 	}
 
 
