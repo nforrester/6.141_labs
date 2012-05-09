@@ -1,7 +1,6 @@
 package Challenge;
 
 import LocalNavigation.Mat;
-import GlobalNavigation.PolygonMap;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -23,7 +22,7 @@ public class Sentinel implements NodeMain {
 
 	private RobotController navigator;
 
-	private PolygonMap map;
+	private GrandChallengeMap map;
 
 	public Sentinel() {
 	}
@@ -55,17 +54,17 @@ public class Sentinel implements NodeMain {
 		System.err.println("WAYPOINTS ADDED");
 		*/
 
-		String mapFile = "/home/rss-student/RSS-I-group/Challenge/src/challenge_2012.txt";
+		String mapFile = "/home/rss-student/RSS-I-group/Challenge/src/construction_map_2012.txt";
 		try {
-			map = new PolygonMap(mapFile);
+			map = GrandChallengeMap.parseFile(mapFile);
 		} catch(IOException e) {
-			System.err.println("IOException in PolygonMap");
+			System.err.println("IOException in GrandChallengeMap");
 			System.exit(0);
 		} catch(ParseException e) {
-			System.err.println("ParseException in PolygonMap");
+			System.err.println("ParseException in GrandChallengeMap");
 			System.exit(0);
 		} catch(Exception e) {
-			System.err.println("Exception in PolygonMap");
+			System.err.println("Exception in GrandChallengeMap");
 			System.exit(0);
 		}
 
@@ -79,9 +78,10 @@ public class Sentinel implements NodeMain {
 		CSpace cspace = new CSpace(robot, map);
 
 		ArrayList<Mat> goals = new ArrayList<Mat>();
-		goals.add(Mat.encodePoint(1, 0));
-		goals.add(Mat.encodePoint(0, 1));
-		goals.add(Mat.encodePoint(3, 4));
+		for (ConstructionObject block: map.getConstructionObjects()) {
+			Point2D.Double pos = block.getPosition()
+			goals.add(Mat.encodePoint(pos.getX(), pos.getY()));
+		}
 
 		Mat legStart = Mat.encodePoint(0, 0);
 		ArrayList<Waypoint> waypoints;

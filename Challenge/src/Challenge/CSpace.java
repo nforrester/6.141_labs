@@ -4,7 +4,6 @@ import java.awt.geom.*;
 import java.util.*;
 
 import LocalNavigation.Mat;
-import GlobalNavigation.PolygonMap;
 import GlobalNavigation.PolygonObstacle;
 import GlobalNavigation.GeomUtils;
 
@@ -23,10 +22,10 @@ public class CSpace {
 	public double xMin, yMin, xMax, yMax;
 
 	// robot reference point is the origin
-	public CSpace(Polygon robot, PolygonMap map) {
+	public CSpace(Polygon robot, GrandChallengeMap map) {
 		Rectangle2D.Double worldRect = map.getWorldRect();
 		constructor(robot, worldRect.getMinX(), worldRect.getMinY(), worldRect.getMaxX(), worldRect.getMaxY());
-		for (PolygonObstacle obstacle : map.getObstacles()) {
+		for (PolygonObstacle obstacle : map.getPolygonObstacles()) {
 			addObstacle(obstacle);
 		}
 	}
