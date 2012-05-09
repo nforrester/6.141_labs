@@ -34,7 +34,6 @@ import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
-import Challenge.PhaseTwo.ConstructionBlock;
 import LocalNavigation.Mat;
 /*
 import VisualServo.VisionGUI;
@@ -150,7 +149,7 @@ public class RobotController implements NodeMain, Runnable  {
 		y     = robotPose[1];
 		theta = robotPose[2];
 
-		//System.err.println("(odometry " + x + " " + y + " " + theta + ")");
+		System.err.println("(odometry " + x + " " + y + " " + theta + ")");
 
 		theta=fixAngle(theta);
 
@@ -229,31 +228,18 @@ public class RobotController implements NodeMain, Runnable  {
 			distanceError += 0.05; // cause it to aim to overshoot, so that it arrives in finite time
 
 			System.err.println("distanceError = " + distanceError);
-			/*
-			if(myWaypoints.get(0).getDir()==1){
-				if (distanceError > 0.15) { // cause rotation guidance to shift to a point beyond the goal, towards the very end, so we get accurate distance, and no crazy turning about at the end of the leg
-					headingError = fixAngle2(getAngle(x, y, myWaypoints.get(0).getX(), myWaypoints.get(0).getY()) - theta);
-				} else {
-					headingError = fixAngle2(getAngle(x, y, (myWaypoints.get(0).getX() - x) * 1.1 + x, (myWaypoints.get(0).getY() - y) * 1.1 + y) - theta);
-				}
-			}else{
-				if (distanceError > 0.15) { // cause rotation guidance to shift to a point beyond the goal, towards the very end, so we get accurate distance, and no crazy turning about at the end of the leg
-					headingError = fixAngle2(getAngle(myWaypoints.get(0).getX(), myWaypoints.get(0).getY(), x, y) - theta);
-				} else {
-					headingError = fixAngle2(getAngle((myWaypoints.get(0).getX() - x) * 1.1 + x, (myWaypoints.get(0).getY() - y) * 1.1 + y, x, y) - theta);
-				}
-			}*/
-
+			if (distanceError > 0.15) { // cause rotation guidance to shift to a point beyond the goal, towards the very end, so we get accurate distance, and no crazy turning about at the end of the leg
+				headingError = fixAngle2(getAngle(x, y, myWaypoints.get(0).getX(), myWaypoints.get(0).getY()) - theta);
+			} else {
+				headingError = fixAngle2(getAngle(x, y, (myWaypoints.get(0).getX() - x) * 1.1 + x, (myWaypoints.get(0).getY() - y) * 1.1 + y) - theta);
+			}
 			System.err.println("headingError = " + headingError);
-			//commandMotors.rotationalVelocity =  headingKpTrans * headingError + headingKi * headingErrorIntegral;
-			//myWaypoints.get(0).getDir() *
+			commandMotors.rotationalVelocity = headingKpTrans * headingError + headingKi * headingErrorIntegral;
+
 			commandMotors.translationalVelocity = myWaypoints.get(0).getDir()*(distanceKp * distanceError + distanceKi * distanceErrorIntegral);
 			distanceErrorIntegral += distanceError;
 
-			System.err.println("rvel = " + commandMotors.rotationalVelocity + "tvel = " + commandMotors.translationalVelocity);
-
-			//if(getDistance(x, y, legStartX, legStartY) >= getDistance(myWaypoints.get(0).getX(), myWaypoints.get(0).getY(), legStartX, legStartY)) {
-			if (comparePoints(x,y,myWaypoints.get(0).getX(),myWaypoints.get(0).getY(),.05)){
+			if(getDistance(x, y, legStartX, legStartY) >= getDistance(myWaypoints.get(0).getX(), myWaypoints.get(0).getY(), legStartX, legStartY)) {
 				distanceErrorIntegral=0;
 				commandMotors.translationalVelocity = 0;
 				legStartX = myWaypoints.get(0).getX();
@@ -270,8 +256,6 @@ public class RobotController implements NodeMain, Runnable  {
 
 	@Override
 	public void run() {
-
-
 	}
 
 	/**
@@ -299,7 +283,6 @@ public class RobotController implements NodeMain, Runnable  {
 		// initialize the ROS publication to command/Motors
 		motorPub = node.newPublisher("/command/Motors","rss_msgs/MotionMsg");
 		commandMotors = new MotionMsg();
-
 
 		// initialize the ROS publication to rss/state
 		statePub = node.newPublisher("/rss/state","std_msgs/String");
@@ -350,10 +333,6 @@ public class RobotController implements NodeMain, Runnable  {
 
 
 		statePub.publish(stateMsg);
-	}
-
-	public ArrayList<Waypoint> getWaypoints() {
-		return myWaypoints;
 	}
 
 
