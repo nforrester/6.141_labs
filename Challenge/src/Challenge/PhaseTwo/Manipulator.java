@@ -30,7 +30,7 @@ public class Manipulator {
 	public final double A_X_B=2.5*I2M;  //Length from Robot origin to base of Arm. To measure in m
 	public final double L_ARM=.245;  //Length of Arm. To measure in m
 	public final double L_WRIST=.13;  //Length of Wrist. to measure in m
-	public final double Y_MAX=.505;  //Max Height
+	public final static double Y_MAX=.505;  //Max Height
 	public final double Y_MIN=.015;  //Min Height
 	
 	public static final short HAND_PORT=2;  //Servo port for gripper

@@ -1,13 +1,16 @@
 package Challenge.PhaseTwo;
 
-import Challenge.Mat;
-import Challenge.MessageListener;
-import Challenge.MotionMsg;
-import Challenge.Node;
-import Challenge.Publisher;
-import Challenge.Subscriber;
+import org.ros.message.MessageListener;
+import org.ros.message.rss_msgs.MotionMsg;
+import org.ros.namespace.GraphName;
+import org.ros.node.Node;
+import org.ros.node.NodeMain;
+import org.ros.node.topic.Publisher;
+import org.ros.node.topic.Subscriber;
 
-public class PhaseTwoMotorController implements nodeMain, Runnable {
+import LocalNavigation.Mat;
+
+public class PhaseTwoMotorController implements NodeMain, Runnable {
 	
 	private Node logNode;
 	
@@ -19,6 +22,9 @@ public class PhaseTwoMotorController implements nodeMain, Runnable {
 	private double y;     // continuously updated in handleOdometry
 	private double theta; // continuously updated in handleOdometry
 	
+
+	protected boolean firstUpdate = true;
+	
 	// transforms between odometry and world frames
 	private Mat odoToWorld; // initialized in handleOdometry
 	private Mat worldToOdo; // initialized in handleOdometry
@@ -26,8 +32,6 @@ public class PhaseTwoMotorController implements nodeMain, Runnable {
 	// transforms between robot and world frames
 	private Mat robotToWorld; // continuously updated in handleOdometry
 	
-	//ROS stuff to read odometry, command the motors and publish our current state
-	private Subscriber<org.ros.message.rss_msgs.OdometryMsg> odoSub;
 	
 	public Publisher<MotionMsg> motorPub;
 	private MotionMsg commandMotors;
@@ -37,8 +41,10 @@ public class PhaseTwoMotorController implements nodeMain, Runnable {
 	//PI parameters
 	private double distanceError=0;
 	private double distanceErrorIntegral=0;
-	private double distanceKp=.65;
-	private double distanceKi=0.005;
+	private double distanceKp=.3;
+	private double distanceKi=0.01;
+	
+	private boolean newOdoMsg=false;
 	
 	
 	//Set of useful functions
@@ -47,6 +53,24 @@ public class PhaseTwoMotorController implements nodeMain, Runnable {
 	}
 	public double getDistance(double x1, double y1, double x2, double y2){
 		return Math.pow(Math.pow(x2-x1, 2)+Math.pow(y2-y1, 2), .5);
+	}
+	public double fixAngle(double theta){
+		while (theta>=2*Math.PI){
+			theta-=2*Math.PI;
+		}
+		while (theta<0){
+			theta+=2*Math.PI;
+		}
+		return theta;
+	}
+	public double fixAngle2(double theta){
+		while (theta>=Math.PI){
+			theta-=2*Math.PI;
+		}
+		while (theta<-Math.PI){
+			theta+=2*Math.PI;
+		}
+		return theta;
 	}
 	
 	//Getter Methods
@@ -58,25 +82,33 @@ public class PhaseTwoMotorController implements nodeMain, Runnable {
 	}
 	
 	//Main Command Functions
-	public void goToX(double xNew){
+	public void goToX(double xNew, int d){
 		isMoving=true;
-		System.err.println("Translating");
-		while(!comparePoints(x,y,xNew,y,.02)){
-		distanceError=getDistance(x, y, xNew ,y);
+		System.err.println("Translating to"+xNew);
 		
-		commandMotors.translationalVelocity = 1*(distanceKp * distanceError + distanceKi * distanceErrorIntegral);
-		distanceErrorIntegral += distanceError;
-		
-		motorPub.publish(commandMotors);
+		while(!comparePoints(x,y,xNew,y,.01)){
+			if(newOdoMsg == true){
+				newOdoMsg = false;
+				distanceError=d*getDistance(x, y, xNew ,y);
+				
+				commandMotors.translationalVelocity = (distanceKp * distanceError + distanceKi * distanceErrorIntegral);
+				distanceErrorIntegral += distanceError;
+				
+				System.err.println("X ("+x+") - xNew ("+xNew+") = distanceError = " + distanceError);
+				System.err.println("velocity = " + commandMotors.translationalVelocity);
+				motorPub.publish(commandMotors);
+			}
+			Thread.yield();
 		}
 		distanceErrorIntegral=0;
 		commandMotors.translationalVelocity = 0;
 		motorPub.publish(commandMotors);
 		isMoving=false;
+		
 	}
 	
-	public void goToRelX(double dx){
-		goToX(x+dx);
+	public void goToRelX(double dx, int dir){
+		goToX(x+dx,dir);
 	}
 	
 	public void setTranslationalVelocity(double v){
@@ -99,14 +131,14 @@ public class PhaseTwoMotorController implements nodeMain, Runnable {
 			
 			firstUpdate = false;
 		}
-
+		newOdoMsg=true;
 		double[] robotPose = Mat.decodePose(Mat.mul(odoToWorld, Mat.encodePose(message.x, message.y, message.theta)));
 
 		x     = robotPose[0];
 		y     = robotPose[1];
 		theta = robotPose[2];
 
-		//System.err.println("(odometry " + x + " " + y + " " + theta + ")");
+		System.err.println("(odometry " + x + " " + y + " " + theta + ")");
 
 		theta=fixAngle(theta);
 
@@ -138,6 +170,21 @@ public class PhaseTwoMotorController implements nodeMain, Runnable {
 	@Override
 	public void run() {
 				
+	}
+	@Override
+	public void onShutdown(Node arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void onShutdownComplete(Node arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public GraphName getDefaultNodeName() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

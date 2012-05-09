@@ -35,7 +35,7 @@ public class PhaseTwoController implements NodeMain, Runnable{
 	public static final int DONE=4;
 	public static final int DEBUG=5;
 	public static final int LOCALIZE=6;
-	public static final int GO_TO_NEXT=6;
+	public static final int GO_TO_NEXT=7;
 	
 	private boolean currentBreakBeamValue = false;
 	
@@ -44,13 +44,13 @@ public class PhaseTwoController implements NodeMain, Runnable{
 	private int iterator=1;
 	
 	//Measured Stuff
-	public static final double BLOCK_SIZE=2.07*Manipulator.I2M;
+	public static final double BLOCK_SIZE=1.93*Manipulator.I2M;
 	
 	public final double[][] DATA={{600,500,0},
 								  {725,800,-.08},
 								  {900,1000,-.115},
 								  {1010,1150,-.135},
-								  {1050,1250,-.145}};
+								  {1075,1250,-.145}};
 	
 	//ROS stuff
 	private Node node;
@@ -92,18 +92,19 @@ public class PhaseTwoController implements NodeMain, Runnable{
 	//Main FSM Handles
 	private void step(){
 		if(state==INIT){
-
 			System.err.println("Init");
-			changeState(DEPOSIT_BLOCKS);
+			//changeState(DEPOSIT_BLOCKS);
 			//changeState(DEBUG);
-			//changeState(PICK_UP);
+			changeState(PICK_UP);
 		
 		}else if(state==DEPOSIT_BLOCKS){
 
 			System.err.println("deposit");
+			
+			waitUp(500);
 		    //assumes that odometry has been reset at the beginning of phase 2		        
-		    robotController.goToX(-2*15*Manipulator.I2M);
-		    waitUp(1000);
+		    robotController.goToX(-27.0*Manipulator.I2M,-1);
+		    waitUp(500);
 		    while(robotController.getIsMoving()){
 		    }
 
@@ -112,59 +113,73 @@ public class PhaseTwoController implements NodeMain, Runnable{
 		    
 		}else if(state==LOCALIZE){
 			System.err.println("localize");
+			/*
 			manipulator.goToPickUp2();
-			waitUp(1000);
+			waitUp(500);
 			while(!currentBreakBeamValue){//while(IR Sensor is unbroken)
 				robotController.setTranslationalVelocity(.1);
 			}
 			
 			robotController.setTranslationalVelocity(0);
+			*/
+			robotController.goToRelX(-.25,-1);
+		    waitUp(500);
+		    while(robotController.getIsMoving()){
+		    }
+		    manipulator.goToPickUp2();
+			waitUp(500);
+			robotController.goToRelX(.25,1);
+		    waitUp(500);
+		    while(robotController.getIsMoving()){
+		    }
 			xStart=x;
 			changeState(PICK_UP);
 			
 		}else if(state==PICK_UP){
-
 			System.err.println("pick up");
+			manipulator.openGripper();
+			waitUp(500);
 			manipulator.goToPickUp2();
-			waitUp(2000);
+			waitUp(500);
 			manipulator.closeGripper();
-			waitUp(2000);
-			robotController.goToX(DATA[iterator][2]+xStart);
+			waitUp(500);
+			robotController.goToX(DATA[iterator][2]+xStart,-1);
 			System.err.println(robotController.getIsMoving());
-			waitUp(2000);
+			waitUp(500);
 		    while(robotController.getIsMoving()){
 		    }
 	        manipulator.servoOut2((int)DATA[iterator][0],(int)DATA[iterator][1],500);
-		    waitUp(2000);
+		    waitUp(500);
 		    changeState(PLACE);
 		    
 		}else if(state==PLACE){
 			
 			System.err.println("place");
-			robotController.goToX(towerHeight-iterator)*BLOCK_SIZE+DATA[iterator][2]+xStart);
-			waitUp(2000);
+			robotController.goToX((towerHeight-1)*BLOCK_SIZE+DATA[iterator][2]+xStart,1);
+			waitUp(500);
 		    while(robotController.getIsMoving()){
 		    }
 		    manipulator.openGripper();
-		    waitUp(2000);
+		    waitUp(500);
 		    iterator++;
 		    changeState(GO_TO_NEXT);
 		}else if(state==GO_TO_NEXT){
+			System.err.println("Go To Next");
 			if (iterator==towerHeight){
-				robotController.goToX(xStart);
-				waitUp(2000);
+				robotController.goToX(xStart,-1);
+				waitUp(500);
 			    while(robotController.getIsMoving()){
 			    }
 				changeState(DONE);
 			}else{
-				robotController.goToX((iterator-1)*BLOCK_SIZE+DATA[iterator][2]+xStart);
-				waitUp(2000);
+				robotController.goToX((iterator-1)*BLOCK_SIZE+DATA[iterator][2]+xStart,-1);
+				waitUp(500);
 			    while(robotController.getIsMoving()){
 			    }
 			    manipulator.goToPickUp2();
-			    waitUp(2000);
-			    robotController.goToX((iterator-1)*BLOCK_SIZE+xStart);
-			    waitUp(2000);
+			    waitUp(500);
+			    robotController.goToX((iterator-1)*BLOCK_SIZE+xStart,1);
+			    waitUp(500);
 			    while(robotController.getIsMoving()){
 			    }
 				changeState(PICK_UP);
