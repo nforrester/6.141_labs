@@ -1,11 +1,11 @@
 package Challenge;
 
+import LocalNavigation.Mat;
+import GlobalNavigation.PotentialCell;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-
-
-
 
 public class PotentialField{
     private int[][] returnfield;
@@ -33,32 +33,7 @@ public class PotentialField{
                 {true,true,true,true,true,true,true,true,true,true},
                 {true,true,true,true,true,true,true,true,true,true},
                 {true,true,true,true,true,true,true,true,true,true}};
-        
-        boolean[][][] cspace3D = new boolean[8][cspace.length][cspace.length];
-        for(int i=0;i < cspace3D.length;i++) {
-            cspace3D[i] = testCspace.clone();
-        }
-        
-        /*int[][][] k = PotentialField.threeDPath(cspace3D,5,5,5);
-        PotentialCell3D[][][] potentialField = PotentialField.makeCells3D(k);
-        int[] target = PotentialField.findNextCell3D(potentialField, potentialField[3][5][4]);
-        System.out.println("Current Value -> " + potentialField[4][5][4].getX() + "," + potentialField[4][5][4].getY() + "," + potentialField[4][5][4].getThetaType() +  " value -> " + potentialField[4][5][4].getFieldValue());
-        System.out.println("Next Target -> " + target[0] + "," + target[1] + "," + target[2] +  " value -> " + potentialField[target[0]][target[1]][target[2]].getFieldValue());*/
-        
-       /*PotentialCell[][] cells = PotentialField.makeCells(cspace, 9, 9);
-        int[] target =PotentialField.findNextCell(cells, cells[0][9]);
-        System.out.println("Next Target -> " + target[0] + "," + target[1] + " value -> " + cells[target[0]][target[1]].getFieldValue());
-        cells[target[0]][target[1]].printNeighborStats();*/
-        
-        PotentialField.getWayPoints(PotentialField.pathFind3D(cspace3D, new int[] {2,3,2},  new int[] {6,6,6}));
-        
-
-        //PotentialField.pathFind(cspace, new int[] {2,0}, new int[] {9,9});
-        
-        
     }
-    
-    
     
     public static ArrayList<int[]> getWayPoints(ArrayList<int[]> intialWayPoints){
         ArrayList<int[]> reduceOne = new ArrayList<int[]>();
@@ -83,7 +58,6 @@ public class PotentialField{
                 checkReplicas.add(b);
             }
         }
-
         
         checkReplicas = new ArrayList<int[]>(); //resetting replicas
             for(int[] b: reduceOne) { //reducing angles rotations and making them implicit
@@ -121,234 +95,6 @@ public class PotentialField{
             return reduceOne;
         }
     
-    
-    
-    public static ArrayList<int[]> pathFind3D(boolean[][][] cspace,int[] start,int[] goal) throws Exception {
-        ArrayList<int[]> wayPoints = new ArrayList<int[]>();
-        int[][][] numberArray = PotentialField.threeDPath(cspace, goal[0], goal[1], goal[2]);
-        PotentialCell3D[][][] potentialField = PotentialField.makeCells3D(numberArray);
-        int[] currentPosition = start.clone();
-        int currentFieldValue = potentialField[start[0]][start[1]][start[2]].getFieldValue();
-        
-        if(currentFieldValue == -1) {
-            throw new Exception("No solution Exists because the robot is on an obstacle!");
-        }
-        
-       while(potentialField[currentPosition[0]][currentPosition[1]][currentPosition[2]].getFieldValue() != 0) { //terminating condition
-
-           int[] tempCurrentPosition = PotentialField.findNextCell3D(potentialField, potentialField[currentPosition[0]][currentPosition[1]][currentPosition[2]]);
-           
-           
-           if(tempCurrentPosition[0] == -1000) {
-               System.err.println("No Solution as the robot is surrounded by obstacles!!!");
-               return wayPoints;
-           }
-           
-           
-           if(tempCurrentPosition[0] != -1000) {
-               currentPosition = tempCurrentPosition.clone(); 
-           }
-           // printing where the robot is headed!!
-           int[] addArray = new int[] {currentPosition[0],currentPosition[1],currentPosition[2],potentialField[currentPosition[0]][currentPosition[1]][currentPosition[2]].getFieldValue()};
-           wayPoints.add(addArray);
-           System.err.println("moving to " + currentPosition[0] + "," + currentPosition[1] + "," + currentPosition[2]+ " -> " +  potentialField[currentPosition[0]][currentPosition[1]][currentPosition[2]].getFieldValue());
-       }
-       return wayPoints;
-    }
-        
-    
-    
-    
-  private static int[] findNextCell3D(PotentialCell3D[][][] potentialField,PotentialCell3D currentCell) throws Exception {
-        
-        HashMap<int[],Boolean> neighborStats = currentCell.getStats();      
-        
-        int currentCellFieldValue = currentCell.getFieldValue();
-        if(currentCellFieldValue == -1) {
-            throw new Exception("The robot is on an obstacle");
-        }
-        
-        int[] currentCellCoordinates = new int[] {currentCell.getX(),currentCell.getY(),currentCell.getThetaType()};
-        
-        Iterator populate = neighborStats.keySet().iterator();
-        if(!populate.hasNext()) return new int[] {-1000,-1000,-1000};
-        int[] currentNextTarget = new int[] {-1000,-1000,-1000};
-        
-        HashMap<int[],Boolean> validPopulation = new HashMap<int[],Boolean>();
-        
-        while(populate.hasNext()) {
-            int[] nextValue = (int[]) populate.next();
-            if(neighborStats.get(nextValue)) {      //Add temporary stats check here
-                validPopulation.put(nextValue, true);
-            }
-        }
-        
-        // if there are no valid directions in which we can travel, return no solution
-        if(validPopulation.keySet().isEmpty()) return currentNextTarget;
-        
-        Iterator leastFind = validPopulation.keySet().iterator();
-        int[] currentArray = (int[]) leastFind.next();
-        int currentMinimum = potentialField[currentArray[0]][currentArray[1]][currentArray[2]].getFieldValue();
-        currentNextTarget = currentArray.clone();
-        while(leastFind.hasNext()) {
-            currentArray = (int[]) leastFind.next();
-            int dummyValue = potentialField[currentArray[0]][currentArray[1]][currentArray[2]].getFieldValue(); 
-            if(dummyValue < currentMinimum) {
-                currentMinimum = dummyValue;
-                currentNextTarget = currentArray.clone();
-            }
-        }
-        
-      // if moving to cell of same value, so restrict direction
-        
-        if(currentCellFieldValue == currentMinimum && (validPopulation.size() > 2)){ // If the robot is not really stuck in an obstacle box withjust one pathway.
-            HashMap<int[],Boolean> elementNeighbors = potentialField[currentCellCoordinates[0]][currentCellCoordinates[1]][currentCellCoordinates[2]].getStats();
-            Iterator it = elementNeighbors.keySet().iterator();
-            while(it.hasNext()) {
-                int[] nextNeighbor = (int[]) it.next();
-                potentialField[nextNeighbor[0]][nextNeighbor[1]][nextNeighbor[2]].changeStatus(new int[] {currentCellCoordinates[0],currentCellCoordinates[1],currentCellCoordinates[2]}, false);
-            }
-        }
-        
-        //if moving to a cell of Value greater than current cell, it is a local minimum.
-        if(currentCellFieldValue < currentMinimum) {
-            HashMap<int[],Boolean> elementNeighbors = potentialField[currentCellCoordinates[0]][currentCellCoordinates[1]][currentCellCoordinates[2]].getStats();
-            Iterator it = elementNeighbors.keySet().iterator();
-            while(it.hasNext()) {
-                int[] nextNeighbor = (int[]) it.next();
-                potentialField[nextNeighbor[0]][nextNeighbor[1]][nextNeighbor[2]].changeStatus(new int[] {currentCellCoordinates[0],currentCellCoordinates[1],currentCellCoordinates[2]}, false);
-            }
-        }       
-        return currentNextTarget;
-    }
-  
-  
-    
-    
-    public static PotentialCell3D[][][] makeCells3D(int[][][] numberArray) throws Exception {
-        // two dimensional no theta
-        int length = numberArray.length;
-        int breadth = numberArray[0].length;
-        int height = numberArray[0][0].length;
-        PotentialCell3D[][][] array = new PotentialCell3D[length][breadth][height];
-        for(int i=0;i<array.length;i++) {
-            for(int j=0;j<array[i].length;j++) { 
-                for(int k=0;k<array[i][j].length;k++) {
-                    if(numberArray[i][j][k] != -1) {
-                        array[i][j][k] = new PotentialCell3D(i,j,k,length,breadth,height,false,numberArray[i][j][k]);              
-                    }
-                    else {
-                        array[i][j][k] = new PotentialCell3D(i,j,k,length,breadth,height,true,numberArray[i][j][k]);  
-                    }
-                }
-            }
-        }
-        ////// Change Obstacle stats as per obstacle Values////////////////////////////
-        for(int i=0;i<array.length;i++) {
-            for(int j=0;j<array[i].length;j++) {
-                for(int k=0;k<array[i][j].length;k++) {
-                    array[i][j][k].formatNeighbors(array);
-                }
-            }
-        }        
-        ////////////////////////////////////////////////////////////////////////////////
-
-        ///////////////////////////////////Print Out Values///////////////////////////////
-        for(PotentialCell3D[][] a:array) {
-            for(PotentialCell3D[] b: a) {
-                for(PotentialCell3D c:b) {
-                    System.out.print(((c.getFieldValue() >= 0) ? c.getFieldValue() : " " )+ ",");
-                }
-                System.out.println();
-            }
-            System.out.println();
-        }
-        /////////////////////////////////////////////////////////////////////////////////////
-        return array;
-    }
-
-    
-    
-    public static int[][][] threeDPath(boolean[][][] cspace,int x,int y,int z) throws Exception {
-        // two dimensional no theta
-        int length = cspace.length;
-        int breadth = cspace[0].length;
-        int height = cspace[0][0].length;
-        int[][][] array = new int[length][breadth][height];
-        for(int i=0;i<length;i++) {
-	System.err.println("hi1");
-            for(int j=0;j<breadth;j++) {
-	System.err.println("hi2");
-                for(int k=0;k<height;k++) {
-		System.err.println("hi3");
-			array[i][j][k] = -100;
-		}
-            }
-        }
-        
-        if(!cspace[x][y][z]) {
-            throw new Exception("Goal cannot be reached as the requested goal is on an obstacle");
-        }
-        
-        array[x][y][z] = 0;
-        for(int m=0;m<length*breadth*height + 2;m++) {
-            
-            for(int i=0;i<array.length;i++) {
-                for(int j=0;j<array[i].length;j++) {
-                    for(int k=0;k<array[i][j].length;k++) {
-                        if(cspace[i][j][k]) { //if the value is true
-                            if(array[i][j][k] >= 0) {
-				System.err.println("hi: " + m + " " + i + " " + j + " " + k + " " + (length*breadth*height + 2));
-                                if(is3DValid(i+1,j,k,length,breadth,height)&& array[i+1][j][k] == -100) array[i+1][j][k] = array[i][j][k]+1; 
-                                if(is3DValid(i-1,j,k,length,breadth,height)&& array[i-1][j][k] == -100 ) array[i-1][j][k] = array[i][j][k]+1; 
-                                if(is3DValid(i,j+1,k,length,breadth,height)&& array[i][j+1][k] == -100) array[i][j+1][k] = array[i][j][k]+ 1; 
-                                if(is3DValid(i,j-1,k,length,breadth,height)&& array[i][j-1][k] == -100) array[i][j-1][k] = array[i][j][k]+ 1;
-                                if(is3DValid(i,j,k+1,length,breadth,height)&& array[i][j][k+1] == -100) array[i][j][k+1] = array[i][j][k]+ 1; 
-                                if(is3DValid(i,j,k-1,length,breadth,height)&& array[i][j][k-1] == -100) array[i][j][k-1] = array[i][j][k]+ 1;
-
-                                //if(is3DValid(i+1,j+1,k,length,breadth,height)&& array[i+1][j+1][k] == -100) array[i+1][j+1][k] = array[i][j][k]+1; 
-                                //if(is3DValid(i+1,j-1,k,length,breadth,height)&& array[i+1][j-1][k] == -100) array[i+1][j-1][k] = array[i][j][k]+1; 
-				//if(is3DValid(i-1,j-1,k,length,breadth,height)&& array[i-1][j-1][k] == -100) array[i-1][j-1][k] = array[i][j][k]+1; 
-                                //if(is3DValid(i-1,j+1,k,length,breadth,height)&& array[i-1][j+1][k] == -100) array[i-1][j+1][k] = array[i][j][k]+1; 
-                            }
-                        }
-                        else {
-                            array[i][j][k] =-1;
-                        }
-                    }
-                }
-            }
-
-        }
-
-        
-        ///////////////////////////////////Print Out Values///////////////////////////////
-       /* for(int[][] a:array) {
-            for(int[] b: a) {
-                for(int c:b) {
-                System.out.print(((c >= 0) ? c : " " )+ ",");
-                }
-                System.out.println();
-            }
-            System.out.println();
-        }*/
-        /////////////////////////////////////////////////////////////////////////////////////
-        return array;
-    }
-    
-    
-    
-    private static boolean is3DValid(int xVal,int yVal,int zVal,int maxX,int maxY,int maxZ) {
-        return xVal >=0 && yVal >=0 && zVal >=0 && xVal < maxX && yVal < maxY && zVal < maxZ;
-    }
-    
-    
-    
-    
-    
-    
-    
-
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
 /////////////////////////////////////////////////////2-Dimension///////////////////////////////////////////////////////////////////////////////      
@@ -467,15 +213,16 @@ public static ArrayList<int[]> pathFind(boolean[][] cspace,int[] start,int[] goa
 
 	public static ArrayList<Waypoint> findWaypoints(CSpace cspace, double startX, double startY, double endX, double endY) {
 		float mazeSize = Math.max((float)cspace.xMax - (float)cspace.xMin, (float)cspace.yMax - (float)cspace.yMin);
+		int nCells = 60;
 
-		int startXi = Math.round((startX - (float)cspace.xMin) / mazeSize * nCells);
-		int startYi = Math.round((startY - (float)cspace.yMin) / mazeSize * nCells);
-		int endXi = Math.round((endX - (float)cspace.xMin) / mazeSize * nCells);
-		int endYi = Math.round((endY - (float)cspace.yMin) / mazeSize * nCells);
+		int startXi = (int)Math.round((startX - (float)cspace.xMin) / mazeSize * nCells);
+		int startYi = (int)Math.round((startY - (float)cspace.yMin) / mazeSize * nCells);
+		int endXi   = (int)Math.round((endX   - (float)cspace.xMin) / mazeSize * nCells);
+		int endYi   = (int)Math.round((endY   - (float)cspace.yMin) / mazeSize * nCells);
 
 		ArrayList<int[]> intWaypoints = new ArrayList<int[]>();
 		try {
-			intWaypoints = pathFind(occupancyGrid, new int[] {startXi, startYi}, new int[] {endXi, endYi});
+			intWaypoints = pathFind(cspace.getOccupancyGrid(nCells), new int[] {startXi, startYi}, new int[] {endXi, endYi});
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -483,8 +230,8 @@ public static ArrayList<int[]> pathFind(boolean[][] cspace,int[] start,int[] goa
 
 		ArrayList<Waypoint> waypoints = new ArrayList<Waypoint>();
 		for (int[] pt: intWaypoints) {
-			float wpX = (float)pt[0] * mazeSize / (float)nCells + mazeSize / (float)nCells / 2 + (float)worldRect.getMinX() - startX;
-			float wpY = (float)pt[1] * mazeSize / (float)nCells + mazeSize / (float)nCells / 2 + (float)worldRect.getMinY() - startY;
+			float wpX = (float)pt[0] * mazeSize / (float)nCells + mazeSize / (float)nCells / 2 + (float)cspace.xMin - (float)startX;
+			float wpY = (float)pt[1] * mazeSize / (float)nCells + mazeSize / (float)nCells / 2 + (float)cspace.yMin - (float)startY;
 			waypoints.add(new Waypoint(wpX, wpY, (short) 1));
 		}
 

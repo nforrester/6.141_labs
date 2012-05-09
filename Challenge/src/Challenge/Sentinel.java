@@ -1,5 +1,8 @@
 package Challenge;
 
+import LocalNavigation.Mat;
+import GlobalNavigation.PolygonMap;
+
 import java.text.ParseException;
 import java.util.ArrayList;
 
@@ -11,12 +14,16 @@ import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
+import java.io.IOException;
+
 public class Sentinel implements NodeMain {
 
 	private Node thisNode;
 	public static final String APPNAME = "Sentinel";
 
 	private RobotController navigator;
+
+	private PolygonMap map;
 
 	public Sentinel() {
 	}
@@ -48,8 +55,7 @@ public class Sentinel implements NodeMain {
 		System.err.println("WAYPOINTS ADDED");
 		*/
 
-		String mapFile = "/home/rss-student/RSS-I-group/Challenge/src/challenge_2012.txt"
-		PolygonMap map;
+		String mapFile = "/home/rss-student/RSS-I-group/Challenge/src/challenge_2012.txt";
 		try {
 			map = new PolygonMap(mapFile);
 		} catch(IOException e) {
@@ -58,9 +64,13 @@ public class Sentinel implements NodeMain {
 		} catch(ParseException e) {
 			System.err.println("ParseException in PolygonMap");
 			System.exit(0);
+		} catch(Exception e) {
+			System.err.println("Exception in PolygonMap");
+			System.exit(0);
 		}
 
-		ArrayList<Mat> robotVert = new ArrayList<Mat>();
+		ArrayList<Mat> robotVerts = new ArrayList<Mat>();
+		double radius = 0.340;
 		for (double theta = 0; theta < 2 * Math.PI; theta += 0.05) {
 			robotVerts.add(Mat.encodePoint(radius * Math.sin(theta), radius * Math.cos(theta)));
 		}

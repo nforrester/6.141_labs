@@ -4,6 +4,9 @@ import java.awt.geom.*;
 import java.util.*;
 
 import LocalNavigation.Mat;
+import GlobalNavigation.PolygonMap;
+import GlobalNavigation.PolygonObstacle;
+import GlobalNavigation.GeomUtils;
 
 /**
  * <p>Configuration space</p>
@@ -89,7 +92,7 @@ public class CSpace {
 
 	public boolean pointInCSpace(Mat point) {
 		for (Polygon obstacle: csObstacles) {
-			if (Polygon.pointInPolygon(obstacle, point) {
+			if (Polygon.pointInPolygon(obstacle, point)) {
 				return false;
 			}
 		}
