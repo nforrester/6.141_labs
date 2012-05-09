@@ -138,7 +138,7 @@ public class PhaseTwoMotorController implements NodeMain, Runnable {
 		y     = robotPose[1];
 		theta = robotPose[2];
 
-		System.err.println("(odometry " + x + " " + y + " " + theta + ")");
+		//System.err.println("(odometry " + x + " " + y + " " + theta + ")");
 
 		theta=fixAngle(theta);
 

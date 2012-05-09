@@ -50,7 +50,7 @@ public class PhaseTwoController implements NodeMain, Runnable{
 								  {725,800,-.08},
 								  {900,1000,-.115},
 								  {1010,1150,-.135},
-								  {1075,1250,-.145}};
+								  {1100,1250,-.145}};
 	
 	//ROS stuff
 	private Node node;
@@ -93,9 +93,9 @@ public class PhaseTwoController implements NodeMain, Runnable{
 	private void step(){
 		if(state==INIT){
 			System.err.println("Init");
-			//changeState(DEPOSIT_BLOCKS);
+			changeState(DEPOSIT_BLOCKS);
 			//changeState(DEBUG);
-			changeState(PICK_UP);
+			//changeState(PICK_UP);
 		
 		}else if(state==DEPOSIT_BLOCKS){
 
@@ -103,7 +103,7 @@ public class PhaseTwoController implements NodeMain, Runnable{
 			
 			waitUp(500);
 		    //assumes that odometry has been reset at the beginning of phase 2		        
-		    robotController.goToX(-27.0*Manipulator.I2M,-1);
+		    robotController.goToX(-26*Manipulator.I2M,-1);
 		    waitUp(500);
 		    while(robotController.getIsMoving()){
 		    }
@@ -132,11 +132,14 @@ public class PhaseTwoController implements NodeMain, Runnable{
 		    waitUp(500);
 		    while(robotController.getIsMoving()){
 		    }
-			xStart=x;
+		    xStart=robotController.getX();
+		    System.err.println("X START = " + xStart);
 			changeState(PICK_UP);
 			
 		}else if(state==PICK_UP){
-			System.err.println("pick up");
+			System.err.println("\n===================================================================================\n" +
+                                             "================================= PICK UP =========================================\n" +
+                                             "===================================================================================\n");
 			manipulator.openGripper();
 			waitUp(500);
 			manipulator.goToPickUp2();
@@ -185,7 +188,8 @@ public class PhaseTwoController implements NodeMain, Runnable{
 				changeState(PICK_UP);
 			}
 		}else if(state==DONE){
-			
+		    manipulator.goToPickUp2();
+		    System.err.println("Done!");
 		}else if(state==DEBUG){
 			
 			manipulator.goToPickUp2();

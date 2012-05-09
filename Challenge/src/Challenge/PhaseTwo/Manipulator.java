@@ -34,9 +34,9 @@ public class Manipulator {
 	public final double Y_MIN=.015;  //Min Height
 	
 	public static final short HAND_PORT=2;  //Servo port for gripper
-	public static final int HAND_BIGOPEN=1000;  //Servo value for gripper full open
-	public static final int HAND_SMALLOPEN=850;  //Servo value for gripper open but still with IR sensor working
-	public static final int HAND_HOLD=500;  //Servo value for max gripping force
+	public static final int HAND_BIGOPEN=2000;  //Servo value for gripper full open
+	public static final int HAND_SMALLOPEN=1850;  //Servo value for gripper open but still with IR sensor working
+	public static final int HAND_HOLD=800;  //Servo value for max gripping force
 	
 	public static final short WRIST_PORT=4;  //Servo port for wrist	
 	public static final int WRIST_90=500;  //various exact angles

@@ -171,7 +171,7 @@ public class CSpace {
 			System.err.println("");
 		}
 	}
-	/*
+	
 	// occupancy grid is indexed from (xMin, yMin)
 	public boolean[][] getOccupancyGrid(int nCellsLinear) {
 		System.err.println("GOT HERE YO!");
@@ -218,7 +218,7 @@ public class CSpace {
 		System.err.println("GOT HERE TOO!");
 		return occupancyGrid;
 	}
-	*/
+	
 
 	public static class Polygon {
 		private static final double DEFAULT_TOLERANCE = 0.0001;
