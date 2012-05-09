@@ -209,7 +209,7 @@ public class RobotController implements NodeMain, Runnable  {
 				changeState(ROTATING);
 			}
 		}else if(state==ROTATING){
-			cspace.printASCIICSpace(60, x, y, theta);
+			//cspace.printASCIICSpace(60, x, y, theta);
 			System.err.println("Rotating");
 			headingError = fixAngle2(headingDesired - theta);
 
@@ -225,7 +225,7 @@ public class RobotController implements NodeMain, Runnable  {
 			}
 
 		}else if(state==TRANSLATING){
-			cspace.printASCIICSpace(60, x, y, theta);
+			//cspace.printASCIICSpace(60, x, y, theta);
 			System.err.println("Translating");
 			distanceError=getDistance(x, y, myWaypoints.get(0).getX() ,myWaypoints.get(0).getY() );
 

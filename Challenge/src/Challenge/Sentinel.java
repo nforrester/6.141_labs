@@ -75,7 +75,7 @@ public class Sentinel implements NodeMain {
 			goals.add(Mat.encodePoint(pos.getX(), pos.getY()));
 		}
 
-		navigator = new RobotController(map.robotStart.getX(), map.robotStart.getY());
+		navigator = new RobotController(map.robotStart.getX(), map.robotStart.getY(), cspace);
 		System.err.println("ROBOT CONTROLLER CREATED");
 		navigator.onStart(thisNode);
 		System.err.println("ROBOT CONTROLLER INITIALIZED");
