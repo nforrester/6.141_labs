@@ -59,13 +59,13 @@ public class Sentinel implements NodeMain {
 			map = GrandChallengeMap.parseFile(mapFile);
 		} catch(IOException e) {
 			System.err.println("IOException in GrandChallengeMap");
-			System.exit(0);
+			System.exit(1);
 		} catch(ParseException e) {
 			System.err.println("ParseException in GrandChallengeMap");
-			System.exit(0);
+			System.exit(1);
 		} catch(Exception e) {
 			System.err.println("Exception in GrandChallengeMap");
-			System.exit(0);
+			System.exit(1);
 		}
 
 		ArrayList<Mat> robotVerts = new ArrayList<Mat>();
@@ -89,7 +89,8 @@ public class Sentinel implements NodeMain {
 			waypoints = PotentialField.findWaypoints(cspace, legStart, goal);
 			System.err.println("Waypoints computed");
 			for (Waypoint waypoint: waypoints) {
-				navigator.addWaypoint(waypoint);
+				//navigator.addWaypoint(waypoint);
+				System.err.println("(waypoint " + waypoint.getX() + " " + waypoint.getY() + ")");
 			}
 			System.err.println("Waypoints added");
 			legStart = goal;
