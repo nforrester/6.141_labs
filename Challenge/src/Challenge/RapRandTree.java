@@ -2,6 +2,7 @@ package Challenge;
 
 import LocalNavigation.Mat;
 import java.util.Random;
+import java.util.ArrayList;
 
 /**
  * <p>Rapidly Exploring Random Tree</p>
@@ -12,12 +13,12 @@ import java.util.Random;
 public class RapRandTree {
 	static Random rand = new Random();
 
-	public ArrayList<Waypoint> findWaypoints(CSpace cspace, Mat start, Mat end)
+	public static ArrayList<Waypoint> findWaypoints(CSpace cspace, Mat start, Mat end) {
 		assert cspace.pointInCSpace(start);
 
 		double delta = 0.1;
 		ArrayList<Mat> nodes = new ArrayList<Mat>();
-		ArrayList<int> parents = new ArrayList<int>();
+		ArrayList<Integer> parents = new ArrayList<Integer>();
 		int nnodes = 0;
 		nodes.add(start);
 		parents.add(-1);
@@ -33,17 +34,18 @@ public class RapRandTree {
 		boolean seekingGoal;
 		while (true) {
 			if (rand.nextFloat() < 0.9) {
-				nextTarget = randomPoint()
+				nextTarget = randomPoint(cspace);
 				seekingGoal = false;
 			} else {
-				nextTarget = goal;
+				nextTarget = end;
 				seekingGoal = true;
 			}
-			minDist = xMax - xMin + yMax - yMin;
-			for (Mat node: nodes) {
-				dist = Mat.dist(node, nextTarget);
+			minDist = cspace.xMax - cspace.xMin + cspace.yMax - cspace.yMin;
+			closeNode = 0;
+			for (i = 0; i < nodes.size(); i++) {
+				dist = Mat.dist(nodes.get(i), nextTarget);
 				if (dist < minDist) {
-					nodes.get(closeNode) = node;
+					closeNode = i;
 					minDist = dist;
 				}
 			}
@@ -51,7 +53,7 @@ public class RapRandTree {
 			segIncrement = Mat.mul(delta / minDist, Mat.sub(nextTarget, nodes.get(closeNode)));
 			lineSegBroken = false;
 			for (i = 0; i < minDist / delta; i++) {
-				point = Mat.add(nodes.get(closeNode), Mat.mul(i, segIncrement))
+				point = Mat.add(nodes.get(closeNode), Mat.mul(i, segIncrement));
 				if (cspace.lineSegInCSpace(nodes.get(closeNode), point)) {
 					nodes.add(point);
 					parents.add(closeNode);
@@ -77,12 +79,13 @@ public class RapRandTree {
 		ArrayList<Waypoint> waypoints = new ArrayList<Waypoint>();
 		while (thisNode != 0) {
 			double pt[] = Mat.decodePoint(nodes.get(thisNode));
-			waypoints.add(0, new Waypoint(pt[0], pt[1]));
+			waypoints.add(0, new Waypoint(pt[0], pt[1], (short) 1));
 			thisNode = parents.get(thisNode);
 		}
+		return waypoints;
 	}
 
-	private Mat randomPoint() {
+	private static Mat randomPoint(CSpace cspace) {
 		Mat point;
 		double x;
 		double y;
