@@ -92,7 +92,7 @@ public class Sentinel implements NodeMain {
 		for (Mat goal: goals) {
 			try {
 				System.err.println("hello world!");
-				waypoints = PotentialField.findWaypoints(cspace, legStart, goal);
+				waypoints = RapRandTree.findWaypoints(cspace, legStart, goal);
 				System.err.println("Waypoints computed:");
 				for (Waypoint waypoint: waypoints) {
 					System.err.println("(waypoint " + waypoint.getX() + " " + waypoint.getY() + ")");
