@@ -14,6 +14,7 @@ import GlobalNavigation.GeomUtils;
  *
  **/
 public class CSpace {
+	public Polygon circleRobot;
 	public Polygon reflectedRobot;
 
 	public ArrayList<Polygon> obstacles = new ArrayList<Polygon>();
@@ -22,29 +23,30 @@ public class CSpace {
 	public double xMin, yMin, xMax, yMax;
 
 	// robot reference point is the origin
-	public CSpace(Polygon robot, GrandChallengeMap map) {
+	public CSpace(Polygon robot, Polygon cRobot, GrandChallengeMap map) {
 		Rectangle2D.Double worldRect = map.getWorldRect();
-		constructor(robot, worldRect.getMinX(), worldRect.getMinY(), worldRect.getMaxX(), worldRect.getMaxY());
+		constructor(robot, cRobot, worldRect.getMinX(), worldRect.getMinY(), worldRect.getMaxX(), worldRect.getMaxY());
 		for (PolygonObstacle obstacle : map.getPolygonObstacles()) {
 			addObstacle(obstacle);
 		}
 	}
 
-	public CSpace(Polygon robot, Rectangle2D.Double worldRect) {
-		constructor(robot, worldRect.getMinX(), worldRect.getMinY(), worldRect.getMaxX(), worldRect.getMaxY());
+	public CSpace(Polygon robot, Polygon cRobot, Rectangle2D.Double worldRect) {
+		constructor(robot, cRobot, worldRect.getMinX(), worldRect.getMinY(), worldRect.getMaxX(), worldRect.getMaxY());
 	}
 
-	public CSpace(Polygon robot, double boundaryXMin, double boundaryYMin, double boundaryXMax, double boundaryYMax) {
-		constructor(robot, boundaryXMin, boundaryYMin, boundaryXMax, boundaryYMax);
+	public CSpace(Polygon robot, Polygon cRobot, double boundaryXMin, double boundaryYMin, double boundaryXMax, double boundaryYMax) {
+		constructor(robot, cRobot, boundaryXMin, boundaryYMin, boundaryXMax, boundaryYMax);
 	}
 
-	private void constructor(Polygon robot, double boundaryXMin, double boundaryYMin, double boundaryXMax, double boundaryYMax) {
+	private void constructor(Polygon robot, Polygon cRobot, double boundaryXMin, double boundaryYMin, double boundaryXMax, double boundaryYMax) {
 
 		xMin = boundaryXMin;
 		yMin = boundaryYMin;
 		xMax = boundaryXMax;
 		yMax = boundaryYMax;
 
+		circleRobot = cRobot;
 		reflectedRobot = Polygon.mul(Mat.mul(-1, Mat.eye(4)), robot);
 		ArrayList<List<Mat>> boundaries = new ArrayList<List<Mat>>();
 
@@ -84,7 +86,7 @@ public class CSpace {
 
 	public void addObstacle(Polygon obstacle) {
 		obstacles.add(obstacle);
-		csObstacles.add(Polygon.minkowskiSumSimple(obstacle, reflectedRobot));
+		csObstacles.add(Polygon.minkowskiSumSimple(obstacle, circleRobot));
 		System.err.print("(obstacle");
 		for (Mat vertex: obstacle.vertices) {
 			double[] pt = Mat.decodePoint(vertex);
@@ -102,12 +104,33 @@ public class CSpace {
 		return true;
 	}
 
+	public boolean pointInCSpace(Mat point, ArrayList<Polygon> csObstacles3D) {
+		for (Polygon obstacle: csObstacles3D) {
+			if (Polygon.pointInPolygon(obstacle, point)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	public boolean lineSegInCSpace(Mat start, Mat end) {
+		assert pointInCSpace(start);
+		assert pointInCSpace(end);
+
+		double sp[] = Mat.decodePoint(start);
+		double ep[] = Mat.decodePoint(end);
+		Mat rotationMatrix = Mat.rotation(Math.atan2(ep[1] - sp[1], ep[0] - sp[0]));
+		Polygon rotatedRobot = Polygon.mul(rotationMatrix, reflectedRobot);
+		ArrayList<Polygon> csObstacles3D = new ArrayList<Polygon>();
+		for (Polygon obstacle: obstacles) {
+			csObstacles3D.add(Polygon.minkowskiSumSimple(obstacle, rotatedRobot));
+		}
+
 		double delta = 0.01;
 		double dist = Mat.dist(start, end);
 		Mat segIncrement = Mat.mul(delta / dist, Mat.sub(end, start));
 		for (int i = 0; i < dist / delta; i++) {
-			if (!pointInCSpace(Mat.add(start, Mat.mul(i, segIncrement)))) {
+			if (!pointInCSpace(Mat.add(start, Mat.mul(i, segIncrement)), csObstacles3D)) {
 				return false;
 			}
 		}
@@ -126,7 +149,7 @@ public class CSpace {
 								Mat.encodePoint(-1 * resolutionLinear / 2,      resolutionLinear / 2),
 								Mat.encodePoint(     resolutionLinear / 2,      resolutionLinear / 2),
 								Mat.encodePoint(     resolutionLinear / 2, -1 * resolutionLinear / 2)));
-		reflectedRobot = Polygon.minkowskiSumSimple(reflectedRobot, resolutionCellSpace);
+		circleRobot = Polygon.minkowskiSumSimple(circleRobot, resolutionCellSpace);
 		System.err.println("GOT HERE as well.");
 		boolean [][] occupancyGrid = new boolean[nCellsLinear][nCellsLinear];
 		for (i = 0; i < nCellsLinear; i++) {

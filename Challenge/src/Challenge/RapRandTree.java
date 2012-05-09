@@ -13,8 +13,13 @@ import java.util.ArrayList;
 public class RapRandTree {
 	static Random rand = new Random();
 
-	public static ArrayList<Waypoint> findWaypoints(CSpace cspace, Mat start, Mat end) {
+	public static ArrayList<Waypoint> findWaypoints(CSpace cspace, Mat start, Mat end) throws Exception {
 		assert cspace.pointInCSpace(start);
+		assert cspace.pointInCSpace(end);
+
+		System.err.println("Starting to make Rapidly-exploring Random Tree");
+		System.err.println("start = " + pts(start));
+		System.err.println("end   = " + pts(end));
 
 		double delta = 0.1;
 		ArrayList<Mat> nodes = new ArrayList<Mat>();
@@ -33,13 +38,23 @@ public class RapRandTree {
 		boolean lineSegBroken;
 		boolean seekingGoal;
 		while (true) {
+			if (nnodes > 1000) {
+				System.err.println("Goal not accessible!");
+				throw new Exception("Goal not accessible!");
+			}
+
 			if (rand.nextFloat() < 0.9) {
 				nextTarget = randomPoint(cspace);
 				seekingGoal = false;
+				//System.err.println("not seeking goal.");
 			} else {
 				nextTarget = end;
 				seekingGoal = true;
+				//System.err.println("SEEKING GOAL!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 			}
+
+			//System.err.println("nextTarget = " + pts(nextTarget));
+
 			minDist = cspace.xMax - cspace.xMin + cspace.yMax - cspace.yMin;
 			closeNode = 0;
 			for (i = 0; i < nodes.size(); i++) {
@@ -49,29 +64,29 @@ public class RapRandTree {
 					minDist = dist;
 				}
 			}
+			//System.err.println("closeNode = " + closeNode + ", " + pts(nodes.get(closeNode)));
 
 			segIncrement = Mat.mul(delta / minDist, Mat.sub(nextTarget, nodes.get(closeNode)));
-			lineSegBroken = false;
 			for (i = 0; i < minDist / delta; i++) {
 				point = Mat.add(nodes.get(closeNode), Mat.mul(i, segIncrement));
 				if (cspace.lineSegInCSpace(nodes.get(closeNode), point)) {
+					//System.err.println("Adding node " + nnodes + ": " + pts(point));
 					nodes.add(point);
 					parents.add(closeNode);
-					closeNode = nnodes;
 					nnodes++;
-				} else {
-					lineSegBroken = true;
-					break;
 				}
 			}
-			if (!lineSegBroken && seekingGoal) {
+			if (seekingGoal) {
+				//System.err.println("Goal not plausibly in reach.");
 				if (cspace.lineSegInCSpace(nodes.get(closeNode), nextTarget)) {
+					//System.err.println("Goal in reach!");
 					nodes.add(nextTarget);
 					parents.add(closeNode);
-					closeNode = nnodes;
 					nnodes++;
 					break;
 				}
+			} else {
+				//System.err.println("Goal not plausibly in reach.");
 			}
 		}
 
@@ -82,6 +97,7 @@ public class RapRandTree {
 			waypoints.add(0, new Waypoint(pt[0], pt[1], (short) 1));
 			thisNode = parents.get(thisNode);
 		}
+		System.err.println("Rapidly-exploring Random Tree is done! nnodes = " + nnodes);
 		return waypoints;
 	}
 
@@ -95,5 +111,10 @@ public class RapRandTree {
 			point = Mat.encodePoint(x, y);
 		} while (!cspace.pointInCSpace(point));
 		return point;
+	}
+
+	private static String pts(Mat point) {
+		double[] pt = Mat.decodePoint(point);
+		return "(" + pt[0] + " " + pt[1] + ")";
 	}
 }

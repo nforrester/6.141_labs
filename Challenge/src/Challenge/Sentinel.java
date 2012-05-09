@@ -36,24 +36,6 @@ public class Sentinel implements NodeMain {
 
 		System.err.println("SENTINEL INITIALIZING");
 
-		/*
-		double f2m = .3048;
-		navigator.addWaypoint(new Waypoint(2   * f2m,  0   * f2m, (short) 1));
-		navigator.addWaypoint(new Waypoint(3   * f2m, -2   * f2m, (short) 1));
-		navigator.addWaypoint(new Waypoint(6   * f2m, -2   * f2m, (short) 1));
-		navigator.addWaypoint(new Waypoint(6.5 * f2m, -3.5 * f2m, (short) 1));
-		navigator.addWaypoint(new Waypoint(7.5 * f2m, -4.5 * f2m, (short) 1));
-		navigator.addWaypoint(new Waypoint(9   * f2m, -4.5 * f2m, (short) 1));
-		navigator.addWaypoint(new Waypoint(7.5 * f2m, -3.5 * f2m, (short) 1));
-		navigator.addWaypoint(new Waypoint(6.5 * f2m, -3.5 * f2m, (short) 1));
-		navigator.addWaypoint(new Waypoint(6   * f2m, -1   * f2m, (short) 1));
-		navigator.addWaypoint(new Waypoint(2   * f2m,  0   * f2m, (short) 1));
-		navigator.addWaypoint(new Waypoint(0   * f2m,  0   * f2m, (short) 1));
-		navigator.addWaypoint(new Waypoint(2   * f2m,  0   * f2m, (short)-1));
-
-		System.err.println("WAYPOINTS ADDED");
-		*/
-
 		String mapFile = "/home/rss-student/gitrss/Challenge/src/construction_map_2012.txt";
 		try {
 			map = GrandChallengeMap.parseFile(mapFile);
@@ -68,14 +50,24 @@ public class Sentinel implements NodeMain {
 			System.exit(1);
 		}
 
+		double robotYDim      = 0.24;
+		double robotXDimFront = 0.20;
+		double robotXDimBack  = 0.33;
 		ArrayList<Mat> robotVerts = new ArrayList<Mat>();
-		double radius = 0.340;
-		for (double theta = 0; theta < 2 * Math.PI; theta += 0.05) {
-			robotVerts.add(Mat.encodePoint(radius * Math.sin(theta), radius * Math.cos(theta)));
-		}
+		robotVerts.add(Mat.encodePoint(robotXDimFront,  robotYDim));
+		robotVerts.add(Mat.encodePoint(robotXDimFront, -robotYDim));
+		robotVerts.add(Mat.encodePoint(robotXDimBack,  -robotYDim));
+		robotVerts.add(Mat.encodePoint(robotXDimBack,   robotYDim));
 		CSpace.Polygon robot = new CSpace.Polygon(robotVerts);
 
-		cspace = new CSpace(robot, map);
+		ArrayList<Mat> cRobotVerts = new ArrayList<Mat>();
+		double radius = 0.340;
+		for (double theta = 0; theta < 2 * Math.PI; theta += 0.05) {
+			cRobotVerts.add(Mat.encodePoint(radius * Math.sin(theta), radius * Math.cos(theta)));
+		}
+		CSpace.Polygon cRobot = new CSpace.Polygon(cRobotVerts);
+
+		cspace = new CSpace(robot, cRobot, map);
 
 		ArrayList<Mat> goals = new ArrayList<Mat>();
 		for (ConstructionObject block: map.getConstructionObjects()) {
