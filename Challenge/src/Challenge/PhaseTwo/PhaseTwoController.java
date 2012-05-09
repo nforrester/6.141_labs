@@ -11,7 +11,6 @@ import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
-import Challenge.RobotController;
 import Challenge.Waypoint;
 import Grasping.Grasping;
 import Grasping.GripperController;
@@ -48,10 +47,10 @@ public class PhaseTwoController implements NodeMain, Runnable{
 	public static final double BLOCK_SIZE=2.07*Manipulator.I2M;
 	
 	public final double[][] DATA={{600,500,0},
-										{725,800,-.08},
-										{900,1000,-.115},
-										{1010,1150,-.135},
-										{1050,1250,-.145}};
+								  {725,800,-.08},
+								  {900,1000,-.115},
+								  {1010,1150,-.135},
+								  {1050,1250,-.145}};
 	
 	//ROS stuff
 	private Node node;
@@ -64,36 +63,12 @@ public class PhaseTwoController implements NodeMain, Runnable{
 	double x=0; //end effector x
 	double y=0; //end effector y
 	double theta=0;//end effector theta	
-	Structure structure;
+	double xStart=0;//Starting X after Localization
+	
 	Manipulator manipulator;
-	RobotController robotController;
-	ArrayList<ConstructionBlock> collectedBlocks;
+	PhaseTwoMotorController robotController;
 	
 	
-	
-	//Command Queue.
-	//ArrayList<Waypoint> myWaypoints=new ArrayList<Waypoint>();
-	
-	/*public PhaseTwoController(ArrayList<ConstructionBlock> myCollectedBlocks) {
-		state=DEBUG;
-		//collectedBlocks=myCollectedBlocks;//Pass the information about the blocks we currently have 
-		structure=new Structure();
-		
-		//add ConstructionBlocks to structure to define the structure we want to make. 6 or 7 or 8 blocks total?
-		manipulator=new Manipulator(node);
-		robotController=new RobotController();
-		
-		//reset robot odometry somehow so we only have to deal with the robot's x value from this point onward. 
-	}*/
-	
-	public void goToY(double yNew){
-		manipulator.goToY(yNew);
-	//	double xOld=x;		
-	//	goToX(manipulator.A_X_B+manipulator.L_ARM*Math.cos(manipulator.a)-x);
-	//	x=xOld;
-		y=yNew;
-		
-	}
 	
 	public void waitUp(int val){
 		System.err.println("Waiting "+val+" microseconds.");
@@ -104,13 +79,10 @@ public class PhaseTwoController implements NodeMain, Runnable{
 		}
 	}
 	
-	public void goToX(double xNew){
-		if(xNew>robotController.getX()){
-			robotController.addWaypoint(new Waypoint(xNew,0,(short) 1));
-		}else{
-			robotController.addWaypoint(new Waypoint(xNew,0,(short) -1));
-		}
-		x=xNew;
+	public void goToY(double yNew){
+		manipulator.goToY(yNew);
+		y=yNew;
+		
 	}
 	
 	public double percentToY(double val){
@@ -122,18 +94,17 @@ public class PhaseTwoController implements NodeMain, Runnable{
 		if(state==INIT){
 
 			System.err.println("Init");
-			//changeState(DEPOSIT_BLOCKS);
-			changeState(DEBUG);
+			changeState(DEPOSIT_BLOCKS);
+			//changeState(DEBUG);
 			//changeState(PICK_UP);
 		
 		}else if(state==DEPOSIT_BLOCKS){
 
 			System.err.println("deposit");
 		    //assumes that odometry has been reset at the beginning of phase 2		        
-		    robotController.addWaypoint(new Waypoint(-2*15*Manipulator.I2M,0, (short)-1));
+		    robotController.goToX(-2*15*Manipulator.I2M);
 		    waitUp(1000);
-		    while(robotController.getWaypoints().size()>0){
-		    	//System.err.println(robotController.getWaypoints().size());
+		    while(robotController.getIsMoving()){
 		    }
 
 			System.err.println("Done Depositing!");
@@ -142,11 +113,13 @@ public class PhaseTwoController implements NodeMain, Runnable{
 		}else if(state==LOCALIZE){
 			System.err.println("localize");
 			manipulator.goToPickUp2();
-			
+			waitUp(1000);
 			while(!currentBreakBeamValue){//while(IR Sensor is unbroken)
 				robotController.setTranslationalVelocity(.1);
 			}
+			
 			robotController.setTranslationalVelocity(0);
+			xStart=x;
 			changeState(PICK_UP);
 			
 		}else if(state==PICK_UP){
@@ -156,11 +129,10 @@ public class PhaseTwoController implements NodeMain, Runnable{
 			waitUp(2000);
 			manipulator.closeGripper();
 			waitUp(2000);
-			robotController.addWaypoint(new Waypoint(DATA[iterator][2],0, (short)-1));
-			System.err.println(robotController.getWaypoints().size());
+			robotController.goToX(DATA[iterator][2]+xStart);
+			System.err.println(robotController.getIsMoving());
 			waitUp(2000);
-		    while(robotController.getWaypoints().size()>0){
-		    //	System.err.println(robotController.getWaypoints().size());
+		    while(robotController.getIsMoving()){
 		    }
 	        manipulator.servoOut2((int)DATA[iterator][0],(int)DATA[iterator][1],500);
 		    waitUp(2000);
@@ -169,10 +141,9 @@ public class PhaseTwoController implements NodeMain, Runnable{
 		}else if(state==PLACE){
 			
 			System.err.println("place");
-			robotController.addWaypoint(new Waypoint((towerHeight-iterator)*BLOCK_SIZE+DATA[iterator][2],0, (short)1));
+			robotController.goToX(towerHeight-iterator)*BLOCK_SIZE+DATA[iterator][2]+xStart);
 			waitUp(2000);
-		    while(robotController.getWaypoints().size()>0){
-		    	
+		    while(robotController.getIsMoving()){
 		    }
 		    manipulator.openGripper();
 		    waitUp(2000);
@@ -180,21 +151,21 @@ public class PhaseTwoController implements NodeMain, Runnable{
 		    changeState(GO_TO_NEXT);
 		}else if(state==GO_TO_NEXT){
 			if (iterator==towerHeight){
-				robotController.addWaypoint(new Waypoint(-.1,0, (short)-1));
+				robotController.goToX(xStart);
 				waitUp(2000);
-			    while(robotController.getWaypoints().size()>0){
+			    while(robotController.getIsMoving()){
 			    }
 				changeState(DONE);
 			}else{
-				robotController.addWaypoint(new Waypoint((iterator-1)*BLOCK_SIZE+DATA[iterator][2],0, (short)-1));
+				robotController.goToX((iterator-1)*BLOCK_SIZE+DATA[iterator][2]+xStart);
 				waitUp(2000);
-			    while(robotController.getWaypoints().size()>0){
+			    while(robotController.getIsMoving()){
 			    }
 			    manipulator.goToPickUp2();
 			    waitUp(2000);
-			    robotController.addWaypoint(new Waypoint((iterator-1)*BLOCK_SIZE,0, (short)-1));
+			    robotController.goToX((iterator-1)*BLOCK_SIZE+xStart);
 			    waitUp(2000);
-			    while(robotController.getWaypoints().size()>0){
+			    while(robotController.getIsMoving()){
 			    }
 				changeState(PICK_UP);
 			}
@@ -226,18 +197,38 @@ public class PhaseTwoController implements NodeMain, Runnable{
 		}
 	}
 	
+	private void changeState(int newState){
+		state=newState;
+		if(state==DEPOSIT_BLOCKS){
+			stateMsg.data = "DEPOSIT_BLOCKS";
+		}else if (state==PICK_UP){
+			stateMsg.data = "PICK_UP";
+		}else if (state==PLACE){
+			stateMsg.data = "PLACE";
+		}else if (state==DONE){
+			stateMsg.data = "DONE!";
+		}else if (state==DEBUG){
+			stateMsg.data = "DEBUG";
+		}else if (state==LOCALIZE){
+			stateMsg.data = "LOCALIZE";
+		}else if (state==GO_TO_NEXT){
+			stateMsg.data = "GO_TO_NEXT";
+		}
+		
+		statePub.publish(stateMsg);
+	}
+	
 	public void onStart(Node node) {
 		this.node = node;
 
 		System.err.println("PHASE 2 STARTED");
 		
 		state=INIT;
-		//collectedBlocks=myCollectedBlocks;//Pass the information about the blocks we currently have 
-		structure=new Structure();
+		//collectedBlocks=myCollectedBlocks;//Pass the information about the blocks we currently have
 		
 		//add ConstructionBlocks to structure to define the structure we want to make. 6 or 7 or 8 blocks total?
 		manipulator=new Manipulator(node);		
-		robotController=new RobotController();
+		robotController=new PhaseTwoMotorController();
 		robotController.onStart(node);
 		while(!manipulator.armPublisher.hasSubscribers()){
 			
@@ -262,27 +253,6 @@ public class PhaseTwoController implements NodeMain, Runnable{
 			currentBreakBeamValue = msg.beamBroken;
 		}
 		
-	}
-	
-	private void changeState(int newState){
-		state=newState;
-		if(state==DEPOSIT_BLOCKS){
-			stateMsg.data = "DEPOSIT_BLOCKS";
-		}else if (state==PICK_UP){
-			stateMsg.data = "PICK_UP";
-		}else if (state==PLACE){
-			stateMsg.data = "PLACE";
-		}else if (state==DONE){
-			stateMsg.data = "DONE!";
-		}else if (state==DEBUG){
-			stateMsg.data = "DEBUG";
-		}else if (state==LOCALIZE){
-			stateMsg.data = "LOCALIZE";
-		}else if (state==GO_TO_NEXT){
-			stateMsg.data = "GO_TO_NEXT";
-		}
-		
-		statePub.publish(stateMsg);
 	}
 
 	@Override
