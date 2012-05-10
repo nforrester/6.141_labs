@@ -33,6 +33,168 @@ public class VisionTools {
 
 
 
+	public ArrayList<double[]> multipleBlobsPresent(KinectImage src, KinectImage dest){
+
+		// width -> 640
+		// height -> 480
+
+		//classify blobs
+		this.classify(src,dest);
+
+		int[][][] matchingPixelsCounts = new int[4][16][12];
+		long[][][] matchingPixelsXCount = new long[4][16][12];
+		long[][][] matchingPixelsYCount = new long[4][16][12];
+		boolean[][][] conditionSatisfied = new boolean[4][16][12];
+
+		ArrayList<double[]> returnArray = new ArrayList<double[]>();
+
+
+		for(int i=0;i<dest.getWidth();i++){
+			for(int j=0;j<dest.getHeight();j++){
+
+				KinectPixel testPixel = src.getPixel(i, j);
+
+				if(isHueSatisfied(testPixel, blockHues[RED])){
+					matchingPixelsXCount[RED][(int)(i/40)][(int)(j/40)] += i;
+					matchingPixelsYCount[RED][(int)(i/40)][(int)(j/40)] += j;
+					matchingPixelsCounts[RED][(int)(i/40)][(int)(j/40)]++;
+				}
+				else if(isHueSatisfied(testPixel, blockHues[GREEN])){
+					matchingPixelsXCount[GREEN][(int)(i/40)][(int)(j/40)] += i;
+					matchingPixelsYCount[GREEN][(int)(i/40)][(int)(j/40)] += j;
+					matchingPixelsCounts[GREEN][(int)(i/40)][(int)(j/40)]++;
+				}
+				else if(isHueSatisfied(testPixel, blockHues[BLUE])){
+					matchingPixelsXCount[BLUE][(int)(i/40)][(int)(j/40)] += i;
+					matchingPixelsYCount[BLUE][(int)(i/40)][(int)(j/40)] += j;
+					matchingPixelsCounts[BLUE][(int)(i/40)][(int)(j/40)]++;
+				}
+				else if(isHueSatisfied(testPixel, blockHues[YELLOW])){
+					matchingPixelsXCount[YELLOW][(int)(i/40)][(int)(j/40)] += i;
+					matchingPixelsYCount[YELLOW][(int)(i/40)][(int)(j/40)] += j;
+					matchingPixelsCounts[YELLOW][(int)(i/40)][(int)(j/40)]++;
+				}
+
+			}
+		}
+
+
+		for(int i=0;i<4;i++){
+			for(int j= 0;j<16;j++){
+				for(int k=0;k<12;k++){
+
+					if(matchingPixelsCounts[i][j][k] > 100){
+						matchingPixelsXCount[i][j][k] /= (long)matchingPixelsCounts[i][j][k];
+						matchingPixelsYCount[i][j][k] /= (long)matchingPixelsCounts[i][j][k];
+						conditionSatisfied[i][j][k] = true;
+					}
+					else{
+						matchingPixelsXCount[i][j][k] = 0;
+						matchingPixelsYCount[i][j][k] = 0;
+					}
+
+				}
+			}
+		}
+
+
+
+
+
+		for(int i=0;i<4;i++){
+			for(int j= 0;j<16;j++){
+				for(int k=0;k<12;k++){
+					boolean one = false;
+					boolean two = false;
+					boolean three = false;
+					if(j+1 < 16){
+						if((conditionSatisfied[i][j][k] && conditionSatisfied[i][j+1][k])){
+							one = true;
+							matchingPixelsCounts[i][j+1][k] = matchingPixelsCounts[i][j+1][k] + 
+									matchingPixelsCounts[i][j][k];
+
+							matchingPixelsXCount[i][j+1][k] = (matchingPixelsXCount[i][j+1][k] + 
+									matchingPixelsXCount[i][j][k])/2;
+
+							matchingPixelsYCount[i][j+1][k] = (matchingPixelsYCount[i][j+1][k] + 
+									matchingPixelsYCount[i][j][k])/2;
+						}
+					}
+
+					if(k +1 <12){
+						if((conditionSatisfied[i][j][k] && conditionSatisfied[i][j][k+1])){
+							two = true;
+							matchingPixelsCounts[i][j][k+1] = matchingPixelsCounts[i][j][k + 1] + 
+									matchingPixelsCounts[i][j][k];
+
+							matchingPixelsXCount[i][j][k+ 1] = (matchingPixelsXCount[i][j][k+1] + 
+									matchingPixelsXCount[i][j][k])/2;
+
+							matchingPixelsYCount[i][j][k+1] = (matchingPixelsYCount[i][j][k+1] + 
+									matchingPixelsYCount[i][j][k])/2;
+						}
+					}
+
+					if(j+1 <16 && k+1 < 12){
+						if((conditionSatisfied[i][j][k] && conditionSatisfied[i][j+1][k+1])){
+							three = true;
+							matchingPixelsCounts[i][j+1][k+1] = matchingPixelsCounts[i][j+1][k + 1] + 
+									matchingPixelsCounts[i][j][k];
+
+							matchingPixelsXCount[i][j +1][k+ 1] = (matchingPixelsXCount[i][j+1][k+1] + 
+									matchingPixelsXCount[i][j][k])/2;
+
+							matchingPixelsYCount[i][j +1][k+1] = (matchingPixelsYCount[i][j+1][k+1] + 
+									matchingPixelsYCount[i][j][k])/2;
+						}
+					}
+
+					if(one || two || three){
+						conditionSatisfied[i][j][k] = false;
+					}
+				}
+			}
+		}
+
+
+		
+		for(int i=0;i<4;i++){
+			for(int j= 0;j<16;j++){
+				for(int k=0;k<12;k++){
+					if(conditionSatisfied[i][j][k]){
+						
+						double[] depthData = getDepthData((int)matchingPixelsXCount[i][j][k],
+															(int)matchingPixelsYCount[i][j][k],src);
+						double[] data = {i,matchingPixelsCounts[i][j][k],
+										(int)matchingPixelsXCount[i][j][k] - (int)(dest.getWidth())/2,
+										(int)matchingPixelsYCount[i][j][k] - (int)(dest.getWidth())/2,
+										(depthData[0] > 5) ? -100 : depthData[0],
+										(depthData[1] > 5) ? -100 : depthData[1],
+										(depthData[2] > 5) ? -100 : depthData[2]};
+						returnArray.add(data);
+						
+					}
+				}
+			}
+		}
+		
+		//print data
+		for(double[] a : returnArray){
+			System.err.println("Color -> " + a[0] + "X -> " + a[4] + "Y -> " + a[5]+ "Z -> " + a[6]);
+			
+		}
+
+
+		return returnArray;
+	}
+
+
+
+
+
+
+
+
 	public double[][] blobPresent(KinectImage src, KinectImage dest){
 
 		this.classify(src,dest);
@@ -41,6 +203,10 @@ public class VisionTools {
 		int[] matchingPixels = new int[4];
 		long[] matchingPixelsXCount = new long[4];
 		long[] matchingPixelsYCount = new long[4];
+
+		System.err.println("width -> " + dest.getWidth() );
+		System.err.println("height -> " + dest.getHeight() );
+
 
 		for(int i=0;i<dest.getWidth();i++){
 			for(int j=0;j<dest.getHeight();j++){

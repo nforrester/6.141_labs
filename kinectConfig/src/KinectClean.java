@@ -195,7 +195,8 @@ public class KinectClean implements NodeMain{
 					
 					/////////////////////////////////////////////////////////////
 
-					double[][] data = visionTools.blobPresent(newImage, processedImage);
+					//double[][] data = visionTools.blobPresent(newImage, processedImage);
+					visionTools.multipleBlobsPresent(newImage, processedImage);
 					
 					/////////////////////////////////////////////////////////////
 
@@ -214,7 +215,7 @@ public class KinectClean implements NodeMain{
 					pubImage.data = transformedImage.toArray();
 					vidPub.publish(pubImage);
 					
-					AnalogStatusMsg publishMessage = new AnalogStatusMsg();
+					/*AnalogStatusMsg publishMessage = new AnalogStatusMsg();
 					
 					if(data[0][0] > 100){
 						publishMessage.values = new double[]{frameNumber,0,data[0][3],data[0][4],data[0][5],0,0,0};
@@ -231,7 +232,7 @@ public class KinectClean implements NodeMain{
 					if(data[0][3] > 100){
 						publishMessage.values = new double[]{frameNumber,3,data[3][3],data[3][4],data[3][5],0,0,0};
 						interfacePub.publish(publishMessage);
-					}
+					}*/
 					
 				}
 
