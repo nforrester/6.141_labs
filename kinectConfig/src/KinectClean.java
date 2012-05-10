@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import org.ros.message.MessageListener;
-import org.ros.message.rss_msgs.AnalogStatusMsg;
 import org.ros.message.sensor_msgs.PointCloud2;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
@@ -22,9 +21,7 @@ import org.ros.node.topic.Subscriber;
 public class KinectClean implements NodeMain{
 	private ArrayBlockingQueue<PointCloud2> imageData = new ArrayBlockingQueue<PointCloud2>(1);
 	private Publisher<org.ros.message.sensor_msgs.Image> vidPub;
-	private Publisher<org.ros.message.rss_msgs.AnalogStatusMsg> interfacePub;
 	public static int frame = 0;
-	public static double frameNumber = 0;
 	
 	private Subscriber<PointCloud2> ptSub;
 	private VisionTools visionTools;
@@ -34,10 +31,10 @@ public class KinectClean implements NodeMain{
 
 	@Override
 	public void onStart(Node node) {
-		ptSub = node.newSubscriber("/camera/rgb/points","sensor_msgs/PointCloud2");
+		ptSub = node.newSubscriber("/camera/rgb/points",
+				"sensor_msgs/PointCloud2");
 		ptSub.addMessageListener(new PointCloudListener());
 		vidPub = node.newPublisher("/rss/kinectVideo", "sensor_msgs/Image");
-		interfacePub = node.newPublisher("/rss/blockData","rss_msgs/AnalogStatusMsg");
 		visionTools = new VisionTools();
 		startTakingThread();
 	}
@@ -180,7 +177,6 @@ public class KinectClean implements NodeMain{
 			public void run() {
 
 				while(true){
-					frameNumber++;
 
 					KinectImage newImage = null;
 
@@ -195,8 +191,7 @@ public class KinectClean implements NodeMain{
 					
 					/////////////////////////////////////////////////////////////
 
-					//double[][] data = visionTools.blobPresent(newImage, processedImage);
-					visionTools.multipleBlobsPresent(newImage, processedImage);
+					visionTools.blobPresent(newImage, processedImage);
 					
 					/////////////////////////////////////////////////////////////
 
@@ -215,25 +210,7 @@ public class KinectClean implements NodeMain{
 					pubImage.data = transformedImage.toArray();
 					vidPub.publish(pubImage);
 					
-					/*AnalogStatusMsg publishMessage = new AnalogStatusMsg();
-					
-					if(data[0][0] > 100){
-						publishMessage.values = new double[]{frameNumber,0,data[0][3],data[0][4],data[0][5],0,0,0};
-						interfacePub.publish(publishMessage);
-					}
-					if(data[0][1] > 100){
-						publishMessage.values = new double[]{frameNumber,1,data[1][3],data[1][4],data[1][5],0,0,0};
-						interfacePub.publish(publishMessage);
-					}
-					if(data[0][2] > 100){
-						publishMessage.values = new double[]{frameNumber,2,data[2][3],data[2][4],data[2][5],0,0,0};
-						interfacePub.publish(publishMessage);
-					}
-					if(data[0][3] > 100){
-						publishMessage.values = new double[]{frameNumber,3,data[3][3],data[3][4],data[3][5],0,0,0};
-						interfacePub.publish(publishMessage);
-					}*/
-					
+
 				}
 
 

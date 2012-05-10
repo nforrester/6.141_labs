@@ -75,7 +75,10 @@ public class Sentinel implements NodeMain {
 			goals.add(Mat.encodePoint(pos.getX(), pos.getY()));
 		}
 
+		// TESTING START (switch)
+		//navigator = new RobotController(0, 0, cspace);
 		navigator = new RobotController(map.robotStart.getX(), map.robotStart.getY(), cspace);
+		// TESTING END
 		System.err.println("ROBOT CONTROLLER CREATED");
 		navigator.onStart(thisNode);
 		System.err.println("ROBOT CONTROLLER INITIALIZED");
@@ -92,7 +95,9 @@ public class Sentinel implements NodeMain {
 				waypoints = trimWaypoints(waypoints);
 				System.err.println("Waypoints trimmed:");
 				for (Waypoint waypoint: waypoints) {
+					// TESTING START (uncomment)
 					navigator.addWaypoint(waypoint);
+					// TESTING END
 					System.err.println("(waypoint " + waypoint.getX() + " " + waypoint.getY() + ")");
 				}
 				System.err.println("Waypoints added");
@@ -102,6 +107,23 @@ public class Sentinel implements NodeMain {
 				e.printStackTrace();
 			}
 		}
+
+		// TESTING START (comment)
+		/*
+		navigator.addWaypoint(new Waypoint(1, 0, (short) 1));
+		navigator.addWaypoint(new Waypoint(1, 1, (short) 1));
+		navigator.addWaypoint(new Waypoint(1, 0, (short) 1));
+		navigator.addWaypoint(new Waypoint(0, 0, (short) 1));
+		navigator.addWaypoint(new Waypoint(1, 0, (short) 1));
+		navigator.addWaypoint(new Waypoint(0, 1, (short) 1));
+		navigator.addWaypoint(new Waypoint(1, 1, (short) 1));
+		navigator.addWaypoint(new Waypoint(1, 0, (short) 1));
+		navigator.addWaypoint(new Waypoint(0, 0, (short) 1));
+		navigator.addWaypoint(new Waypoint(1, 1, (short) 1));
+		navigator.addWaypoint(new Waypoint(0, 1, (short) 1));
+		navigator.addWaypoint(new Waypoint(0, 0, (short) 1));
+		*/
+		// TESTING END
 
 		System.err.println("WAYPOINTS ADDED");
 

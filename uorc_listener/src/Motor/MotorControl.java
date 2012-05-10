@@ -78,8 +78,8 @@ public class MotorControl implements NodeMain {
 
 			// This was changed by Neil Forrester for the final challenge on 5/7/2012
 			// The balanced functionality is conflicting with optical odometry
-			robotVelocityController = new RobotVelocityController(new WheelVelocityControllerI(), new WheelVelocityControllerI());
-			//robotVelocityController = new RobotVelocityControllerBalanced();
+			//robotVelocityController = new RobotVelocityController(new WheelVelocityControllerI(), new WheelVelocityControllerI());
+			robotVelocityController = new RobotVelocityControllerBalanced();
 
 			System.out.println("robot velocity controller created");
 			robot.setRobotVelocityController(robotVelocityController);

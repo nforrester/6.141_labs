@@ -33,173 +33,11 @@ public class VisionTools {
 
 
 
-	public ArrayList<double[]> multipleBlobsPresent(KinectImage src, KinectImage dest){
-
-		// width -> 640
-		// height -> 480
-
-		//classify blobs
-		this.classify(src,dest);
-
-		int[][][] matchingPixelsCounts = new int[4][16][12];
-		long[][][] matchingPixelsXCount = new long[4][16][12];
-		long[][][] matchingPixelsYCount = new long[4][16][12];
-		boolean[][][] conditionSatisfied = new boolean[4][16][12];
-
-		ArrayList<double[]> returnArray = new ArrayList<double[]>();
-
-
-		for(int i=0;i<dest.getWidth();i++){
-			for(int j=0;j<dest.getHeight();j++){
-
-				KinectPixel testPixel = src.getPixel(i, j);
-
-				if(isHueSatisfied(testPixel, blockHues[RED])){
-					matchingPixelsXCount[RED][(int)(i/40)][(int)(j/40)] += i;
-					matchingPixelsYCount[RED][(int)(i/40)][(int)(j/40)] += j;
-					matchingPixelsCounts[RED][(int)(i/40)][(int)(j/40)]++;
-				}
-				else if(isHueSatisfied(testPixel, blockHues[GREEN])){
-					matchingPixelsXCount[GREEN][(int)(i/40)][(int)(j/40)] += i;
-					matchingPixelsYCount[GREEN][(int)(i/40)][(int)(j/40)] += j;
-					matchingPixelsCounts[GREEN][(int)(i/40)][(int)(j/40)]++;
-				}
-				else if(isHueSatisfied(testPixel, blockHues[BLUE])){
-					matchingPixelsXCount[BLUE][(int)(i/40)][(int)(j/40)] += i;
-					matchingPixelsYCount[BLUE][(int)(i/40)][(int)(j/40)] += j;
-					matchingPixelsCounts[BLUE][(int)(i/40)][(int)(j/40)]++;
-				}
-				else if(isHueSatisfied(testPixel, blockHues[YELLOW])){
-					matchingPixelsXCount[YELLOW][(int)(i/40)][(int)(j/40)] += i;
-					matchingPixelsYCount[YELLOW][(int)(i/40)][(int)(j/40)] += j;
-					matchingPixelsCounts[YELLOW][(int)(i/40)][(int)(j/40)]++;
-				}
-
-			}
-		}
-
-
-		for(int i=0;i<4;i++){
-			for(int j= 0;j<16;j++){
-				for(int k=0;k<12;k++){
-
-					if(matchingPixelsCounts[i][j][k] > 100){
-						matchingPixelsXCount[i][j][k] /= (long)matchingPixelsCounts[i][j][k];
-						matchingPixelsYCount[i][j][k] /= (long)matchingPixelsCounts[i][j][k];
-						conditionSatisfied[i][j][k] = true;
-					}
-					else{
-						matchingPixelsXCount[i][j][k] = 0;
-						matchingPixelsYCount[i][j][k] = 0;
-					}
-
-				}
-			}
-		}
-
-
-
-
-
-		for(int i=0;i<4;i++){
-			for(int j= 0;j<16;j++){
-				for(int k=0;k<12;k++){
-					boolean one = false;
-					boolean two = false;
-					boolean three = false;
-					if(j+1 < 16){
-						if((conditionSatisfied[i][j][k] && conditionSatisfied[i][j+1][k])){
-							one = true;
-							matchingPixelsCounts[i][j+1][k] = matchingPixelsCounts[i][j+1][k] + 
-									matchingPixelsCounts[i][j][k];
-
-							matchingPixelsXCount[i][j+1][k] = (matchingPixelsXCount[i][j+1][k] + 
-									matchingPixelsXCount[i][j][k])/2;
-
-							matchingPixelsYCount[i][j+1][k] = (matchingPixelsYCount[i][j+1][k] + 
-									matchingPixelsYCount[i][j][k])/2;
-						}
-					}
-
-					if(k +1 <12){
-						if((conditionSatisfied[i][j][k] && conditionSatisfied[i][j][k+1])){
-							two = true;
-							matchingPixelsCounts[i][j][k+1] = matchingPixelsCounts[i][j][k + 1] + 
-									matchingPixelsCounts[i][j][k];
-
-							matchingPixelsXCount[i][j][k+ 1] = (matchingPixelsXCount[i][j][k+1] + 
-									matchingPixelsXCount[i][j][k])/2;
-
-							matchingPixelsYCount[i][j][k+1] = (matchingPixelsYCount[i][j][k+1] + 
-									matchingPixelsYCount[i][j][k])/2;
-						}
-					}
-
-					if(j+1 <16 && k+1 < 12){
-						if((conditionSatisfied[i][j][k] && conditionSatisfied[i][j+1][k+1])){
-							three = true;
-							matchingPixelsCounts[i][j+1][k+1] = matchingPixelsCounts[i][j+1][k + 1] + 
-									matchingPixelsCounts[i][j][k];
-
-							matchingPixelsXCount[i][j +1][k+ 1] = (matchingPixelsXCount[i][j+1][k+1] + 
-									matchingPixelsXCount[i][j][k])/2;
-
-							matchingPixelsYCount[i][j +1][k+1] = (matchingPixelsYCount[i][j+1][k+1] + 
-									matchingPixelsYCount[i][j][k])/2;
-						}
-					}
-
-					if(one || two || three){
-						conditionSatisfied[i][j][k] = false;
-					}
-				}
-			}
-		}
-
-
-		
-		for(int i=0;i<4;i++){
-			for(int j= 0;j<16;j++){
-				for(int k=0;k<12;k++){
-					if(conditionSatisfied[i][j][k]){
-						
-						double[] depthData = getDepthData((int)matchingPixelsXCount[i][j][k],
-															(int)matchingPixelsYCount[i][j][k],src);
-						double[] data = {i,matchingPixelsCounts[i][j][k],
-										(int)matchingPixelsXCount[i][j][k] - (int)(dest.getWidth())/2,
-										(int)matchingPixelsYCount[i][j][k] - (int)(dest.getWidth())/2,
-										(depthData[0] > 5) ? -100 : depthData[0],
-										(depthData[1] > 5) ? -100 : depthData[1],
-										(depthData[2] > 5) ? -100 : depthData[2]};
-						returnArray.add(data);
-						
-					}
-				}
-			}
-		}
-		
-		//print data
-		for(double[] a : returnArray){
-			System.err.println("Color -> " + a[0] + "X -> " + a[4] + "Y -> " + a[5]+ "Z -> " + a[6]);
-			
-		}
-
-
-		return returnArray;
-	}
-
-
-
-
-
-
-
-
-	public double[][] blobPresent(KinectImage src, KinectImage dest){
+	public int[][] blobPresent(KinectImage src, KinectImage dest){
 
 		this.classify(src,dest);
 
-		double[][] returnArray = new double[4][6];
+		int[][] returnArray = new int[4][3];
 		int[] matchingPixels = new int[4];
 		long[] matchingPixelsXCount = new long[4];
 		long[] matchingPixelsYCount = new long[4];
@@ -238,7 +76,7 @@ public class VisionTools {
 		}
 
 		for(int i=0;i<4;i++){
-			if(matchingPixels[i] > 100){
+			if(matchingPixels[i] > 500){
 				matchingPixelsXCount[i] /= (long)matchingPixels[i];
 				matchingPixelsYCount[i] /= (long)matchingPixels[i];
 			}
@@ -251,15 +89,10 @@ public class VisionTools {
 			returnArray[i][0] = (int) matchingPixels[i]; //area
 			returnArray[i][1] = (int)matchingPixelsXCount[i] - (int)(dest.getWidth()/2); // Averaged X with (0,0) as center of image
 			returnArray[i][2] = (int)matchingPixelsYCount[i] - (int)(dest.getHeight()/2); // Averaged Y with (0,0) as center of image
-			double[] depthData = getDepthData((int)matchingPixelsXCount[i],(int)matchingPixelsYCount[i],src);
-			returnArray[i][3] = (depthData[0] > 5) ? -100 : depthData[0];
-			returnArray[i][4] = (depthData[1] > 5) ? -100 : depthData[1];
-			returnArray[i][5] = (depthData[2] > 5) ? -100 : depthData[2];
-
 
 			if(matchingPixelsXCount[i] > 0 && matchingPixelsYCount[i] > 0){
 				for (int j = (int)matchingPixelsXCount[i] - 8; j< (int)matchingPixelsXCount[i] + 9;j++){
-
+				
 					if(j < dest.getWidth() && j > 0){
 						dest.setPixel(dest.getPixel(j,(int)matchingPixelsYCount[i]).changeColor(255,   255,   255),
 								j,(int)matchingPixelsYCount[i]);
@@ -267,7 +100,7 @@ public class VisionTools {
 					}
 				}
 				for (int j = (int)matchingPixelsYCount[i] - 8; j< (int)matchingPixelsYCount[i] + 9;j++){
-
+					
 					if(j < dest.getHeight() && j > 0){
 						dest.setPixel(dest.getPixel((int)matchingPixelsYCount[i],j).changeColor(255,   255,   255),
 								(int)matchingPixelsYCount[i],j);
@@ -277,9 +110,9 @@ public class VisionTools {
 			}
 
 		}
-
-
-		/*System.err.println("Red Area -> " + returnArray[0][0] + "Red X -> " + returnArray[0][1]
+		
+	
+			System.err.println("Red Area -> " + returnArray[0][0] + "Red X -> " + returnArray[0][1]
 					+ "Red Y -> " + returnArray[0][2]);
 			System.err.println("green Area -> " + returnArray[1][0] + "green X -> " + returnArray[1][1]
 					+ "green Y -> " + returnArray[1][2]);
@@ -287,19 +120,9 @@ public class VisionTools {
 					+ "blue Y -> " + returnArray[2][2]);
 			System.err.println("yellow Area -> " + returnArray[3][0] + "yellow X -> " + returnArray[3][1]
 					+ "yellow Y -> " + returnArray[3][2]);
-			System.err.println();*/
-
-		System.err.println("Red X -> " + returnArray[0][3] + "Red Y -> " + returnArray[0][4]
-				+ "Red Z -> " + returnArray[0][5]);
-		System.err.println("green X -> " + returnArray[1][3] + "green Y -> " + returnArray[1][4]
-				+ "green Z -> " + returnArray[1][5]);
-		System.err.println("blue X -> " + returnArray[2][3] + "blue Y -> " + returnArray[2][4]
-				+ "blue Z -> " + returnArray[2][5]);
-		System.err.println("yellow X -> " + returnArray[3][3] + "yellow Y -> " + returnArray[3][4]
-				+ "yellow Z -> " + returnArray[3][5]);
-		System.err.println();
-
-
+			System.err.println();
+		
+		
 		return returnArray;
 	}
 
@@ -480,34 +303,6 @@ public class VisionTools {
 		}
 
 		return Math.abs(pixHue) < tolerance;
-	}
-
-
-	private double[] getDepthData(int row,int col,KinectImage src) {
-		KinectPixel testPixel = src.getPixel(row, col);
-		if(!Float.isNaN(testPixel.getX()) && !Float.isNaN(testPixel.getY()) && !Float.isNaN(testPixel.getZ())){
-			return new double[]{testPixel.getX(),testPixel.getY(),testPixel.getZ()};
-		}
-		else{
-
-			if(isValid(row,col-1,src)){
-				return getDepthData(row,col-1,src);
-			}
-
-		}
-		return new double[]{-100,-100,-100};
-	}
-
-
-
-	private boolean isValid(int xVal,int yVal,KinectImage src) {
-		return xVal >=0 && yVal >=0 && xVal < src.getWidth() && yVal < src.getHeight();
-	}
-
-	private ArrayList<int[]> getNeighborsOne(int x,int y) {
-		ArrayList<int[]> neighborList = new ArrayList<int[]>();
-		neighborList.add(new int[]{x,y-1});
-		return neighborList;
 	}
 
 

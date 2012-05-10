@@ -184,7 +184,7 @@ public class RobotController implements NodeMain, Runnable  {
 	}
 
 	public boolean compareAngles(double thetaOne, double thetaTwo, double tolerance) {
-		return fixAngle2(Math.abs(thetaTwo-thetaOne)) < tolerance;
+		return Math.abs(fixAngle2(thetaTwo-thetaOne)) < tolerance;
 	}
 
 	public double getDistance(double x1, double y1, double x2, double y2){

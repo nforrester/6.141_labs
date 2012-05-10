@@ -1,10 +1,6 @@
 <launch>
-  <machine name="workstation" address="workstation">
-     <env name="ROS_MASTER_URI" value="http://workstation:11311" />
-     <env name="ROS_HOSTNAME" value="workstation" />
-  </machine>
+  <include file="$(find lab4)/launch/config.launch" />
 
- <node name="gui" pkg="rosjava_bootstrap" type="run.py" args="kinectConfig KinectClean" machine="workstation">
-  </node> 	  
+  <node name="kinect" pkg="rosjava_bootstrap" type="run.py" args="kinectConfig KinectClean" machine="workstation" />
 
 </launch>
