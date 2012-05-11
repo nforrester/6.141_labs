@@ -2,6 +2,8 @@ package Challenge;
 
 import LocalNavigation.Mat;
 
+import Challenge.PhaseTwo.PhaseTwoController;
+
 import java.text.ParseException;
 import java.util.ArrayList;
 
@@ -86,6 +88,25 @@ public class Sentinel implements NodeMain {
 			}
 		}
 
+		// bubble sort the blocks from west to east
+		boolean sorted;
+		do {
+			sorted = true;
+			for (i = 0; i < goals.size() - 1; i++) {
+				double pt0[] = Mat.decodePoint(goals.get(i));
+				double pt1[] = Mat.decodePoint(goals.get(i + 1));
+				if (pt1[0] < pt0[0]) {
+					goals.set(i, Mat.encodePoint(pt1[0], pt1[1]));
+					goals.set(i + 1, Mat.encodePoint(pt0[0], pt0[1]));
+					sorted = false;
+				}
+			}
+		} while (!sorted);
+
+		// add goals that will bring it to a nice pose to build in
+		goals.add(Mat.encodePoint(2.5, 1));
+		goals.add(Mat.encodePoint(4, 0.5));
+
 		// TESTING START (switch)
 		//navigator = new RobotController(0, 0, cspace);
 		navigator = new RobotController(map.robotStart.getX(), map.robotStart.getY(), cspace);
@@ -117,12 +138,14 @@ public class Sentinel implements NodeMain {
 
 		System.err.println("SENTINEL INITIALIZED");
 
-		monitorThread = new Thread(new Runnable() {
+		Thread monitorThread = new Thread(new Runnable() {
 				@Override
 				public void run() {
 					while (true) {
-						if (navigation.getNumWaypoints() == 0) {
-							phaseTwo = new PhaseTwoController();
+						if (navigator.getNumWaypoints() == 0) {
+							// TESTING START (uncomment)
+							PhaseTwoController phaseTwo = new PhaseTwoController();
+							// TESTING END
 							break;
 						}
 						try {
@@ -149,7 +172,7 @@ public class Sentinel implements NodeMain {
 				for (Waypoint waypoint: waypoints) {
 					System.err.println("(waypoint " + waypoint.getX() + " " + waypoint.getY() + ")");
 				}
-				waypoints = trimWaypoints(waypoints);
+				waypoints = trimWaypoints(legStart, waypoints);
 				System.err.println("Waypoints trimmed:");
 				for (Waypoint waypoint: waypoints) {
 					// TESTING START (uncomment)
@@ -166,16 +189,22 @@ public class Sentinel implements NodeMain {
 		}
 	}
 
-	private ArrayList<Waypoint> trimWaypoints(ArrayList<Waypoint> waypoints) {
-		for (int legStart = 0; legStart < waypoints.size() - 2; legStart++) {
+	private ArrayList<Waypoint> trimWaypoints(Mat start, ArrayList<Waypoint> waypoints) {
+		double st[] = Mat.decodePoint(start);
+		waypoints.add(0, new Waypoint(st[0], st[1], (short) 1));
+		int legStart = 0;
+		while (legStart < waypoints.size() - 2) {
 			Mat legStartPoint = Mat.encodePoint(waypoints.get(legStart).getX(), waypoints.get(legStart).getY());
 			Mat legEndPoint = Mat.encodePoint(waypoints.get(legStart + 2).getX(), waypoints.get(legStart + 2).getY());
 			if (cspace.lineSegInCSpace(legStartPoint, legEndPoint)) {
+				System.err.println("Trimming " + waypoints.get(legStart + 1).getX() + " " + waypoints.get(legStart + 1).getY());
 				waypoints.remove(legStart + 1);
 			} else {
+				System.err.println("Can't trim " + waypoints.get(legStart + 1).getX() + " " + waypoints.get(legStart + 1).getY());
 				legStart++;
 			}
 		}
+		waypoints.remove(0);
 		return waypoints;
 	}
 
