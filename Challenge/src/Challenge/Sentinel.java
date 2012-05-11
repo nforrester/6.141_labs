@@ -50,9 +50,9 @@ public class Sentinel implements NodeMain {
 			System.exit(1);
 		}
 
-		double robotYDim      = 0.24;
-		double robotXDimFront = 0.20;
-		double robotXDimBack  = 0.33;
+		double robotYDim      = 0.27;
+		double robotXDimFront = 0.23;
+		double robotXDimBack  = 0.36;
 		ArrayList<Mat> robotVerts = new ArrayList<Mat>();
 		robotVerts.add(Mat.encodePoint(robotXDimFront,  robotYDim));
 		robotVerts.add(Mat.encodePoint(robotXDimFront, -robotYDim));
@@ -61,7 +61,7 @@ public class Sentinel implements NodeMain {
 		CSpace.Polygon robot = new CSpace.Polygon(robotVerts);
 
 		ArrayList<Mat> cRobotVerts = new ArrayList<Mat>();
-		double radius = 0.340;
+		double radius = 0.37;
 		for (double theta = 0; theta < 2 * Math.PI; theta += 0.05) {
 			cRobotVerts.add(Mat.encodePoint(radius * Math.sin(theta), radius * Math.cos(theta)));
 		}
