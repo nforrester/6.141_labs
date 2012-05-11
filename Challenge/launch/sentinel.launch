@@ -1,4 +1,3 @@
-
 <launch>
   <include file="$(find lab4)/launch/config.launch" />
 
@@ -7,6 +6,4 @@
   <node name="odo" pkg="rosjava_bootstrap" type="run.py" args="odometry odometry.Odometry" machine="netbook" />
 
   <node name="nav" pkg="rosjava_bootstrap" type="run.py" args="Challenge Challenge.Sentinel" machine="workstation" />
-  <node name="mice" pkg="rosjava_bootstrap" type="runMice.py" args="Challenge Challenge.TwoMice" machine="netbook" />
-
 </launch>
