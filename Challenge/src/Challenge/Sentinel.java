@@ -75,6 +75,17 @@ public class Sentinel implements NodeMain {
 			goals.add(Mat.encodePoint(pos.getX(), pos.getY()));
 		}
 
+		// reject blocks north of the L obstacle
+		int i = 0;
+		while (i < goals.size()) {
+			double pt[] = Mat.decodePoint(goals.get(i));
+			if (pt[1] > 1.67) {
+				goals.remove(i);
+			} else {
+				i++;
+			}
+		}
+
 		// TESTING START (switch)
 		//navigator = new RobotController(0, 0, cspace);
 		navigator = new RobotController(map.robotStart.getX(), map.robotStart.getY(), cspace);
@@ -82,7 +93,53 @@ public class Sentinel implements NodeMain {
 		System.err.println("ROBOT CONTROLLER CREATED");
 		navigator.onStart(thisNode);
 		System.err.println("ROBOT CONTROLLER INITIALIZED");
-		Mat legStart = Mat.encodePoint(map.robotStart.getX(), map.robotStart.getY());
+
+		executeGoals(map.robotStart.getX(), map.robotStart.getY(), goals);
+
+		// TESTING START (comment)
+		/*
+		navigator.addWaypoint(new Waypoint(1, 0, (short) 1));
+		navigator.addWaypoint(new Waypoint(1, 1, (short) 1));
+		navigator.addWaypoint(new Waypoint(1, 0, (short) 1));
+		navigator.addWaypoint(new Waypoint(0, 0, (short) 1));
+		navigator.addWaypoint(new Waypoint(1, 0, (short) 1));
+		navigator.addWaypoint(new Waypoint(0, 1, (short) 1));
+		navigator.addWaypoint(new Waypoint(1, 1, (short) 1));
+		navigator.addWaypoint(new Waypoint(1, 0, (short) 1));
+		navigator.addWaypoint(new Waypoint(0, 0, (short) 1));
+		navigator.addWaypoint(new Waypoint(1, 1, (short) 1));
+		navigator.addWaypoint(new Waypoint(0, 1, (short) 1));
+		navigator.addWaypoint(new Waypoint(0, 0, (short) 1));
+		*/
+		// TESTING END
+
+		System.err.println("WAYPOINTS ADDED");
+
+		System.err.println("SENTINEL INITIALIZED");
+
+		monitorThread = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					while (true) {
+						if (navigation.getNumWaypoints() == 0) {
+							phaseTwo = new PhaseTwoController();
+							break;
+						}
+						try {
+							Thread.sleep(500);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+							System.err.println("Interrupted! Exiting!");
+							System.exit(1);
+						}
+					}
+					System.err.println("BUILDING THE TOWER!");
+				}
+			});
+	}
+
+	private void executeGoals(double startX, double startY, ArrayList<Mat> goals) {
+		Mat legStart = Mat.encodePoint(startX, startY);
 		ArrayList<Waypoint> waypoints;
 		for (Mat goal: goals) {
 			try {
@@ -107,27 +164,6 @@ public class Sentinel implements NodeMain {
 				e.printStackTrace();
 			}
 		}
-
-		// TESTING START (comment)
-		/*
-		navigator.addWaypoint(new Waypoint(1, 0, (short) 1));
-		navigator.addWaypoint(new Waypoint(1, 1, (short) 1));
-		navigator.addWaypoint(new Waypoint(1, 0, (short) 1));
-		navigator.addWaypoint(new Waypoint(0, 0, (short) 1));
-		navigator.addWaypoint(new Waypoint(1, 0, (short) 1));
-		navigator.addWaypoint(new Waypoint(0, 1, (short) 1));
-		navigator.addWaypoint(new Waypoint(1, 1, (short) 1));
-		navigator.addWaypoint(new Waypoint(1, 0, (short) 1));
-		navigator.addWaypoint(new Waypoint(0, 0, (short) 1));
-		navigator.addWaypoint(new Waypoint(1, 1, (short) 1));
-		navigator.addWaypoint(new Waypoint(0, 1, (short) 1));
-		navigator.addWaypoint(new Waypoint(0, 0, (short) 1));
-		*/
-		// TESTING END
-
-		System.err.println("WAYPOINTS ADDED");
-
-		System.err.println("SENTINEL INITIALIZED");
 	}
 
 	private ArrayList<Waypoint> trimWaypoints(ArrayList<Waypoint> waypoints) {

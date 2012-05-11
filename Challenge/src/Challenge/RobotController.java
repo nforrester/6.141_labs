@@ -339,6 +339,7 @@ public class RobotController implements NodeMain, Runnable  {
 		statePub.publish(stateMsg);
 	}
 
-
-
+	public int getNumWaypoints() {
+		return myWaypoints.size();
 	}
+}
