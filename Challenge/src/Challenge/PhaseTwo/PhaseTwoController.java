@@ -44,13 +44,13 @@ public class PhaseTwoController implements NodeMain, Runnable{
 	private int iterator=1;
 	
 	//Measured Stuff
-	public static final double BLOCK_SIZE=1.93*Manipulator.I2M;
+	public static final double BLOCK_SIZE=1.925*Manipulator.I2M;
 	
 	public final double[][] DATA={{600,500,0},
-								  {725,800,-.08},
+								  {755,800,-.08},
 								  {900,1000,-.115},
-								  {1010,1150,-.135},
-								  {1100,1250,-.145}};
+								  {1100,1150,-.135},
+								  {1110,1260,-.145}};
 	
 	//ROS stuff
 	private Node node;
@@ -151,7 +151,9 @@ public class PhaseTwoController implements NodeMain, Runnable{
 			waitUp(500);
 		    while(robotController.getIsMoving()){
 		    }
-	        manipulator.servoOut2((int)DATA[iterator][0],(int)DATA[iterator][1],500);
+		    manipulator.servoOut2((int)DATA[0][0],(int)DATA[iterator][1],500);
+		    waitUp(200);
+		    manipulator.servoOut2((int)DATA[iterator][0],(int)DATA[iterator][1],500);
 		    waitUp(500);
 		    changeState(PLACE);
 		    
@@ -162,6 +164,8 @@ public class PhaseTwoController implements NodeMain, Runnable{
 			waitUp(500);
 		    while(robotController.getIsMoving()){
 		    }
+		    manipulator.servoOut2((int)DATA[iterator][0]+50,(int)DATA[iterator][1],500);
+		    waitUp(500);
 		    manipulator.openGripper();
 		    waitUp(500);
 		    iterator++;
